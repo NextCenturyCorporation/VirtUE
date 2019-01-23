@@ -9,4 +9,4 @@ echo sleeping; sleep 20; echo slept;
 sudo kinit -k ${principal}
 sudo nohup env KRB5_TRACE=/dev/stdout java -Xint -jar /usr/local/lib/cifs-proxy-server-0.0.1.jar --spring.config.location=cifs-proxy.properties,cifs-proxy-security.properties >& proxy.log&
 #while ! curl http://${cifsHostname}:${cifsPort}/hello 2> /dev/null ; do echo -n '.' ; sleep 1; done; echo 'Connected'
-export counter=0; while ! curl http://localhost:8080/hello 2> /dev/null ; do echo -n "." ;((counter++)); sleep 1; if [ $counter = "30" ]; then break; fi; done; echo 'Done'
+export counter=0; while ! curl http://localhost:8080/hello 2> /dev/null ; do echo -n "." ;((counter++)); sleep 1; if [ $counter = "45" ]; then break; fi; done; echo 'Done'

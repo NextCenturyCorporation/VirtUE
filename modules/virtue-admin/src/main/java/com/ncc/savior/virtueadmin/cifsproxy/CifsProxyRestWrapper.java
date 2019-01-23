@@ -30,10 +30,9 @@ public class CifsProxyRestWrapper {
 		jsonMapper = new ObjectMapper();
 	}
 
-	public CifsShareCreationParameter createShare(String username, String password, String virtueId,
-			String cifsProxyHostname, FileSystem fs) {
+	public CifsShareCreationParameter createShare(String cifsProxyHostname, String username, String password,
+			String virtueId, FileSystem fs) {
 		try {
-			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
 
 			MultiValueMap<String, String> headers = new HttpHeaders();
 			headers.add("Content-Type", "application/json");
@@ -61,12 +60,11 @@ public class CifsProxyRestWrapper {
 			node.put("path", path);
 			node.set("permissions", permissions);
 			node.put("type", "CIFS");
-			HttpEntity<String> shareEntity = new HttpEntity<String>(node.toString(), headers);
-			CifsShareCreationParameter shareOutput = null;
-			logger.debug("Sending: " + node.toString());
-			ResponseEntity<CifsShareCreationParameter> resp = krt.postForEntity(shareUrl, shareEntity,
+			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
+//			ResponseEntity<CifsShareCreationParameter> resp = krt.postForEntity(shareUrl, shareEntity,
+//					CifsShareCreationParameter.class);
+			CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 3,
 					CifsShareCreationParameter.class);
-			shareOutput = resp.getBody();
 			logger.debug("CIFS returned " + shareOutput);
 			return shareOutput;
 		} catch (RestClientException e) {
@@ -97,6 +95,21 @@ public class CifsProxyRestWrapper {
 		}
 	}
 
+	public CifsVirtueCreationParameter getVirtueParams(String cifsHostname, String username, String password,
+			String virtueId) {
+		try {
+			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
+			String getVirtueUri = "http://" + cifsHostname + ":8080/virtue/" + virtueId;
+			ResponseEntity<CifsVirtueCreationParameter> resp = krt.getForEntity(getVirtueUri,
+					CifsVirtueCreationParameter.class);
+			return resp.getBody();
+		} catch (RestClientException e) {
+			String msg = "Error deleting virtue='" + virtueId + "' for CIFS Proxy";
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
+		}
+	}
+
 	public void deleteShare(String cifsHostname, String username, String password, String exportedShareName) {
 		try {
 			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
@@ -105,10 +118,12 @@ public class CifsProxyRestWrapper {
 		} catch (RestClientException e) {
 			String msg = "Error deleting share='" + exportedShareName + "' for CIFS Proxy";
 			logger.error(msg, e);
-			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
+			// error will be thrown if no share exists. So we may want to ignore or check.
+			// for now we'll ignore.
+//			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 		}
 	}
-	
+
 	public void deleteVirtue(String cifsHostname, String username, String password, String virtueId) {
 		try {
 			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);

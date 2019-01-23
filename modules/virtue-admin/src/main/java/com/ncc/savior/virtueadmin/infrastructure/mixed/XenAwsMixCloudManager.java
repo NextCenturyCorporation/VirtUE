@@ -20,7 +20,6 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.model.CifsVirtueCreationParameter;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -157,23 +156,19 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();
 		try {
-			Map<String, CifsVirtueCreationParameter> cifsVirtueParams = new HashMap<String, CifsVirtueCreationParameter>();
-			for (FileSystem fs : fileSystems) {
-				CifsVirtueCreationParameter cvcp = cifsManager.cifsBeforeVirtueCreation(vi, fs);
-				cifsVirtueParams.put(fs.getId(), cvcp);
-			}
+			cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
 			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			linuxFuture.thenAccept((myLinuxVms) -> {
 //			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
 				try {
-					cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, cifsVirtueParams, password);
+					cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, password);
 				} catch (Throwable t) {
 					// TODO need to fix how we handle this error.
 					logger.error("error creating cifs", t);
 				}
 			});
 		} catch (SaviorException e) {
-			//TODO we probably dont want to ignore
+			// TODO we probably dont want to ignore
 			logger.error("Error with CIFS proxy.  Ignoring and continuing!", e);
 		}
 		// }
