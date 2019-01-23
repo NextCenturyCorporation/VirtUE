@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 
 /**
  *
@@ -248,36 +249,10 @@ public class LoginPage {
 
 	private void doLogin(String domain, String username, String password) throws IOException {
 		DesktopUser user = authService.login(domain, username, password);
-		triggerLoginSuccessListener(user);
 	}
 
 	public JPanel getContainer() {
 		return container;
 	}
 
-	public void addLoginEventListener(ILoginEventListener listener) {
-		loginListeners.add(listener);
-	}
-
-	public void removeLoginEventListener(ILoginEventListener listener) {
-		loginListeners.remove(listener);
-	}
-
-	protected void triggerLoginSuccessListener(DesktopUser user) throws IOException {
-		for (ILoginEventListener listener : loginListeners) {
-			listener.onLoginSuccess(user);
-		}
-	}
-
-	protected void triggerLoginFailureListener(String username, String domain, RuntimeException e) {
-		for (ILoginEventListener listener : loginListeners) {
-			listener.onLoginFailure(username, domain, e);
-		}
-	}
-
-	public static interface ILoginEventListener {
-		public void onLoginSuccess(DesktopUser user) throws IOException;
-
-		public void onLoginFailure(String username, String domain, RuntimeException e);
-	}
 }

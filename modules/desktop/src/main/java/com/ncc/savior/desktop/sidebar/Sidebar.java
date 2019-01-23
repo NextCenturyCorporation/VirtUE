@@ -43,7 +43,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
@@ -54,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
@@ -62,7 +62,6 @@ import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.Defau
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.sidebar.DefaultApplicationLauncher.IHyperlinkMessageListener;
-import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
@@ -188,6 +187,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private BridgeSensorService bridgeSensorService;
 
+	private IStartPollListener startPollListener;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
 		this.authService = authService;
@@ -263,6 +264,8 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 
 		});
+
+		registerLoginListener();
 	}
 
 	public void start(JFrame frame, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -290,21 +293,22 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
 		this.frame.setVisible(true);
-		initiateLoginScreen(loginPageView);
 	}
 
-	private void initiateLoginScreen(LoginPage lp) throws IOException {
-		lp.addLoginEventListener(new ILoginEventListener() {
+	public void registerLoginListener() {
+		authService.addLoginListener(new ILoginListener() {
+
 			@Override
-			public void onLoginSuccess(DesktopUser user) throws IOException {
+			public void onLogin(DesktopUser user) {
 				onLogin(user);
 				ghostText.reset();
 			}
 
 			@Override
-			public void onLoginFailure(String username, String domain, RuntimeException e) {
-				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+			public void onLogout() {
+				// do nothing
 			}
+
 		});
 	}
 
@@ -327,6 +331,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
+		triggerStartPoll();
 	}
 
 	@Override
@@ -349,12 +354,6 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading || empty) {
-			loading = false;
-			empty = false;
-			setInitialViewPort();
-		}
-
 		for (DesktopVirtue virtue : virtues) {
 			if (useAdminColor) {
 				try {
@@ -376,108 +375,89 @@ public class Sidebar implements VirtueChangeHandler {
 			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
 			virtueIdToVlc.put(virtue.getTemplateId(), vlc);
 
-			SwingUtilities.invokeLater(new Runnable() {
-
-				@Override
-				public void run() {
-					virtueTileView.addVirtueToRow(virtue, vtc, vtc.getRow());
-					virtueListView.addVirtueToRow(virtue, vlc, vlc.getRow());
-				}
-
-			});
+			virtueTileView.addVirtueToRow(virtue, vtc, vtc.getRow());
+			virtueListView.addVirtueToRow(virtue, vlc, vlc.getRow());
 
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
+				try {
+					Preferences pref = preferenceService.getPreferenceNode(DesktopPreference.FAVORITES);
+					boolean isFavorited = pref.getBoolean(ad.getId() + virtue.getTemplateId(), false);
+					ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							Preferences pref = preferenceService.getPreferenceNode(DesktopPreference.FAVORITES);
-							boolean isFavorited = pref.getBoolean(ad.getId() + virtue.getTemplateId(), false);
-							ApplicationDom dom = new ApplicationDom(ad, isFavorited);
+					VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+							virtue, favoritesTileView, dom.getChangeListener(), saviorTile, isFavorited, frame,
+							textField, dropDownBox, sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_TILE);
+					appsTileVa.tileSetup();
+					appsTileVa.registerListener(dom.getChangeListener());
+					appsTileView.addApplication(ad, appsTileVa);
 
-							VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, scrollPane,
-									vtc, virtue, favoritesTileView, dom.getChangeListener(), saviorTile, isFavorited,
-									frame, textField, dropDownBox, sortAppsByStatus, ghostText, headerColor,
-									DesktopView.APPS_TILE);
-							appsTileVa.tileSetup();
-							appsTileVa.registerListener(dom.getChangeListener());
-							appsTileView.addApplication(ad, appsTileVa);
+					VirtueApplicationItem virtueTileVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+							virtue, favoritesTileView, dom.getChangeListener(), saviorTile, isFavorited, frame,
+							textField, dropDownBox, sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_TILE);
+					virtueTileVa.tileSetup();
+					virtueTileVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem virtueTileVa = new VirtueApplicationItem(ad, virtueService,
-									scrollPane, vtc, virtue, favoritesTileView, dom.getChangeListener(), saviorTile,
-									isFavorited, frame, textField, dropDownBox, sortAppsByStatus, ghostText,
-									headerColor, DesktopView.VIRTUE_TILE);
-							virtueTileVa.tileSetup();
-							virtueTileVa.registerListener(dom.getChangeListener());
+					VirtueApplicationItem virtueListVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+							virtue, favoritesTileView, dom.getChangeListener(), saviorList, isFavorited, frame,
+							textField, dropDownBox, sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_LIST);
+					virtueListVa.listSetup();
+					virtueListVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem virtueListVa = new VirtueApplicationItem(ad, virtueService,
-									scrollPane, vtc, virtue, favoritesTileView, dom.getChangeListener(), saviorList,
-									isFavorited, frame, textField, dropDownBox, sortAppsByStatus, ghostText,
-									headerColor, DesktopView.VIRTUE_LIST);
-							virtueListVa.listSetup();
-							virtueListVa.registerListener(dom.getChangeListener());
+					VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+							virtue, favoritesTileView, dom.getChangeListener(), saviorList, isFavorited, frame,
+							textField, dropDownBox, sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_LIST);
+					appsListVa.listSetup();
+					appsListVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, scrollPane,
-									vtc, virtue, favoritesTileView, dom.getChangeListener(), saviorList, isFavorited,
-									frame, textField, dropDownBox, sortAppsByStatus, ghostText, headerColor,
-									DesktopView.APPS_LIST);
-							appsListVa.listSetup();
-							appsListVa.registerListener(dom.getChangeListener());
+					appsListView.addApplication(ad, appsListVa);
+					vtc.addApplication(ad, virtueTileVa);
+					vlc.addApplication(ad, virtueListVa);
 
-							appsListView.addApplication(ad, appsListVa);
-							vtc.addApplication(ad, virtueTileVa);
-							vlc.addApplication(ad, virtueListVa);
+					Consumer<Image> consumer = i -> {
+						Image tileImg = i.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+						ImageIcon tileIcon = new ImageIcon(tileImg);
+						Image listImg = i.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+						ImageIcon listIcon = new ImageIcon(listImg);
+						appsTileVa.setImage(tileIcon);
+						virtueTileVa.setImage(tileIcon);
+						virtueListVa.setImage(listIcon);
+						appsListVa.setImage(listIcon);
+						favoritesTileView.setTileImage(ad, virtue, tileIcon);
+					};
 
-							Consumer<Image> consumer = i -> {
-								Image tileImg = i.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
-								ImageIcon tileIcon = new ImageIcon(tileImg);
-								Image listImg = i.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
-								ImageIcon listIcon = new ImageIcon(listImg);
-								appsTileVa.setImage(tileIcon);
-								virtueTileVa.setImage(tileIcon);
-								virtueListVa.setImage(listIcon);
-								appsListVa.setImage(listIcon);
-								favoritesTileView.setTileImage(ad, virtue, tileIcon);
-							};
+					iconService.getImage(ad.getIconKey(), consumer);
 
-							iconService.getImage(ad.getIconKey(), consumer);
+					dom.addListener(appsTileVa.getChangeListener());
+					dom.addListener(appsListVa.getChangeListener());
+					dom.addListener(virtueTileVa.getChangeListener());
+					dom.addListener(virtueListVa.getChangeListener());
 
-							dom.addListener(appsTileVa.getChangeListener());
-							dom.addListener(appsListVa.getChangeListener());
-							dom.addListener(virtueTileVa.getChangeListener());
-							dom.addListener(virtueListVa.getChangeListener());
-
-							if (isFavorited) {
-								String selected = (String) dropDownBox.getSelectedItem();
-								VirtueApplicationItem favoritedVa;
-								switch (selected) {
-								case SORT_ALPHABETICAL:
-									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
-											favoritesTileView, dom.getChangeListener(), saviorTile, true, frame,
-											textField, dropDownBox, null, ghostText, headerColor,
-											DesktopView.APPS_TILE);
-									favoritedVa.tileSetup();
-									favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
-									break;
-								case SORT_STATUS:
-									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
-											favoritesTileView, dom.getChangeListener(), saviorTile, true, frame,
-											textField, dropDownBox, null, ghostText, headerColor,
-											DesktopView.APPS_TILE);
-									favoritedVa.tileSetup();
-									favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus,
-											ghostText);
-									break;
-								}
-							}
-						} catch (Exception e) {
-							logger.debug("Error with adding virtues");
+					if (isFavorited) {
+						String selected = (String) dropDownBox.getSelectedItem();
+						VirtueApplicationItem favoritedVa;
+						switch (selected) {
+						case SORT_ALPHABETICAL:
+							favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
+									favoritesTileView, dom.getChangeListener(), saviorTile, true, frame, textField,
+									dropDownBox, null, ghostText, headerColor, DesktopView.APPS_TILE);
+							favoritedVa.tileSetup();
+							favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
+							break;
+						case SORT_STATUS:
+							favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
+									favoritesTileView, dom.getChangeListener(), saviorTile, true, frame, textField,
+									dropDownBox, null, ghostText, headerColor, DesktopView.APPS_TILE);
+							favoritedVa.tileSetup();
+							favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus,
+									ghostText);
+							break;
 						}
 					}
-				});
-
+				} catch (Exception e) {
+					logger.debug("Error with adding virtues");
+				}
 			}
+
 		}
 
 		String keyword = textField.getText();
@@ -486,6 +466,11 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 		sortByOption(keyword);
 
+		if (loading || empty) {
+			loading = false;
+			empty = false;
+			setInitialViewPort();
+		}
 		scrollPane.getViewport().validate();
 	}
 
@@ -968,6 +953,7 @@ public class Sidebar implements VirtueChangeHandler {
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
 		if (!loading && !empty) {
+			virtueTileView.getContainer().validate();
 			scrollPane.setViewportView(virtueTileView.getContainer());
 		}
 	}
@@ -1277,5 +1263,17 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public void registerStartPollListener(IStartPollListener startPollListener) {
+		this.startPollListener = startPollListener;
+	}
+
+	public void triggerStartPoll() {
+		startPollListener.startPoll();
+	}
+
+	public static interface IStartPollListener {
+		public void startPoll();
 	}
 }
