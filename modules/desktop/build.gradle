@@ -13,10 +13,14 @@ repositories {
 
 mainClassName = "com.ncc.savior.desktop.sidebar.SidebarApplication"
 
+
 task fatJar(type: Jar) {
     classifier = 'all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+    manifest {
+        attributes 'Main-Class': 'com.ncc.savior.desktop.rmi.RemoteStartApplication'
+    }
 }
 
 dependencies {

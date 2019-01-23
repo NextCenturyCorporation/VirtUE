@@ -28,10 +28,13 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -41,7 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
@@ -87,6 +92,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private DesktopView view;
 
 	private JFrame frame;
+
+	private static OS os = JavaUtil.getOs();
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
@@ -212,37 +219,60 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				if (!Sidebar.askAgain) {
-					try {
-						virtueService.startApplication(vc.getVirtue(), ad);
+				if (os == OS.WINDOWS && SwingUtilities.isRightMouseButton(event)) {
+					JPopupMenu pm = new JPopupMenu();
+					pm.add(new JLabel("<html>Would you like to <br>create a shortcut?</html>"));
+					JMenuItem mi2 = new JMenuItem("Yes");
+					JMenuItem mi3 = new JMenuItem("No");
 
-						if (hasFullBorder()) {
-							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
-						} else {
-							container.setBorder(new MatteBorder(2, 2, 0, 0, Color.DARK_GRAY));
+					mi2.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent evt) {
+							ShortcutUtil.createShortcut(virtue.getName(), ad.getName(), virtue.getTemplateId(),
+									ad.getId());
 						}
+					});
 
-						Timer timer = new Timer(160, new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent arg0) {
-								if (hasFullBorder()) {
-									container.setBorder(new LineBorder(Color.GRAY, 1));
-								} else {
-									container.setBorder(new MatteBorder(0, 0, 2, 2, Color.DARK_GRAY));
-								}
-							}
-						});
-
-						timer.start();
-
-						// virtue.setVirtueState(VirtueState.LAUNCHING);
-						// vc.updateVirtue(virtue);
-					} catch (Exception e) {
-						String msg = "Error attempting to start a " + ad.getName() + " application";
-						logger.error(msg);
-					}
+					pm.setPopupSize(125, 90);
+					pm.addSeparator();
+					pm.add(mi2);
+					pm.addSeparator();
+					pm.add(mi3);
+					pm.show(container, -44, 26);
 				} else {
-					setupDialog();
+					if (!Sidebar.askAgain) {
+						try {
+							virtueService.startApplication(vc.getVirtue(), ad);
+
+							if (hasFullBorder()) {
+								container.setBorder(
+										new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+							} else {
+								container.setBorder(new MatteBorder(2, 2, 0, 0, Color.DARK_GRAY));
+							}
+
+							Timer timer = new Timer(160, new ActionListener() {
+								@Override
+								public void actionPerformed(ActionEvent arg0) {
+									if (hasFullBorder()) {
+										container.setBorder(new LineBorder(Color.GRAY, 1));
+									} else {
+										container.setBorder(new MatteBorder(0, 0, 2, 2, Color.DARK_GRAY));
+									}
+								}
+							});
+
+							timer.start();
+
+							// virtue.setVirtueState(VirtueState.LAUNCHING);
+							// vc.updateVirtue(virtue);
+						} catch (Exception e) {
+							String msg = "Error attempting to start a " + ad.getName() + " application";
+							logger.error(msg);
+						}
+					} else {
+						setupDialog();
+					}
 				}
 			}
 		});

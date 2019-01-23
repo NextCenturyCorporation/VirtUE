@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
-import com.ncc.savior.desktop.clipboard.defaultApplications.RmiServer;
 import com.ncc.savior.desktop.sidebar.Sidebar;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -25,7 +24,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiInterface {
 	private static final String SERVICE_NAME = "SaviorDesktop";
 	public static final String RMI_NAME = "//localhost/" + SERVICE_NAME;
-	private static final Logger logger = LoggerFactory.getLogger(RmiServer.class);
+	private static final Logger logger = LoggerFactory.getLogger(DesktopRmiServer.class);
 	private static final long serialVersionUID = 1L;
 	// registry needed to prevent it from being garbage collected.
 	@SuppressWarnings("unused")
@@ -120,7 +119,6 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 	}
 
 	public void addToPendingApplications(String virtueId, String applicationId) {
-		logger.info("Adding to pending!!!");
 		pendingApplications.add(Pair.of(virtueId, applicationId));
 	}
 
@@ -133,10 +131,8 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 		}
 		for (DesktopVirtue currVirtue : virtues) {
 			if (currVirtue.getTemplateId().equals(virtueId)) {
-				logger.info("Starting application");
 				ApplicationDefinition appDefn = currVirtue.getApps().get(applicationId);
 				try {
-					// System.out.println("STARTING APP");
 					virtueService.startApplication(currVirtue, appDefn);
 				} catch (Exception e) {
 					e.printStackTrace();

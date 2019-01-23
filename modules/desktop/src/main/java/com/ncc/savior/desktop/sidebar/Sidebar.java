@@ -799,7 +799,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		// frame.pack();
 
-		boolean useSystemTray = true;
+		boolean useSystemTray = false;
 		if (useSystemTray && SystemTray.isSupported()) {
 			setupSystemTray();
 		}

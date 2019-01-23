@@ -6,6 +6,9 @@ import java.net.URL;
 
 import javax.swing.JFrame;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.alerting.ToastUserAlertService;
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
@@ -39,7 +42,12 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
  *
  */
 public class SidebarApplication {
+	private static final Logger logger = LoggerFactory.getLogger(SidebarApplication.class);
+
 	public static void main(String[] args) throws HeadlessException, Exception {
+		// logger.debug("Size of array is: " + args.length);
+		// logger.debug(args[0]);
+		logger.debug("sidebar application!!!");
 		start(new JFrame());
 	}
 
@@ -72,7 +80,7 @@ public class SidebarApplication {
 		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
 		BridgeSensorService bridgeSensorService = new BridgeSensorService(bridgeSensorTimeoutMillis, port, host,
-				enableBridgeSensor);
+				false);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl,
 				bridgeSensorService);
 		IApplicationManagerFactory appManager;

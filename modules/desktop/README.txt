@@ -9,5 +9,7 @@ Running Savior Desktop
     (*)Ensure you have a java jdk installed, e.g. "sudo apt install openjdk-8-jdk" on linux
 	5. Add a full path to the clipboard jar to the property savior.desktop.clipboard.jar in ./savior-user.properties
 	   a. on Windows clients, the backslash must be escaped.  I.E. c:\\folder\\clipboard.jar
+	6. To enable shortcuts, run 'gradle fatjar' from the desktop directory. This will create a jar named
+	 'desktop-0.1.0-SNAPSHOT-all.jar' in the desktop/build/libs directory. Move this jar to the desktop directory
 
 6. Run 'gradle run' or com.ncc.savior.desktop.sidebar.SidebarApplication as a java application.
