@@ -355,8 +355,10 @@ public class CifsManager {
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 		cf = addScriptsToRunLaterTemplated(vm, cf);
 //		cf = addScriptsToRunLaterOld(vm, cf);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		cf = cifsVmUpdater.chainFutures(cf, user);
 		cf.thenAccept((VirtualMachine myVm) -> {
-			logger.debug("CIFS Proxy future complete");
+			logger.debug("CIFS Proxy future complete.  Vm="+myVm);
 			future.complete(myVm);
 		});
 		cf.exceptionally((ex) -> {
@@ -480,7 +482,7 @@ public class CifsManager {
 		});
 	}
 
-	private String getHostnameFromShareAddress(String target) {
+	public static String getHostnameFromShareAddress(String target) {
 		target = target.replaceAll("\\\\", "/");
 		while (target.startsWith("/")) {
 			target = target.substring(1);
@@ -490,6 +492,18 @@ public class CifsManager {
 			target = target.substring(0, index);
 		}
 
+		return target;
+	}
+
+	public static String getPathFromShareAddress(String target) {
+		target = target.replaceAll("\\\\", "/");
+		while (target.startsWith("/")) {
+			target = target.substring(1);
+		}
+		int index = target.indexOf("/");
+		if (index > 0) {
+			target = target.substring(index);
+		}
 		return target;
 	}
 

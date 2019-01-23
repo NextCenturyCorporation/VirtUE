@@ -990,6 +990,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void setInitialViewPort() {
+		JavaUtil.sleepAndLogInterruption(100);
 		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
 		String view = lastView.get(PREFERENCE_VIEW, null);
 		if (!JavaUtil.isNotEmpty(view)) {

@@ -48,10 +48,9 @@ public class CifsProxyRestWrapper {
 			if (fs.getWritePerm()) {
 				permissions.add("WRITE");
 			}
-			logger.debug("**hardcode");
-
-			String server = "EC2AMAZ-H6GG6ER";
-			String path = "shared";
+			
+			String server = CifsManager.getHostnameFromShareAddress(fs.getAddress());
+			String path = CifsManager.getPathFromShareAddress(fs.getAddress());
 
 			node.put("name", fs.getName());
 			node.put("virtueId", virtueId);
@@ -61,8 +60,6 @@ public class CifsProxyRestWrapper {
 			node.set("permissions", permissions);
 			node.put("type", "CIFS");
 			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
-//			ResponseEntity<CifsShareCreationParameter> resp = krt.postForEntity(shareUrl, shareEntity,
-//					CifsShareCreationParameter.class);
 			CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 3,
 					CifsShareCreationParameter.class);
 			logger.debug("CIFS returned " + shareOutput);
