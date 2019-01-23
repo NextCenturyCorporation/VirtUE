@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +26,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * used. Do NOT use in production.
  */
 public class SingleUserFilter extends OncePerRequestFilter {
+
+	@SuppressWarnings("unused")
+	private static final Logger logger = LoggerFactory.getLogger(SingleUserFilter.class);
 
 	private static final String PROPERTY_SINGLEUSER_AUTHORITIES = "savior.security.singleuser.authorities";
 	private static final String PROPERTY_SINGLEUSER_NAME = "savior.security.singleuser.name";
@@ -46,6 +52,12 @@ public class SingleUserFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		;
+		// String temp = request
+		// if (request.getSession(false) != null) {
+		// 	logger.debug("singleUser " + request.getSession(false).getId());
+		// }
+
 		Authentication authentication = new AbstractAuthenticationToken(authorities) {
 			private static final long serialVersionUID = 1L;
 

@@ -6,9 +6,10 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { SensingModel } from '../models/sensing.model';
+import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
 
-const httpHeader = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' }).set(InterceptorRemoteDestinationHeader, '')
 };
 
 /**
@@ -23,7 +24,7 @@ const httpHeader = {
 export class SensingService {
 
   /** #uncommented */
-  baseUrl: string;
+  baseUrl: string = "";
   /** #uncommented */
   private jsonfile = './assets/json/sensing.json';
   /** #uncommented */
@@ -41,12 +42,20 @@ export class SensingService {
 
   /**
    * #uncommented
+   * Don't do it this way! This class is really just a skeleton, but you should set method through httpClient's setBaseUrl
+   * method, and just use relative urls to make requests. If the baseUrl is just the virtue-admin server, then you don't need
+   * to set anything, because it's already been set in the main body of the code. If it isn't though, you'll need to define
+   * a provider for HttpClient for just this class, so this class can use a different instance of httpclient and therefore be
+   * able to set a different baseUrl without screwing other thigns up.
    * @param
    *
    * @return
    */
   public setBaseUrl( url: string ): void {
-    this.baseUrl = url;
+  console.log(url);
+    if (url) {
+      this.baseUrl = url;
+    }
   }
 
   /**
@@ -56,7 +65,7 @@ export class SensingService {
    * @return
    */
   public getSensingLog(): Observable<any> {
-    return this.httpClient.get<any>(this.baseUrl + this.configUrl);
+    return this.httpClient.get<any>(this.baseUrl + this.configUrl, httpOptions);
   }
 
   /**

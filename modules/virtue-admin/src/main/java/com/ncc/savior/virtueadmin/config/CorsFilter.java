@@ -8,6 +8,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -29,6 +30,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	private String allowCredentials;
 	private String allowMethods;
 
+	/** see note in BaseSecurityConfig about the result of requests made to Spring endpoints (like /login), when CORS is set up improperly */
 	@Autowired
 	public CorsFilter(Environment env) {
 		this.enabled = Boolean.valueOf(env.getProperty("savior.cors.enabled", "false"));
@@ -36,6 +38,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
 		this.allowMethods = env.getProperty("savior.cors.allow-methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+
 		if (enabled) {
 			logger.debug("CORS Filter has been enabled");
 			logger.debug("  CORS-allow-origin=" + allowOrigin);
@@ -74,7 +77,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 		chain.doFilter(servletRequest, servletResponse);
 	}
 
- 	@Override
+	@Override
 	public void destroy() {
 		//do nothing
 	}

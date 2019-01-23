@@ -98,4 +98,10 @@ export class RouterService {
     return this.router.routerState.snapshot.url;
   }
 
+  loginRedirect() {
+    console.log(this.getRouterUrl().split('?'));
+    if (this.getRouterUrl().split('?')[0] !== '/login') {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.getRouterUrl().split("?")[0] }});
+    }
+  }
 }
