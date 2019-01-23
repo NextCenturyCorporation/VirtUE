@@ -85,7 +85,7 @@ public class RunRemoteScriptCompletableFutureService
 				}
 				logger.debug(lines.toString());
 			}
-
+			logger.debug("all commands run successfully");
 		} finally {
 			if (channel != null) {
 				channel.disconnect();

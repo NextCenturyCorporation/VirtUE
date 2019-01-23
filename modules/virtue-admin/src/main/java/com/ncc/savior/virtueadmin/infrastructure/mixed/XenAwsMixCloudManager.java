@@ -9,11 +9,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
@@ -101,6 +99,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
+		cifsManager.cifsBeforeVirtueDelete(virtueInstance);
 		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
 		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture, null);
 		// Database needs to be updated when we delete, but we don't have access here.
@@ -157,16 +156,26 @@ public class XenAwsMixCloudManager implements ICloudManager {
 //		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();
-		Map<String, CifsVirtueCreationParameter> cifsVirtueParams =new HashMap<String, CifsVirtueCreationParameter>();
-		for (FileSystem fs : fileSystems) {
-			CifsVirtueCreationParameter cvcp = cifsManager.cifsOnVirtueCreation(vi, fs);
-			cifsVirtueParams.put(fs.getId(), cvcp);
-		}
-		String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
-		linuxFuture.thenAccept((myLinuxVms) -> {
+		try {
+			Map<String, CifsVirtueCreationParameter> cifsVirtueParams = new HashMap<String, CifsVirtueCreationParameter>();
+			for (FileSystem fs : fileSystems) {
+				CifsVirtueCreationParameter cvcp = cifsManager.cifsBeforeVirtueCreation(vi, fs);
+				cifsVirtueParams.put(fs.getId(), cvcp);
+			}
+			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+			linuxFuture.thenAccept((myLinuxVms) -> {
 //			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
-			cifsManager.addFilesystemLinux(vi ,user, fileSystems, myLinuxVms, cifsVirtueParams, password);
-		});
+				try {
+					cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, cifsVirtueParams, password);
+				} catch (Throwable t) {
+					// TODO need to fix how we handle this error.
+					logger.error("error creating cifs", t);
+				}
+			});
+		} catch (SaviorException e) {
+			//TODO we probably dont want to ignore
+			logger.error("Error with CIFS proxy.  Ignoring and continuing!", e);
+		}
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
 			// When xen (really NFS) and all windows VM's are up
@@ -178,7 +187,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				try {
 					windowsNfsMountingService.addWindowsStartupServices(xen, windows);
 				} catch (Throwable t) {
-					logger.error("error adding to windows services",t);
+					logger.error("error adding to windows services", t);
 				}
 			}
 			logger.debug("Finished adding vms to Windows Startup Services");
