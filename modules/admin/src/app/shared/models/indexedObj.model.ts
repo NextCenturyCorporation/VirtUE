@@ -16,7 +16,8 @@ import { Subdomains } from '../services/subdomains.enum';
  *      The Virtues have virtual machines, printers, and file systems.
  *      The virtual machines have applications.
  *
- *      Thus, we'd need to first load the applications, use them to set up the virtual machines, and then load the printers and file systems.
+ *      Thus, we'd need to first load the applications, use them to set up the virtual machines, and then load the printers and
+ *        file systems.
  *      It can then set up the virtues, and thereafter set up the Users.
  *
  *
