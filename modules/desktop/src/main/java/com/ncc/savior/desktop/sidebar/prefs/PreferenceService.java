@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.util.JavaUtil;
 
@@ -50,7 +51,7 @@ public class PreferenceService {
 			}
 
 			@Override
-			public void onLogin() {
+			public void onLogin(DesktopUser user) {
 				try {
 					username = authService.getUser().getUsername();
 				} catch (InvalidUserLoginException e) {
