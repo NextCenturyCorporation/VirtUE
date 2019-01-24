@@ -908,5 +908,11 @@ public class AdminResource {
 		boolean enable = Boolean.parseBoolean(enableString);
 		adminService.setFileSystemStatus(fileSystemId, enable);
 	}
+	
+	@GET
+	@Path("sync")
+	public void sync() {
+		adminService.sync();
+	}
 
 }
