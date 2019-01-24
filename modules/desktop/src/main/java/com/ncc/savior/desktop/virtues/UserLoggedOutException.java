@@ -8,6 +8,6 @@ public class UserLoggedOutException extends Exception {
 	}
 
 	public UserLoggedOutException(String message) {
-       super(message);
-    }
+		super(message);
+	}
 }
