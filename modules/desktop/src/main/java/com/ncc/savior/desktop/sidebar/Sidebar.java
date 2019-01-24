@@ -349,12 +349,6 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading || empty) {
-			loading = false;
-			empty = false;
-			setInitialViewPort();
-		}
-
 		for (DesktopVirtue virtue : virtues) {
 			if (useAdminColor) {
 				try {
@@ -485,6 +479,12 @@ public class Sidebar implements VirtueChangeHandler {
 			keyword = "";
 		}
 		sortByOption(keyword);
+
+		if (loading || empty) {
+			loading = false;
+			empty = false;
+			setInitialViewPort();
+		}
 
 		scrollPane.getViewport().validate();
 	}

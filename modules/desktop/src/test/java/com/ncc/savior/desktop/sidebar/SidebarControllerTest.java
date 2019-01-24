@@ -61,7 +61,7 @@ public class SidebarControllerTest {
 			public void addNoVirtues() {
 			}
 		};
-		SidebarController sc = new SidebarController(null, null, null);
+		SidebarController sc = new SidebarController(null, new Sidebar(null, null, null, null, null, null), null);
 
 		Map<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
 		String color = null;
