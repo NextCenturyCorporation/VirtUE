@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
@@ -102,8 +103,7 @@ public class DesktopResourceService {
 			}
 		} catch (IOException | ProcessingException | NotAcceptableException e) {
 
-			logger.error("error attempting to get virtues.", e);
-			instances = new ArrayList<DesktopVirtue>();
+			throw new ConnectException();
 		}
 		return instances;
 	}

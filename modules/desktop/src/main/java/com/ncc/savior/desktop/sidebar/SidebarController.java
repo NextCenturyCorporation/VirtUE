@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -123,8 +124,11 @@ public class SidebarController {
 							List<DesktopVirtue> virtues;
 							try {
 								virtues = virtueService.getVirtuesForUser();
-							} catch (IOException | UserLoggedOutException e) {
-								sidebar.logout();
+							} catch (ConnectException e) {
+								sidebar.logout(false);
+								break;
+							} catch (UserLoggedOutException e) {
+								sidebar.logout(true);
 								break;
 							}
 

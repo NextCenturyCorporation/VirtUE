@@ -1101,7 +1101,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				logout();
+				logout(true);
 			}
 		});
 
@@ -1267,7 +1267,7 @@ public class Sidebar implements VirtueChangeHandler {
 		return listener;
 	}
 
-	public void logout() {
+	public void logout(boolean serverConnected) {
 		try {
 			BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out", authService.getUser().getUsername(),
 					MessageType.LOGOUT);
@@ -1275,7 +1275,11 @@ public class Sidebar implements VirtueChangeHandler {
 		} catch (InvalidUserLoginException e1) {
 			logger.error("error with sending message to bridge sensor");
 		}
-		authService.logout();
+		if (serverConnected) {
+			authService.logout();
+		} else {
+			authService.triggerOnLogout();
+		}
 		loading = true;
 		try {
 			startLogin();
