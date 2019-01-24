@@ -1101,21 +1101,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				try {
-					BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out",
-							authService.getUser().getUsername(), MessageType.LOGOUT);
-					bridgeSensorService.sendMessage(messageObj);
-				} catch (InvalidUserLoginException e1) {
-					logger.error("error with sending message to bridge sensor");
-				}
-				authService.logout();
-				loading = true;
-				try {
-					startLogin();
-				} catch (IOException e) {
-					String msg = "Error attempting to logout";
-					logger.error(msg, e);
-				}
+				logout();
 			}
 		});
 
@@ -1279,6 +1265,24 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public void logout() {
+		try {
+			BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out", authService.getUser().getUsername(),
+					MessageType.LOGOUT);
+			bridgeSensorService.sendMessage(messageObj);
+		} catch (InvalidUserLoginException e1) {
+			logger.error("error with sending message to bridge sensor");
+		}
+		authService.logout();
+		loading = true;
+		try {
+			startLogin();
+		} catch (IOException e) {
+			String msg = "Error attempting to logout";
+			logger.error(msg, e);
+		}
 	}
 
 	public void registerStartPollListener(IStartPollListener listener) {
