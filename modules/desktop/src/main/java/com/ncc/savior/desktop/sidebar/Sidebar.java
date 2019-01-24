@@ -187,6 +187,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private boolean useAdminColor = true;
 
 	private BridgeSensorService bridgeSensorService;
+	private IStartPollListener startPollListener;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
@@ -275,7 +276,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		try {
 			DesktopUser user = authService.loginWithCachedCredentials();
-			onLogin(user);
+			renderMainPage(user);
 		} catch (InvalidUserLoginException e) {
 			startLogin();
 		}
@@ -297,7 +298,7 @@ public class Sidebar implements VirtueChangeHandler {
 		lp.addLoginEventListener(new ILoginEventListener() {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
-				onLogin(user);
+				renderMainPage(user);
 				ghostText.reset();
 			}
 
@@ -308,7 +309,7 @@ public class Sidebar implements VirtueChangeHandler {
 		});
 	}
 
-	private void onLogin(DesktopUser user) throws IOException {
+	private void renderMainPage(DesktopUser user) throws IOException {
 		BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged in", authService.getUser().getUsername(),
 				MessageType.LOGIN);
 		bridgeSensorService.sendMessage(messageObj);
@@ -327,6 +328,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
+		triggerStartPoll();
 	}
 
 	@Override
@@ -1277,5 +1279,17 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public void registerStartPollListener(IStartPollListener listener) {
+		startPollListener = listener;
+	}
+
+	public void triggerStartPoll() {
+		startPollListener.startPoll();
+	}
+
+	public static interface IStartPollListener {
+		public void startPoll();
 	}
 }

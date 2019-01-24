@@ -85,12 +85,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   * in the order in which they should be loaded.
   *
   * Generally, this is lowest-highest. (ordering is printer/fileSystem/app < vm < virtue < user)
-  * - So if dataset A has references (e.g. a list of IDs) to items from dataset B, and this loads A before loading B, then those references
+  * - So if dataset A has references (e.g. a list of IDs) to items from dataset B, and this loads A before loading B,
+  * then those references
   *   will simply remain references, instead of having links to the actual objects. Everything else should work fine.
-  *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down `[DatasetNames.VMS, DatasetNames.VIRTUES]`
+  *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down
+  *   `[DatasetNames.VMS, DatasetNames.VIRTUES]`
   *
-  * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between the two sets
-  *   (say you just want the names of all of them, and don't want to waste time building anything else), then request them in opposite order.
+  * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between
+  *   the two sets (say you just want the names of all of them, and don't want to waste time building anything else),
+  *   then request them in opposite order.
   */
   neededDatasets: DatasetNames[];
 

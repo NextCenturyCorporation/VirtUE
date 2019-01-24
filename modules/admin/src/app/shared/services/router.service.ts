@@ -30,7 +30,7 @@ export class RouterService {
         });
 
     // Tell angular to load a fresh, new, component every time the router navigates to a URL, even if the user has been there before.
-    this.router.routeReuseStrategy.shouldReuseRoute = function(){
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
 

@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
-//import javax.ws.rs.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,10 +35,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpMethod;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -104,8 +97,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
-				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
-				.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
+				.antMatchers("/login").permitAll()
+				.antMatchers("/logout").permitAll()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
 				.antMatchers("/data/**").permitAll()// note this is a backdoor for development/testing.
 				.anyRequest().authenticated()
