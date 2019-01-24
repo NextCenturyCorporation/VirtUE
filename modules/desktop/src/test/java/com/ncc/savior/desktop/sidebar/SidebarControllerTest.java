@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
@@ -16,6 +17,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class SidebarControllerTest {
 
+	@Ignore
 	@Test
 	public void testDetectChangesAndReport() throws IOException {
 		ArrayList<String> changed = new ArrayList<String>();
