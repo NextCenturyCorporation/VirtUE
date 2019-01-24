@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -46,7 +48,6 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.BaseImediateCompletableFutureService;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteScriptCompletableFutureService.ScriptGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
@@ -162,63 +163,64 @@ public class CifsManager {
 
 	/**
 	 * CIFS proxy actions that need to be performed when a virtue creation is
-	 * starting.
+	 * starting. Runs asynchronously and returns a Future with the result as any
+	 * exception thrown. Null indicates success.
 	 * 
 	 * @param virtue
 	 * @param fs
 	 * @return
+	 * @return
 	 */
-	public CifsVirtueCreationParameter cifsBeforeVirtueCreation(VirtueInstance virtue,
-			Collection<FileSystem> fileSystems) {
-		// TODO should be run in another thread to avoid stopping the virtue startup. or
-		// at least cause virtue to go to error state if fails.
-		try {
-			VirtueUser user = userManager.getUser(virtue.getUsername());
-			VirtualMachine cifsVm = cifsProxyDao.getCifsVm(user);
-			String cifsProxyHostname = this.getHostnameFromDns(cifsVm);
-			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
-			CifsVirtueCreationParameter virtueParams = cifsRestWrapper.createVirtue(cifsProxyHostname,
-					user.getUsername(), password, virtue);
+	public Future<Exception> cifsBeforeVirtueCreation(VirtueInstance virtue, Collection<FileSystem> fileSystems) {
+		String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+		Callable<Exception> callable = () -> {
+			try {
+				VirtueUser user = userManager.getUser(virtue.getUsername());
+				VirtualMachine cifsVm = cifsProxyDao.getCifsVm(user);
+				String cifsProxyHostname = this.getHostnameFromDns(cifsVm);
+				cifsRestWrapper.createVirtue(cifsProxyHostname, user.getUsername(), password, virtue);
 
-			for (FileSystem fs : fileSystems) {
-				String delegator = cifsProxyHostname;
-				String target = getHostnameFromShareAddress(fs.getAddress());
+				for (FileSystem fs : fileSystems) {
+					String delegator = cifsProxyHostname;
+					String target = getHostnameFromShareAddress(fs.getAddress());
 
-				HashMap<String, Object> model = new HashMap<String, Object>();
-				model.put("cifsDomain", cifsDomain);
-				model.put("domainAdmin", domainAdminUser);
-				model.put("domainPassword", domainAdminUserPassword);
-				model.put("cifsAdUrl", cifsAdUrl);
-				model.put("domainIp", domainIp);
-				model.put("delegator", delegator);
-				model.put("target", target);
-				model.put("fileSystem", fs);
-				model.put("cifsVm", cifsVm);
-				model.put("user", user);
+					HashMap<String, Object> model = new HashMap<String, Object>();
+					model.put("cifsDomain", cifsDomain);
+					model.put("domainAdmin", domainAdminUser);
+					model.put("domainPassword", domainAdminUserPassword);
+					model.put("cifsAdUrl", cifsAdUrl);
+					model.put("domainIp", domainIp);
+					model.put("delegator", delegator);
+					model.put("target", target);
+					model.put("fileSystem", fs);
+					model.put("cifsVm", cifsVm);
+					model.put("user", user);
 
-				File keyFile = keyManager.getKeyFileByName(cifsVm.getPrivateKeyName());
-				JSch ssh = new JSch();
-				Session session;
-				ssh.addIdentity(keyFile.getAbsolutePath());
-				session = ssh.getSession(cifsVm.getUserName(), cifsVm.getIpAddress(), cifsVm.getSshPort());
-				session.setConfig("PreferredAuthentications", "publickey");
-				session.setConfig("StrictHostKeyChecking", "no");
-				session.setTimeout(1000);
-				session.connect();
-				SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
-				// cifsProxyDao.saveVirtueParams(virtueParams);
-				CifsShareCreationParameter share = cifsRestWrapper.createShare(cifsProxyHostname, user.getUsername(),
-						password, virtue.getId(), fs);
-				share.setFileSystemId(fs.getId());
-				cifsProxyDao.saveShareParams(share);
+					File keyFile = keyManager.getKeyFileByName(cifsVm.getPrivateKeyName());
+					JSch ssh = new JSch();
+					Session session;
+					ssh.addIdentity(keyFile.getAbsolutePath());
+					session = ssh.getSession(cifsVm.getUserName(), cifsVm.getIpAddress(), cifsVm.getSshPort());
+					session.setConfig("PreferredAuthentications", "publickey");
+					session.setConfig("StrictHostKeyChecking", "no");
+					session.setTimeout(1000);
+					session.connect();
+					SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
+					// cifsProxyDao.saveVirtueParams(virtueParams);
+					CifsShareCreationParameter share = cifsRestWrapper.createShare(cifsProxyHostname,
+							user.getUsername(), password, virtue.getId(), fs);
+					share.setFileSystemId(fs.getId());
+					cifsProxyDao.saveShareParams(share);
+				}
+				logger.debug("Cifs before virtue action completed successfully");
+				return null;
+			} catch (JSchException | TemplateException | IOException e) {
+				logger.error("error on cifs", e);
+//				return new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Error creating cifs virtue", t);
+				return e;
 			}
-
-			return virtueParams;
-
-		} catch (JSchException | TemplateException | IOException t) {
-			logger.error("error on cifs", t);
-			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Error creating cifs virtue", t);
-		}
+		};
+		return serviceProvider.getExecutor().submit(callable);
 	}
 
 	public void cifsBeforeVirtueDelete(VirtueInstance virtueInstance) {
@@ -265,7 +267,7 @@ public class CifsManager {
 				}
 			} catch (JSchException | IOException e) {
 				throw new SaviorException(SaviorErrorCode.SSH_ERROR,
-						"Unable to connect to VM for FileSystem attachment, vm=" + vm);
+						"Unable to connect to VM for FileSystem attachment, vm=" + vm, e);
 			}
 		}
 	}
@@ -358,7 +360,7 @@ public class CifsManager {
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 		cf = cifsVmUpdater.chainFutures(cf, user);
 		cf.thenAccept((VirtualMachine myVm) -> {
-			logger.debug("CIFS Proxy future complete.  Vm="+myVm);
+			logger.debug("CIFS Proxy future complete.  Vm=" + myVm);
 			future.complete(myVm);
 		});
 		cf.exceptionally((ex) -> {
@@ -398,60 +400,6 @@ public class CifsManager {
 		return cf;
 	}
 
-	private CompletableFuture<VirtualMachine> addScriptsToRunLaterOld(VirtualMachine vm,
-			CompletableFuture<VirtualMachine> cf) {
-		// String baseCommand = "/usr/local/bin/post-deploy-config.sh";
-		String baseCommand = "/usr/local/bin/post-deploy-config.sh";
-
-		// kinit -k http/webserver.test.savior
-		String cifsStart = String.format(
-				"sudo nohup env KRB5_TRACE=/dev/stdout java -Xint -jar cifs-proxy-server-0.0.1.jar --spring.config.location=cifs-proxy.properties,cifs-proxy-security.properties >& proxy.log&");
-
-		// cf = serviceProvider.getAddRsa().chainFutures(cf, v);
-		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
-		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String cifsHostname = getHostnameFromDns(vm);
-			String cifsPostDeploy = String.format(
-					"sudo %s --domain %s --admin %s --password %s --hostname %s --dcip %s --verbose &> post-deploy.log",
-					baseCommand, cifsDomain, domainAdminUser, domainAdminUserPassword, cifsHostname, domainIp);
-			return cifsPostDeploy;
-		}));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("$?"));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String principal = getPrincipal(vm);
-			String cifPropertyUpdate = String.format("echo 'savior.cifsproxy.principal=%s' > cifs-proxy.properties",
-					principal);
-			return cifPropertyUpdate;
-		}));
-		String cifPropertyUpdate = String
-				.format("echo 'savior.security.ad.domain=%s' >> cifs-proxy-security.properties;", cifsDomain);
-		cifPropertyUpdate += String.format("echo 'savior.security.ad.url=%s' >> cifs-proxy-security.properties;",
-				cifsAdUrl);
-		cifPropertyUpdate += String.format("echo 'savior.security.ldap=%s' >> cifs-proxy-security.properties;",
-				cifsAdUrl);
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifPropertyUpdate));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("cat *.properties"));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf,
-				new CommandGenerator("echo sleeping; sleep 20; echo slept;"));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String principal = getPrincipal(vm);
-			String cifsKinit = String.format("sudo kinit -k %s", principal);
-			return cifsKinit;
-		}));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifsStart));
-		CommandGenerator cg = new CommandGenerator((myVm) -> {
-			String cifsHostname = getHostnameFromDns(vm);
-			String cifsUpTest = String.format(
-					"while ! curl http://%s:8080/hello 2> /dev/null ; do echo -n '.' ; sleep 1; done; echo 'Connected'",
-					cifsHostname);
-			return cifsUpTest;
-		});
-		cg.setTimeoutMillis(300000);
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, cg);
-		return cf;
-	}
-
 	private String getPrincipal(VirtualMachine vm) {
 		String cifsHostname = getHostnameFromDns(vm);
 		String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
@@ -466,20 +414,6 @@ public class CifsManager {
 		}
 //		cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
 		return cifsHostname;
-	}
-
-	private void addToDeletePipeline(VirtualMachine vm, CompletableFuture<VirtualMachine> future) {
-		Void v = null;
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.DELETING);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getTestUpDown().chainFutures(cf, false);
-		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf.thenAccept((myVm) -> {
-			future.complete(myVm);
-		});
 	}
 
 	public static String getHostnameFromShareAddress(String target) {
@@ -544,40 +478,33 @@ public class CifsManager {
 		return (current > timeout);
 	}
 
-	// TODO make into templated scripts!
 	private void runFileSystemLinuxScripts(CifsVirtueCreationParameter cifsVirtueParams, VirtualMachine cifsVm,
 			Session session, CifsShareCreationParameter share) throws JSchException, IOException {
-		String exportedName = share.getExportedName();
-		String localPath = "/media/" + exportedName;
-		String networkPath = "//" + cifsVm.getInternalIpAddress() + "/" + exportedName;
-
-		String credentialFileName = Long.toString(share.getId());
 		String credentialsDir = "/home/user/.smbcredentials/";
+		String credentialFileName = Long.toString(share.getId());
 		String credentialFilePath = credentialsDir + credentialFileName;
+		HashMap<String, Object> model = new HashMap<String, Object>();
+//		model.put("cifsDomain", cifsDomain);
+//		model.put("domainAdmin", domainAdminUser);
+//		model.put("domainPassword", domainAdminUserPassword);
+//		model.put("cifsAdUrl", cifsAdUrl);
+//		model.put("domainIp", domainIp);
+		model.put("cifsVirtueParams", cifsVirtueParams);
+		model.put("cifsShare", share);
+		model.put("cifsVm", cifsVm);
+		model.put("credentialsDir", credentialsDir);
+		model.put("credentialFilePath", credentialFilePath);
 
-		String test = String.format("password=%s\n", cifsVirtueParams.getPassword());
-
-		String setupScript = String.format("mkdir %s; sudo mkdir %s ;", credentialsDir, localPath);
-//		String script1 = String.format("echo '' >> %s", credentialFilePath);
-		String script2 = String.format("echo 'username=%s' >> %s", cifsVirtueParams.getUsername(), credentialFilePath);
-//		String script2 = String.format("cat >> %s; %s", credentialFilePath, cifsVirtueParams.getPassword());
-		String script3 = String.format("sudo sh -c \"echo '%s %s cifs credentials=%s 0 2' >> /etc/fstab\"", networkPath,
-				localPath, credentialFilePath);
-		String script4 = String.format("sudo mount %s", localPath);
-
-		StringInputStream source = new StringInputStream(test);
-
-		SshUtil.sendCommandFromSession(session, setupScript);
 		try {
+			String sourceStr = String.join("\n",
+					templateService.processTemplateToLines("linuxFileSystemMount-password.tpl", model));
+			StringInputStream source = new StringInputStream(sourceStr);
+			SshUtil.runCommandsFromFile(templateService, session, "linuxFileSystemMount-setup.tpl", model);
 			SshUtil.sftpFile(session, source, credentialFilePath);
-		} catch (SftpException e) {
-			throw new IOException("Error FTP'ing password file.", e);
+			SshUtil.runCommandsFromFile(templateService, session, "linuxFileSystemMount-post.tpl", model);
+		} catch (TemplateException | SftpException e) {
+			throw new IOException("Error mounting file system.", e);
 		}
-//		SshUtil.sendCommandFromSession(session, script1);
-		SshUtil.sendCommandFromSession(session, script2);
-		SshUtil.sendCommandFromSession(session, script3);
-		List<String> mountput = SshUtil.sendCommandFromSession(session, script4);
-		logger.debug("mountput: " + mountput);
 	}
 
 	public VirtueCreationDeletionListener getVirtueCreationDeletionListener() {

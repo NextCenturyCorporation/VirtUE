@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
@@ -156,12 +158,17 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();
 		try {
-			cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
+			Future<Exception> cifsPriorTask = cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
 			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			linuxFuture.thenAccept((myLinuxVms) -> {
 //			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
 				try {
-					cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, password);
+					Exception e = cifsPriorTask.get();
+					if (e == null) {
+						cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, password);
+					} else {
+						throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs Prior Task failed!", e);
+					}
 				} catch (Throwable t) {
 					// TODO need to fix how we handle this error.
 					logger.error("error creating cifs", t);
