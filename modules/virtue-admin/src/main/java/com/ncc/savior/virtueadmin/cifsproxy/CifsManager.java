@@ -35,6 +35,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
@@ -175,6 +176,7 @@ public class CifsManager {
 		String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		Callable<Exception> callable = () -> {
 			try {
+				waitUntilCifsProxyReady(virtue.getUsername());
 				VirtueUser user = userManager.getUser(virtue.getUsername());
 				VirtualMachine cifsVm = cifsProxyDao.getCifsVm(user);
 				String cifsProxyHostname = this.getHostnameFromDns(cifsVm);
@@ -221,6 +223,25 @@ public class CifsManager {
 			}
 		};
 		return serviceProvider.getExecutor().submit(callable);
+	}
+
+	private void waitUntilCifsProxyReady(String username) {
+		long timeout = 1000 * 60 * 10;
+		VirtueUser user = userManager.getUser(username);
+		long start = System.currentTimeMillis();
+		long timeoutTimeMillis = start + timeout;
+		while (true) {
+			logger.debug("waiting for cifs proxy ready");
+			if (timeoutTimeMillis < System.currentTimeMillis()) {
+				// timeout!
+				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs startup timed out");
+			}
+			VirtualMachine vm = cifsProxyDao.getCifsVm(user);
+			if (vm!=null && vm.getState().equals(VmState.RUNNING)) {
+				break;
+			}
+			JavaUtil.sleepAndLogInterruption(500);
+		}
 	}
 
 	public void cifsBeforeVirtueDelete(VirtueInstance virtueInstance) {
