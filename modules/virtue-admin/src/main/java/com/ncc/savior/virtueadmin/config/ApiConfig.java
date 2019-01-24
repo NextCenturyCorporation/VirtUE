@@ -1,9 +1,9 @@
-/* 
+/*
 *  ApiConfig.java
-*  
+*
 *  VirtUE - Savior Project
 *  Created by Wole OMitowoju 11/16/2017
-*  
+*
 *  Copyright (c) 2017 Next Century Corporation. All rights reserved.
 */
 
@@ -27,19 +27,19 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * ApiConfig is responsible for registering all the webserivce apis.
- * 
- * 
+ *
+ *
  */
 @Component
 @ApplicationPath("/")
-@PropertySources({ @PropertySource(value = "classpath:savior-server.properties", ignoreResourceNotFound = true), 
+@PropertySources({ @PropertySource(value = "classpath:savior-server.properties", ignoreResourceNotFound = true),
 		@PropertySource(value = "file:savior-server.properties", ignoreResourceNotFound = true) })
 public class ApiConfig extends ResourceConfig {
 
 	public ApiConfig() {
 
 		//register(ContextInitializer.class);
-		
+
 		/* Register all you webservice class here: */
 		register(DesktopRestService.class);
 		register(DataResource.class);
@@ -48,11 +48,9 @@ public class ApiConfig extends ResourceConfig {
 		register(UserResource.class);
 		register(WebServiceUtil.class);
 		register(MultiPartFeature.class);
-		
 		register(CorsFilter.class);
-		
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
-		
+
 
 	}
 

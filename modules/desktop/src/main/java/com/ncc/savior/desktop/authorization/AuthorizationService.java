@@ -77,6 +77,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
+	logger.debug(domain + " " + this.loginUrl + " " + username + " " +  password);
 		if (!(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {

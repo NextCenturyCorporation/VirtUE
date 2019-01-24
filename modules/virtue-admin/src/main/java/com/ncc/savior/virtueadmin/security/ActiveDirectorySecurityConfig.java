@@ -43,6 +43,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	protected ActiveDirectorySecurityConfig() {
 		super("ActiveDirectory");
+		logger.debug("ActiveDirectorySecurityConfig: " + adDomain + " " + adUrl);
 	}
 
 	private static final XLogger logger = XLoggerFactory.getXLogger(ActiveDirectorySecurityConfig.class);
