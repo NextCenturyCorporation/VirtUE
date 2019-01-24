@@ -150,10 +150,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	}
 
 	@Bean
-	public CollaredSunKerberosJaasTicketValidator sunJaasKerberosTicketValidator() {
+	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
 		logger.entry();
-		CollaredSunKerberosJaasTicketValidator ticketValidator = new CollaredSunKerberosJaasTicketValidator();
-		SunJaasKerberosTicketValidator ticketValidator2 = new SunJaasKerberosTicketValidator();
+//		CollaredSunKerberosJaasTicketValidator ticketValidator = new CollaredSunKerberosJaasTicketValidator();
+		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
 		ticketValidator.setServicePrincipal(servicePrincipal);
 		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		ticketValidator.setDebug(true);

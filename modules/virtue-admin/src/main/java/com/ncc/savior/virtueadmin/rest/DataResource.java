@@ -25,12 +25,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -739,29 +733,6 @@ public class DataResource {
 		clearResourcesDatabase();
 		userManager.clear(true);
 		return "database cleared.";
-	}
-
-	@GET
-	@Path("ticket")
-	public void ticket() throws GSSException {
-		Oid krb5Mechanism = new Oid("1.2.840.113554.1.2.2");
-		Oid krb5PrincipalNameType = new Oid("1.2.840.113554.1.2.2.1");
-		int usage = GSSCredential.ACCEPT_ONLY;
-		GSSManager manager = GSSManager.getInstance();
-		Oid koid = new Oid("1.2.840.113554.1.2.2");
-		GSSName clientName = manager.createName("kdrumm", GSSName.NT_USER_NAME);
-		GSSCredential clientCred = manager.createCredential(clientName, 8 * 3600, koid, GSSCredential.INITIATE_ONLY);
-
-		GSSName serverName = manager.createName("kdrumm-del@VIRTUE2.NCCDO.COM", GSSName.NT_HOSTBASED_SERVICE);
-
-		GSSContext context = manager.createContext(serverName, koid, clientCred, GSSContext.DEFAULT_LIFETIME);
-		context.requestMutualAuth(true);
-		context.requestConf(false);
-		context.requestInteg(true);
-
-		byte[] outToken = context.initSecContext(new byte[0], 0, 0);
-		System.out.println(outToken);
-		context.dispose();
 	}
 
 	@GET

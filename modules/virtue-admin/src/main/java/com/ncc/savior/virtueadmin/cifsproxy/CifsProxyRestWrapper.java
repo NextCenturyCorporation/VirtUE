@@ -48,7 +48,7 @@ public class CifsProxyRestWrapper {
 			if (fs.getWritePerm()) {
 				permissions.add("WRITE");
 			}
-			
+
 			String server = CifsManager.getHostnameFromShareAddress(fs.getAddress());
 			String path = CifsManager.getPathFromShareAddress(fs.getAddress());
 
@@ -59,11 +59,17 @@ public class CifsProxyRestWrapper {
 			node.put("path", path);
 			node.set("permissions", permissions);
 			node.put("type", "CIFS");
-			KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
-			CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 3,
-					CifsShareCreationParameter.class);
-			logger.debug("CIFS returned " + shareOutput);
-			return shareOutput;
+			try {
+				KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
+				CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 3,
+						CifsShareCreationParameter.class);
+				logger.debug("CIFS returned " + shareOutput);
+				return shareOutput;
+			} catch (SaviorException e) {
+				logger.debug("Failed to access CIFS with username=" + username + " and password=" + password + " url="
+						+ shareUrl);
+				throw e;
+			}
 		} catch (RestClientException e) {
 			String msg = "Error creating share for CIFS Proxy";
 			logger.error(msg, e);

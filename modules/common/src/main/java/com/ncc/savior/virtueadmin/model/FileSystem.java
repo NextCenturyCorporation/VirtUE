@@ -1,18 +1,11 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
-
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
-import javax.persistence.Embeddable;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 
 /**
  *

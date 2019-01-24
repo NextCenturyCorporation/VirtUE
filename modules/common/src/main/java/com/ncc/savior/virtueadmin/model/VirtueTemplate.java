@@ -4,28 +4,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ElementCollection;
 import javax.persistence.Transient;
-import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.Embedded;
 
 import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import com.ncc.savior.virtueadmin.model.Printer;
-import com.ncc.savior.virtueadmin.model.FileSystem;
-import com.ncc.savior.virtueadmin.model.WhitelistedNetwork;
 
 
 /**

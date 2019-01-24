@@ -1,25 +1,15 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+
+import javax.persistence.Embeddable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import com.ncc.savior.virtueadmin.model.NetworkProtocol;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Application Data Transfer Object (DTO).
