@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
-import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
@@ -262,26 +261,6 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onUpdate() {
 				sortWithKeyword();
-			}
-
-		});
-
-		authService.addLoginListener(new ILoginListener() {
-
-			@Override
-			public void onLogin(DesktopUser user) {
-				try {
-					renderMainPage(user);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				ghostText.reset();
-			}
-
-			@Override
-			public void onLogout() {
-				// do nothing
 			}
 
 		});
