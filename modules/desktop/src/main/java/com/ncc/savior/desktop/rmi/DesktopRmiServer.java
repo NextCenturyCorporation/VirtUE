@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.sidebar.Sidebar;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -44,7 +45,7 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 		authService.addLoginListener(new ILoginListener() {
 
 			@Override
-			public void onLogin() {
+			public void onLogin(DesktopUser user) {
 				startPendingApplications();
 			}
 

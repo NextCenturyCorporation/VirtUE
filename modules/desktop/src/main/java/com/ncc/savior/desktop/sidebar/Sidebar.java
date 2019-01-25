@@ -54,13 +54,13 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
-import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
@@ -184,6 +184,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private boolean useAdminColor = true;
 
 	private BridgeSensorService bridgeSensorService;
+	private IStartPollListener startPollListener;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
@@ -242,6 +243,26 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 
 		});
+
+		authService.addLoginListener(new ILoginListener() {
+
+			@Override
+			public void onLogin(DesktopUser user) {
+				try {
+					renderMainPage(user);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ghostText.reset();
+			}
+
+			@Override
+			public void onLogout() {
+				// do nothing
+			}
+
+		});
 	}
 
 	public void start(JFrame frame, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -254,13 +275,14 @@ public class Sidebar implements VirtueChangeHandler {
 
 		try {
 			DesktopUser user = authService.loginWithCachedCredentials();
-			onLogin(user);
+			renderMainPage(user);
 		} catch (InvalidUserLoginException e) {
 			startLogin();
 		}
 	}
 
 	public void startLogin() throws IOException {
+		System.out.println("wow");
 		this.loginPageView = new LoginPage(authService);
 		frame.getContentPane().removeAll();
 		frame.getContentPane().validate();
@@ -269,25 +291,9 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
 		this.frame.setVisible(true);
-		initiateLoginScreen(loginPageView);
 	}
 
-	private void initiateLoginScreen(LoginPage lp) throws IOException {
-		lp.addLoginEventListener(new ILoginEventListener() {
-			@Override
-			public void onLoginSuccess(DesktopUser user) throws IOException {
-				onLogin(user);
-				ghostText.reset();
-			}
-
-			@Override
-			public void onLoginFailure(String username, String domain, RuntimeException e) {
-				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
-			}
-		});
-	}
-
-	private void onLogin(DesktopUser user) throws IOException {
+	private void renderMainPage(DesktopUser user) throws IOException {
 		BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged in", authService.getUser().getUsername(),
 				MessageType.LOGIN);
 		bridgeSensorService.sendMessage(messageObj);
@@ -306,6 +312,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
+		triggerStartPoll();
 	}
 
 	@Override
@@ -1256,5 +1263,18 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public void registerStartPollListener(IStartPollListener listener) {
+		startPollListener = listener;
+	}
+
+	public void triggerStartPoll() {
+		System.out.println("wow");
+		startPollListener.startPoll();
+	}
+
+	public static interface IStartPollListener {
+		public void startPoll();
 	}
 }
