@@ -87,8 +87,10 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   /** a table to display the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
-  /** re-classing item, to make it easier and less error-prone to work with. */
-  protected item: Virtue;
+  /** re-classing item, to make it easier and less error-prone to work with.
+  * Must be public to be used in template html file in production mode.
+  */
+ public item: Virtue;
 
   /** to notify the parent item form that one of this.item's lists of child ids has been changed */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();

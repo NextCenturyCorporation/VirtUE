@@ -43,11 +43,15 @@ import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab
 })
 export class VirtueMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
-  /** the version to be displayed. See [[updateVersion]] for details */
-  private newVersion: number;
+  /** the version to be displayed. See [[updateVersion]] for details
+   * Must be public to be used in template html file in production mode.
+   */
+  public newVersion: number;
 
-  /** re-classing parent's item object */
-  protected item: Virtue;
+  /** re-classing parent's item object
+  * Must be public to be used in template html file in production mode.
+  */
+ public item: Virtue;
 
   /**
    * see [[ItemFormMainTabComponent.constructor]] for parameters
