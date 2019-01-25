@@ -55,8 +55,6 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 			}
 
 		});
-
-		bindServer(virtueService, sidebar, authService);
 	}
 
 	public static void bindServer(VirtueService virtueService, Sidebar sidebar, AuthorizationService authService) {

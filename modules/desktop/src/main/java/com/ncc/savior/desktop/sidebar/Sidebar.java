@@ -282,7 +282,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void startLogin() throws IOException {
-		System.out.println("wow");
 		this.loginPageView = new LoginPage(authService);
 		frame.getContentPane().removeAll();
 		frame.getContentPane().validate();
@@ -1270,7 +1269,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void triggerStartPoll() {
-		System.out.println("wow");
 		startPollListener.startPoll();
 	}
 
