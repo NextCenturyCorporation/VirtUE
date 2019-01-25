@@ -27,9 +27,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  * See the commented-out GenericPageComponent.activateModal() function for the unimplemented design.
  *
  */
-@Component({
-  selector: 'app-generic-modal'
-})
+// @Component({
+//   selector: 'app-generic-modal',
+//   templateUrl: './generic.modal.html'
+// })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */

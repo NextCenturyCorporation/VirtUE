@@ -73,7 +73,7 @@
 
     <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
     It is passed the preceeding list, followed by the values between colons -->
-    <div *ngFor="let elem of elements | listFilterSort : sortColumn.sortField : sortDirection : filterColumnName : filterCondition : update;
+    <div *ngFor="let elem of elements | listFilterSort : getColSortField(sortColumn) : sortDirection : filterColumnName : filterCondition : update;
      let elemIndex = index; trackBy: indexTracker"
       appActiveClass
       [ngStyle]="{'background-color': elementIsDisabled(elem.obj) ? 'rgba(233,227,230, 0.65)' : '#ffffff' }"

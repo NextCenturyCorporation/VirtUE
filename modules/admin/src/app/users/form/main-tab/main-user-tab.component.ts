@@ -44,14 +44,19 @@ import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab
 })
 export class UserMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
-  /** whether or not this user has 'user' rights - I assume this is a temporary role #TODO */
-  private roleUser: boolean;
+  /** whether or not this user has 'user' rights - I assume this is a temporary role #TODO
+   * Must be public to be used in template html file in production mode.
+   */
+  public roleUser: boolean;
 
-  /** whether or not this user has 'admin' rights over something */
-  private roleAdmin: boolean;
+  /** whether or not this user has 'admin' rights over something
+   * Must be public to be used in template html file in production mode.
+   */
+  public roleAdmin: boolean;
 
-  /** re-classing parent's item object */
-  protected item: User;
+  /** re-classing parent's item object 
+  * Must be public to be used in template html file in production mode.*/
+  public item: User;
 
   /**
    * see [[ItemFormMainTabComponent.constructor]] for parameters

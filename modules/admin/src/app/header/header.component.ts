@@ -32,7 +32,7 @@ export class HeaderComponent implements OnInit {
   ];
 
   constructor(
-      private authService: AuthenticationService
+      public authService: AuthenticationService
     ) {
 
   }

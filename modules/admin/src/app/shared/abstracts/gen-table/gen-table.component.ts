@@ -76,15 +76,17 @@ export class GenericTableComponent<T> {
 
   /**
    * This defines what columns show up in the table.
+   * Must be public to be used in template html file in production mode.
    */
-  private columns: Column[];
+  public columns: Column[];
 
   /**
    * This list is what gets actually displayed in the table.
    *
    * Table will automatically update once this is set, and will display an no-data-message in the meantime.
+   * Must be public to be used in template html file in production mode.
    */
-  private elements: TableElement<T>[];
+  public elements: TableElement<T>[];
 
   /** used to put a colored bar for everywhere virtues show up */
   private hasColoredLabels: boolean;
@@ -93,20 +95,25 @@ export class GenericTableComponent<T> {
    * Call to re-render the table on a change to filterValue.
    * this just gets toggled, and is passed into the listFilterSort pipe, where it is ignored.
    * The fact that its value changes though, makes angular re-render the table, filtering it based on the currect criteria.
+   * Must be public to be used in template html file in production mode.
    */
-  private update: boolean = false;
+  public update: boolean = false;
 
   /** The message that should show up intead of any table data, when [[elements]] is undefined or empty. */
   private noDataMessage: string;
 
-  /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive. */
-  private tableWidth: number;
+  /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive.
+  * Must be public to be used in template html file in production mode.*/
+  public tableWidth: number;
 
-  /** The column which should the table should be sorted by */
-  private sortColumn: Column;
+  /** The column which should the table should be sorted by
+   * Must be public to be used in template html file in production mode.
+   */
+  public sortColumn: Column;
 
-  /** Whether the table should be sorted in an ascending or descending pattern. Valid values are ASC or DESC */
-  private sortDirection: string = SORT_DIR.ASC;
+  /** Whether the table should be sorted in an ascending or descending pattern. Valid values are ASC or DESC
+  * Must be public to be used in template html file in production mode.*/
+  public sortDirection: string = SORT_DIR.ASC;
 
   /**
    * Holds a [[SelectionMode]] describing whether rows in the table can be selected, and if so, how many values can be selected.
@@ -572,5 +579,9 @@ export class GenericTableComponent<T> {
    */
   sortingAscending(): boolean {
     return this.sortDirection === SORT_DIR.ASC;
+  }
+
+  getColSortField(col) {
+    return (col.sortField ? col.sortField : undefined )
   }
 }

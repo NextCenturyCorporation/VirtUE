@@ -44,8 +44,10 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
   /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
 
-  /** re-classing parent's item object */
-  protected item: VirtualMachine;
+  /** re-classing parent's item object
+   * Must be public to be used in template html file in production mode.
+   */
+  public item: VirtualMachine;
 
   /**
    * see [[ItemFormMainTabComponent.constructor]] for inherited parameters
@@ -53,8 +55,10 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
   constructor(
       routerService: RouterService,
       dialog: MatDialog,
-      /** the available operating systems that this VM can be set as. */
-      protected osOptions: OSSet
+      /** the available operating systems that this VM can be set as.
+       * Must be public to be used in template html file in production mode.
+       */
+      public osOptions: OSSet
       ) {
     super(routerService, dialog);
     this.childDatasetName = DatasetNames.APPS;
