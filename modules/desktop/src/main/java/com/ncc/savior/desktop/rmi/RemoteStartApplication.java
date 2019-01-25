@@ -18,9 +18,8 @@ public class RemoteStartApplication {
 	}
 
 	private static void remoteApplicationIpc(String[] args) throws HeadlessException, Exception {
-		String[] arguments = { "79ddefae-1573-4b47-b636-6b9fc710cfd5", "3175f4b7-5d45-45f6-b6c0-04af5a4f9520" };
-		String virtueId = arguments[0];
-		String applicationId = arguments[1];
+		String virtueId = args[0];
+		String applicationId = args[1];
 
 		try {
 			lookUp = (DesktopRmiInterface) Naming.lookup(DesktopRmiServer.RMI_NAME);
