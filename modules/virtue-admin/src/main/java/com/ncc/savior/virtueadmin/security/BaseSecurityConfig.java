@@ -8,7 +8,6 @@ import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+//import org.springframework.http.HttpMethod;
+import javax.ws.rs.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,7 +36,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -75,6 +75,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			@Override
 			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 					AuthenticationException exception) throws IOException, ServletException {
+				logger.debug("%%FAILED " + request.getRequestedSessionId());
 				response.setStatus(401);
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
@@ -84,33 +85,48 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
+
 				response.setStatus(200);
 				response.setContentType(MediaType.APPLICATION_JSON.toString());
+
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow
-																														// CORS
-																														// option
-																														// calls
-				.antMatchers(HttpMethod.OPTIONS, "/login").permitAll().antMatchers(HttpMethod.OPTIONS, "/logout")
-				.permitAll().antMatchers("/desktop/**").hasRole(USER_ROLE).antMatchers("/data/**").permitAll()
-				.anyRequest().authenticated().and().formLogin().failureHandler(authenticationFailureHandler)
-				.successHandler(successHandler).loginPage("/login").and().logout().clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN", "JSESSIONID").invalidateHttpSession(true);
+		http
+			.authorizeRequests()
+				.antMatchers("/").permitAll()
+				.antMatchers("/favicon.ico").permitAll()
+				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+				.antMatchers("/login").permitAll()
+				.antMatchers("/logout").permitAll()
+				.antMatchers("/desktop/**").hasRole(USER_ROLE)
+				.antMatchers("/data/**").permitAll()// note this is a backdoor for development/testing.
+				.anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.failureHandler(authenticationFailureHandler)
+				.successHandler(successHandler)
+				.loginPage("/login")
+				.and()
+			.logout()
+				.clearAuthentication(true)
+				// .deleteCookies("XSRF-TOKEN", "JSESSIONID")
+				.deleteCookies("JSESSIONID")
+				.invalidateHttpSession(true)
+			;
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				.ignoringAntMatchers(csrfDisabledURLs);
+		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+		http.csrf().disable();
 
 		http.sessionManagement()
-				// .invalidSessionUrl("/login")
-				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).maximumSessions(10)
-				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+				.maximumSessions(10).sessionRegistry(sessionRegistry()).expiredUrl("/login");
+
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
+
 		doConfigure(http);
 
-		// http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
@@ -181,4 +197,5 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.warn(string);
 		return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
 	}
+
 }

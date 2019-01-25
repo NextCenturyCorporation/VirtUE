@@ -26,6 +26,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+import javax.ws.rs.ProcessingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,12 +235,18 @@ public class LoginPage {
 		String password = new String(passwordField.getPassword());
 
 		if (username.equals("")) {
+			errorMessage.setText("Please enter a valid username");
 			errorMessage.setForeground(Color.RED);
 			container.validate();
 			container.repaint();
 		} else {
 			try {
 				doLogin(domain, username, password);
+			} catch (ProcessingException e) {
+				errorMessage.setText("Server is not connected");
+				errorMessage.setForeground(Color.RED);
+				container.validate();
+				container.repaint();
 			} catch (IOException e) {
 				logger.error("Login error");
 			}

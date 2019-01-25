@@ -59,8 +59,11 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
+import com.ncc.savior.desktop.sidebar.DefaultApplicationLauncher.IHyperlinkMessageListener;
+import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
@@ -69,6 +72,7 @@ import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
 import com.ncc.savior.desktop.virtues.BridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.BridgeSensorService;
 import com.ncc.savior.desktop.virtues.ClipboardBridgeSensorMessage;
+import com.ncc.savior.desktop.virtues.HyperlinkBridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.MessageType;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -217,6 +221,24 @@ public class Sidebar implements VirtueChangeHandler {
 		this.defaulApplicationLauncher = new DefaultApplicationLauncher(virtueService, iconService, colorManager,
 				preferenceService);
 
+		defaulApplicationLauncher.addHyperlinkMessageListener(new IHyperlinkMessageListener() {
+
+			@Override
+			public void onMessage(String dataSourceGroupId, String dataDestinationGroupId,
+					DefaultApplicationType applicationType, String params) {
+				try {
+					HyperlinkBridgeSensorMessage messageObj = new HyperlinkBridgeSensorMessage(
+							"Opening new application through hyperlink",
+							authService.getUser().getUsername(), MessageType.HYPERLINK, dataSourceGroupId,
+							dataDestinationGroupId, applicationType, params);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e) {
+					logger.error("error with sending message to bridge sensor");
+				}
+			}
+
+		});
+
 		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
 			@Override
@@ -290,6 +312,22 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
 		this.frame.setVisible(true);
+		initiateLoginScreen(loginPageView);
+	}
+
+	private void initiateLoginScreen(LoginPage lp) throws IOException {
+		lp.addLoginEventListener(new ILoginEventListener() {
+			@Override
+			public void onLoginSuccess(DesktopUser user) throws IOException {
+				renderMainPage(user);
+				ghostText.reset();
+			}
+
+			@Override
+			public void onLoginFailure(String username, String domain, RuntimeException e) {
+				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+			}
+		});
 	}
 
 	private void renderMainPage(DesktopUser user) throws IOException {
@@ -334,12 +372,6 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading || empty) {
-			loading = false;
-			empty = false;
-			setInitialViewPort();
-		}
-
 		for (DesktopVirtue virtue : virtues) {
 			if (useAdminColor) {
 				try {
@@ -470,6 +502,12 @@ public class Sidebar implements VirtueChangeHandler {
 			keyword = "";
 		}
 		sortByOption(keyword);
+
+		if (loading || empty) {
+			loading = false;
+			empty = false;
+			setInitialViewPort();
+		}
 
 		scrollPane.getViewport().validate();
 	}
@@ -1084,21 +1122,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				try {
-					BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out",
-							authService.getUser().getUsername(), MessageType.LOGOUT);
-					bridgeSensorService.sendMessage(messageObj);
-				} catch (InvalidUserLoginException e1) {
-					logger.error("error with sending message to bridge sensor");
-				}
-				authService.logout();
-				loading = true;
-				try {
-					startLogin();
-				} catch (IOException e) {
-					String msg = "Error attempting to logout";
-					logger.error(msg, e);
-				}
+				logout(true);
 			}
 		});
 
@@ -1262,6 +1286,28 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public void logout(boolean serverConnected) {
+		try {
+			BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out", authService.getUser().getUsername(),
+					MessageType.LOGOUT);
+			bridgeSensorService.sendMessage(messageObj);
+		} catch (InvalidUserLoginException e1) {
+			logger.error("error with sending message to bridge sensor");
+		}
+		if (serverConnected) {
+			authService.logout();
+		} else {
+			authService.triggerOnLogout();
+		}
+		loading = true;
+		try {
+			startLogin();
+		} catch (IOException e) {
+			String msg = "Error attempting to logout";
+			logger.error(msg, e);
+		}
 	}
 
 	public void registerStartPollListener(IStartPollListener listener) {

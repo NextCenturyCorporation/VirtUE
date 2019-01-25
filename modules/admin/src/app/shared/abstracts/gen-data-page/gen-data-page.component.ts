@@ -85,12 +85,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   * in the order in which they should be loaded.
   *
   * Generally, this is lowest-highest. (ordering is printer/fileSystem/app < vm < virtue < user)
-  * - So if dataset A has references (e.g. a list of IDs) to items from dataset B, and this loads A before loading B, then those references
+  * - So if dataset A has references (e.g. a list of IDs) to items from dataset B, and this loads A before loading B,
+  * then those references
   *   will simply remain references, instead of having links to the actual objects. Everything else should work fine.
-  *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down `[DatasetNames.VMS, DatasetNames.VIRTUES]`
+  *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down
+  *   `[DatasetNames.VMS, DatasetNames.VIRTUES]`
   *
-  * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between the two sets
-  *   (say you just want the names of all of them, and don't want to waste time building anything else), then request them in opposite order.
+  * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between
+  *   the two sets (say you just want the names of all of them, and don't want to waste time building anything else),
+  *   then request them in opposite order.
   */
   neededDatasets: DatasetNames[];
 
@@ -129,21 +132,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
    * This is the standard method that most components need to run upon load.
-   * It sets up the tool used to load data ([[DataRequestService.baseUrl]]), and sends out a request for the data the page needs.
+   * It used to perform other setup but now just sends out a request for the data the page needs.
    */
   cmnDataComponentSetup(): void {
-    let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
-      this.baseUrl = res[0].virtue_server;
-
-      this.dataRequestService.setBaseUrl(this.baseUrl);
-
       this.pullData();
-    }, error => {
-      console.log("Error retrieving base url."); // TODO notify user
-    }, () => {
-      sub.unsubscribe();
-    });
-
   }
 
   /**
@@ -280,7 +272,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     error => {
       console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'");
       // close stream on error.
-      sub.unsubscribe();
+      if (sub) {
+        sub.unsubscribe();
+      }
       // TODO notify user
     },
     () => { // once the dataset has been pulled and fully processed above

@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.xpra;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -148,6 +149,16 @@ public class XpraConnectionManager {
 				throw new IOException("Error getting starting and getting display from Xpra.");
 			}
 		}
+	}
+
+	public void closeActiveClients() {
+		Collection<XpraClient> clients = activeClientsMap.values();
+
+		for (XpraClient client : clients) {
+			client.close();
+		}
+
+		activeClientsMap.clear();
 	}
 
 }

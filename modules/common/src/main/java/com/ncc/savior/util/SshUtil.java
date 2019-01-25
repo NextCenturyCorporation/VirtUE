@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 
 /**
  * Utility functions related to SSH.
@@ -257,6 +260,30 @@ public class SshUtil {
 		session.setTimeout(1000);
 		session.connect();
 		return session;
+	}
+
+	/**
+	 * Utilizes an {@link ITemplateService} to send commands from a template file on
+	 * a session. Each line of the templated script will be run separately.
+	 * 
+	 * @param templateService
+	 * @param session
+	 * @param templateName
+	 * @param dataModel
+	 * @return
+	 * @throws TemplateException
+	 * @throws IOException 
+	 * @throws JSchException 
+	 */
+	public static List<String> runCommandsFromFile(ITemplateService templateService, Session session,
+			String templateName, Map<String, Object> dataModel) throws TemplateException, JSchException, IOException {
+		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
+		List<String> output = new ArrayList<String>();
+		for (String line : lines) {
+			List<String> o = SshUtil.sendCommandFromSession(session, line);
+			output.addAll(o);
+		}
+		return output;
 	}
 
 	public static String getKeyFromFile(File privateKey) {

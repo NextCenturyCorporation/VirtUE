@@ -24,7 +24,8 @@ import com.ncc.savior.virtueadmin.model.NetworkProtocol;
 /**
  * Application Data Transfer Object (DTO).
  *
- *
+ * If get/set-Protocol are still commented out, then this still is broken - saving enums to the h2db like this doesn't work.
+ * When that is fixed, remember to remove the hard-coding to this.protocol in the default constructor.
  */
 @Embeddable
 public class WhitelistedNetwork {
@@ -40,7 +41,7 @@ public class WhitelistedNetwork {
 	private NetworkProtocol protocol;
 
 	public WhitelistedNetwork(String host, NetworkProtocol protocol, int localPort, int remotePort) {
-		logger.debug("here2 ");
+		// logger.debug("In first WhitelistedNetwork constructor");
 		this.host = host;
 		this.localPort = localPort;
 		this.remotePort = remotePort;
@@ -49,16 +50,14 @@ public class WhitelistedNetwork {
 
 	/**
 	 * Used for jackson deserialization
-	 * This file was copied from ApplicationDefinition - don't know if we still need this.
 	 */
 	protected WhitelistedNetwork() {
-
-		logger.debug("here ");
-		protocol = NetworkProtocol.TCPIP;
+		// logger.debug("In second WhitelistedNetwork constructor");
+		this.protocol = NetworkProtocol.TCPIP;
 	}
 
 	public WhitelistedNetwork(WhitelistedNetwork wlNetwork) {
-		logger.debug("here3 ");
+		// logger.debug("In third WhitelistedNetwork constructor");
 		this.host = wlNetwork.getHost();
 		this.localPort = wlNetwork.getLocalPort();
 		this.remotePort = wlNetwork.getRemotePort();
@@ -67,7 +66,6 @@ public class WhitelistedNetwork {
 
 	@JsonGetter
 	public String getHost() {
-		logger.debug("getHost");
 		return host;
 	}
 
@@ -89,19 +87,19 @@ public class WhitelistedNetwork {
 	// below setters used for jackson deserialization
 	@JsonSetter
 	public void setHost(String host) {
-		logger.debug("setHost " + host);
+		// logger.debug("setHost " + host);
 		this.host = host;
 	}
 
 	@JsonSetter
 	public void setLocalPort(int localPort) {
-		logger.debug("setLocalPort " + localPort);
+		// logger.debug("setLocalPort " + localPort);
 		this.localPort = localPort;
 	}
 
 	@JsonSetter
 	public void setRemotePort(int remotePort) {
-		logger.debug("setRemotePort " + remotePort);
+		// logger.debug("setRemotePort " + remotePort);
 		this.remotePort = remotePort;
 	}
 

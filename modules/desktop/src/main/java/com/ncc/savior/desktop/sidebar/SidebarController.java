@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.Sidebar.IStartPollListener;
+import com.ncc.savior.desktop.virtues.UserLoggedOutException;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
@@ -69,6 +71,7 @@ public class SidebarController {
 				@Override
 				public void onLogout() {
 					stopVirtuePoll();
+					virtueService.closeXpraConnections();
 				}
 
 			});
@@ -121,9 +124,12 @@ public class SidebarController {
 							List<DesktopVirtue> virtues;
 							try {
 								virtues = virtueService.getVirtuesForUser();
-							} catch (IOException e1) {
-								// TODO do something with connection errors.
-								virtues = new ArrayList<DesktopVirtue>(0);
+							} catch (ConnectException e) {
+								sidebar.logout(false);
+								break;
+							} catch (UserLoggedOutException e) {
+								sidebar.logout(true);
+								break;
 							}
 
 							updateVirtues(virtues);

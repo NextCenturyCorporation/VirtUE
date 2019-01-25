@@ -220,8 +220,9 @@ public class VirtueService {
 	 *
 	 * @return
 	 * @throws IOException
+	 * @throws UserLoggedOutException
 	 */
-	public List<DesktopVirtue> getVirtuesForUser() throws IOException {
+	public List<DesktopVirtue> getVirtuesForUser() throws IOException, UserLoggedOutException {
 		List<DesktopVirtue> list = null;
 		list = desktopResourceService.getVirtues();
 		for (DesktopVirtue virtue : list) {
@@ -338,5 +339,9 @@ public class VirtueService {
 
 	public List<DesktopVirtue> getApplicationsWithTag(String tag) {
 		return desktopResourceService.getApplicationsWithTag(tag);
+	}
+
+	public void closeXpraConnections() {
+		connectionManager.closeActiveClients();
 	}
 }

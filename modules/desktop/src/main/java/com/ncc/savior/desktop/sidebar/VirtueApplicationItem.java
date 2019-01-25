@@ -239,14 +239,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 					pm.addSeparator();
 					pm.add(mi3);
 					pm.show(container, -44, 26);
-				} else {
-					if (!Sidebar.askAgain) {
+
+				} else if ((event.getClickCount() == 2 && Sidebar.askAgain)
+						|| (event.getClickCount() == 1 && !Sidebar.askAgain)) {
+					// double click starts applications when the prompt is enabled and single click
+					// starts applications when the prompt is disabled
 						try {
 							virtueService.startApplication(vc.getVirtue(), ad);
 
 							if (hasFullBorder()) {
-								container.setBorder(
-										new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+								container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
 							} else {
 								container.setBorder(new MatteBorder(2, 2, 0, 0, Color.DARK_GRAY));
 							}
@@ -262,6 +264,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 								}
 							});
 
+							timer.setRepeats(false);
 							timer.start();
 
 							// virtue.setVirtueState(VirtueState.LAUNCHING);
@@ -270,11 +273,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 							String msg = "Error attempting to start a " + ad.getName() + " application";
 							logger.error(msg);
 						}
-					} else {
+					} else if (Sidebar.askAgain) {
 						setupDialog();
 					}
 				}
-			}
 		});
 
 		favoritedLabel.addMouseListener(new MouseAdapter() {

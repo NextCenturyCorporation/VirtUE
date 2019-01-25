@@ -1,5 +1,7 @@
 import { Component, OnInit, NgModule } from '@angular/core';
 
+import { AuthenticationService } from '../shared/services/authentication.service';
+
 /**
  * @class
  * This class represents the header which is displayed on every page, allowing
@@ -29,9 +31,22 @@ export class HeaderComponent implements OnInit {
     {value: 'Applications', link: '/applications'}
   ];
 
+  constructor(
+      private authService: AuthenticationService
+    ) {
+
+  }
+
   /**
    * Do nothing extra on render at the moment.
    */
   ngOnInit() {
+  }
+
+  getNavOptions() {
+    if (this.authService.isAuthenticated()) {
+      return this.navigation;
+    }
+    return [];
   }
 }

@@ -18,6 +18,7 @@ import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.sidebar.Sidebar;
+import com.ncc.savior.desktop.virtues.UserLoggedOutException;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -32,6 +33,7 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 	private static Registry registry;
 	private VirtueService virtueService;
 	private AuthorizationService authService;
+	private Sidebar sidebar;
 
 	private List<Pair<String, String>> pendingApplications;
 
@@ -127,6 +129,9 @@ public class DesktopRmiServer extends UnicastRemoteObject implements DesktopRmiI
 			virtues = virtueService.getVirtuesForUser();
 		} catch (IOException e1) {
 			logger.info("IOException");
+		} catch (UserLoggedOutException e) {
+			sidebar.logout(true);
+			return;
 		}
 		for (DesktopVirtue currVirtue : virtues) {
 			if (currVirtue.getTemplateId().equals(virtueId)) {
