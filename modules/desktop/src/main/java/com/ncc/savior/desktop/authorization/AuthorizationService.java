@@ -129,7 +129,7 @@ public class AuthorizationService {
 		}
 	}
 
-	protected void triggerOnLogout() {
+	public void triggerOnLogout() {
 		for (ILoginListener listener : loginListeners) {
 			listener.onLogout();
 		}
