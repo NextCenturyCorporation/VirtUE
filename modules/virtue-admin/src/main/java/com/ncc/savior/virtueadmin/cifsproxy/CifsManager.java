@@ -211,7 +211,6 @@ public class CifsManager {
 					// cifsProxyDao.saveVirtueParams(virtueParams);
 					CifsShareCreationParameter share = cifsRestWrapper.createShare(cifsProxyHostname,
 							user.getUsername(), password, virtue.getId(), fs);
-					share.setFileSystemId(fs.getId());
 					cifsProxyDao.saveShareParams(share);
 				}
 				logger.debug("Cifs before virtue action completed successfully");
@@ -237,7 +236,7 @@ public class CifsManager {
 				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs startup timed out");
 			}
 			VirtualMachine vm = cifsProxyDao.getCifsVm(user);
-			if (vm!=null && vm.getState().equals(VmState.RUNNING)) {
+			if (vm != null && vm.getState().equals(VmState.RUNNING)) {
 				break;
 			}
 			JavaUtil.sleepAndLogInterruption(500);

@@ -19,7 +19,6 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
  * Service which will try to run a remote command or fail.
- * 
  *
  */
 public class RunRemoteCommandCompletableFutureService

@@ -12,6 +12,10 @@ import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Test Cifs DAO.  Not used in production and may have unimplemented methods. 
+ *
+ */
 public class MemoryCifsProxyDao implements ICifsProxyDao {
 
 	private HashMap<String, CifsProxyData> userMap;

@@ -95,7 +95,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				// .authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
 				.authenticationProvider(kerberosServiceAuthenticationProvider())
 				// for username/password
-				.authenticationProvider(kerberosAuthenticationProvider()).eraseCredentials(false);
+				.authenticationProvider(kerberosAuthenticationProvider())
+				// Prevents password from being removed so we can pull it out and use it for
+				// CIFS.
+				.eraseCredentials(false);
 		logger.exit();
 	}
 
@@ -124,7 +127,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry(authenticationManager);
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
 		filter.setAuthenticationManager(authenticationManager);
-		
+
 		filter.setFailureHandler(new AuthenticationFailureHandler() {
 
 			@Override
@@ -152,18 +155,12 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Bean
 	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
 		logger.entry();
-//		CollaredSunKerberosJaasTicketValidator ticketValidator = new CollaredSunKerberosJaasTicketValidator();
 		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
 		ticketValidator.setServicePrincipal(servicePrincipal);
 		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		ticketValidator.setDebug(true);
 		ticketValidator.setHoldOnToGSSContext(true);
-		
-//		ticketValidator2.setServicePrincipal(servicePrincipal);
-//		ticketValidator2.setKeyTabLocation(new FileSystemResource(keytabLocation));
-//		ticketValidator2.setDebug(true);
 		logger.exit(ticketValidator);
-		
 		return ticketValidator;
 	}
 
@@ -194,6 +191,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				.accessDeniedHandler(getAccessDeniedHandler()).and()
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
-		//http.csrf().disable();
+		// http.csrf().disable();
 	}
 }

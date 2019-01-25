@@ -1,5 +1,10 @@
 package com.ncc.savior.virtueadmin.model;
 
+/**
+ * Data Access Object (DAO) for creating and passing CIFS Proxy Virtues as
+ * defined by the CIFS Proxy API.
+ *
+ */
 public class CifsVirtueCreationParameter {
 	private String name;
 	private String id;

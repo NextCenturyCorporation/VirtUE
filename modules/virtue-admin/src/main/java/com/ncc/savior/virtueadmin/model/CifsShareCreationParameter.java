@@ -8,7 +8,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+/**
+ * Data Access Object (DAO) for creating and passing CIFS Proxy Shares as
+ * defined by the CIFS Proxy API.
+ *
+ */
 
 @Entity
 public class CifsShareCreationParameter {
@@ -24,7 +28,6 @@ public class CifsShareCreationParameter {
 	private List<String> permissions;
 	private String type;
 	private String exportedName;
-	private String fileSystemId;
 
 	public CifsShareCreationParameter() {
 	}
@@ -104,14 +107,5 @@ public class CifsShareCreationParameter {
 	public String toString() {
 		return "CifsShareCreationParameter [name=" + name + ", virtueId=" + virtueId + ", server=" + server + ", path="
 				+ path + ", permissions=" + permissions + ", type=" + type + ", exportedName=" + exportedName + "]";
-	}
-
-	@JsonIgnore
-	public void setFileSystemId(String fsId) {
-		this.fileSystemId = fsId;
-	}
-
-	public String getFileSystemId() {
-		return this.fileSystemId;
 	}
 }
