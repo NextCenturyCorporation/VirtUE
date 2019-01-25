@@ -22,7 +22,14 @@ import com.ncc.savior.virtueadmin.model.CifsVirtueCreationParameter;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 
+/**
+ * Encapsulates all HTTP requests sent to a cifs proxy.
+ *
+ */
 public class CifsProxyRestWrapper {
+	private static final String PERMISSION_WRITE = "WRITE";
+	private static final String PERMISSION_READ = "READ";
+	private static final String PERMISSION_EXECUTE = "EXECUTE";
 	private static final Logger logger = LoggerFactory.getLogger(CifsProxyRestWrapper.class);
 	private ObjectMapper jsonMapper;
 
@@ -40,13 +47,13 @@ public class CifsProxyRestWrapper {
 			ObjectNode node = jsonMapper.createObjectNode();
 			ArrayNode permissions = jsonMapper.createArrayNode();
 			if (fs.getExecutePerm()) {
-				permissions.add("EXECUTE");
+				permissions.add(PERMISSION_EXECUTE);
 			}
 			if (fs.getReadPerm()) {
-				permissions.add("READ");
+				permissions.add(PERMISSION_READ);
 			}
 			if (fs.getWritePerm()) {
-				permissions.add("WRITE");
+				permissions.add(PERMISSION_WRITE);
 			}
 
 			String server = CifsManager.getHostnameFromShareAddress(fs.getAddress());
