@@ -4,6 +4,7 @@ buildscript {
 		springSecurityVersion = '5.0.0.RELEASE'
         springDataVersion = '2.0.2.RELEASE'
         jerseyVersion = '2.26'
+        awsVersion = '1.11.483' 
 	}
 	
 	repositories {
@@ -25,7 +26,7 @@ apply plugin: "io.spring.dependency-management"
 
 dependencyManagement {
   imports {
-      mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.263'
+      mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.483'
   }
 }
 
@@ -65,12 +66,12 @@ testSets {
 dependencies {
 	compile project(':common')
 	
-    compile 'com.amazonaws:aws-java-sdk:1.9.6'
-    compile 'com.amazonaws:aws-java-sdk-s3'
-    compile 'com.amazonaws:aws-java-sdk-ec2'    
-    compile 'com.amazonaws:aws-java-sdk-cloudformation'
-    compile 'com.amazonaws:aws-java-sdk-simpledb'
-    compile 'com.amazonaws:aws-java-sdk-route53' 
+	compile group: 'com.amazonaws', name: 'aws-java-sdk', version: awsVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: awsVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-cloudformation', version: awsVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-simpledb', version: awsVersion
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-route53', version: awsVersion
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyVersion

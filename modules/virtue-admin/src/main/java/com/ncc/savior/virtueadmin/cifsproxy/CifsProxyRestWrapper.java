@@ -163,8 +163,7 @@ public class CifsProxyRestWrapper {
 			return output;
 		} catch (RestClientException e) {
 			if (retries > 0) {
-				logger.error("Error making kerberos request to CIFS Proxy.  Retrying with " + (retries - 1) + " retries",
-						e);
+				logger.error("Error making kerberos request to CIFS Proxy.  Retrying with " + (retries - 1) + " retries");
 				JavaUtil.sleepAndLogInterruption(1000);
 				return kerberosRequestWithRetries(krt, virtueUrl, body, retries - 1, returnType);
 			} else {

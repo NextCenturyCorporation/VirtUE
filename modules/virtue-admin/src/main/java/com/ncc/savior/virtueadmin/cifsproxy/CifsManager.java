@@ -207,8 +207,9 @@ public class CifsManager {
 					session.setConfig("StrictHostKeyChecking", "no");
 					session.setTimeout(1000);
 					session.connect();
-					List<String> output = SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
-					logger.debug("allow-delegation output: "+ output);
+					List<String> output = SshUtil.runCommandsFromFile(templateService, session,
+							"cifs-allow-delegation.tpl", model);
+					logger.debug("allow-delegation output: " + output);
 					// cifsProxyDao.saveVirtueParams(virtueParams);
 					CifsShareCreationParameter share = cifsRestWrapper.createShare(cifsProxyHostname,
 							user.getUsername(), password, virtue.getId(), fs);
@@ -230,14 +231,15 @@ public class CifsManager {
 		VirtueUser user = userManager.getUser(username);
 		long start = System.currentTimeMillis();
 		long timeoutTimeMillis = start + timeout;
+		logger.debug("waiting for cifs proxy ready for " + username);
 		while (true) {
-			logger.debug("waiting for cifs proxy ready");
 			if (timeoutTimeMillis < System.currentTimeMillis()) {
 				// timeout!
 				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs startup timed out");
 			}
 			VirtualMachine vm = cifsProxyDao.getCifsVm(user);
 			if (vm != null && vm.getState().equals(VmState.RUNNING)) {
+				logger.debug("Cifs Proxy is ready for " + username);
 				break;
 			}
 			JavaUtil.sleepAndLogInterruption(500);

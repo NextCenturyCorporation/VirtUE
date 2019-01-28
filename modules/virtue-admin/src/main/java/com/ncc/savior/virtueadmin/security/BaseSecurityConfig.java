@@ -8,6 +8,7 @@ import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -110,8 +110,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.logout()
 				.clearAuthentication(true)
-				// .deleteCookies("XSRF-TOKEN", "JSESSIONID")
-				.deleteCookies("JSESSIONID")
+				.deleteCookies("XSRF-TOKEN", "JSESSIONID")
 				.invalidateHttpSession(true)
 			;
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);

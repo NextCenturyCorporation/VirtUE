@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
@@ -17,6 +18,7 @@ import javax.imageio.ImageIO;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -32,6 +34,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ncc.savior.desktop.alerting.PlainAlertMessage;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
@@ -81,23 +85,25 @@ public class DesktopResourceService {
 		this(authService, baseApiUri, false, bridgeSensorService);
 	}
 
-	public List<DesktopVirtue> getVirtues() throws IOException {
+	public List<DesktopVirtue> getVirtues() throws IOException, UserLoggedOutException {
 		List<DesktopVirtue> instances;
 		try {
 			Response r = getListOfClass("virtue", "GET");
 			InputStream in = (InputStream) r.getEntity();
+			// logger.debug("Status code is: " + r.getStatus());
 			if (r.getStatus() >= 400) {
 				String data = streamToString(in);
 				logger.error("response (" + r.getStatus() + "): " + data);
-				instances = new ArrayList<DesktopVirtue>();
+				PlainAlertMessage pam = new PlainAlertMessage("Server error message", "Logged out by server");
+				UserAlertingServiceHolder.sendAlert(pam);
+				throw new UserLoggedOutException();
 			} else {
 				instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtue>>() {
 				});
 			}
-		} catch (IOException | ProcessingException e) {
+		} catch (IOException | ProcessingException | NotAcceptableException e) {
 
-			logger.error("error attempting to get virtues.", e);
-			instances = new ArrayList<DesktopVirtue>();
+			throw new ConnectException();
 		}
 		return instances;
 	}

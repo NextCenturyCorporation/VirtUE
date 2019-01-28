@@ -32,9 +32,9 @@ import { Mode } from '../gen-form/mode.enum';
  *
  * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
  */
-@Component({
-  templateUrl: './item-list.component.html'
-})
+// @Component({
+//   templateUrl: './item-list.component.html'
+// })
 export abstract class ItemListComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */

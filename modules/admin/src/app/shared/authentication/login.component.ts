@@ -17,6 +17,7 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
   returnUrl: string;
   returnedData: any = {headers: ""};
   message: string = "";
+  loading: boolean = false;
 
   constructor(
     routerService: RouterService,
@@ -38,11 +39,13 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
   }
 
   onSubmit() {
+    this.loading = true;
     this.submitted = true;
     this.message = "";
 
     // stop here if form is invalid
     if (this.loginForm.invalid) {
+      this.loading = false;
       return;
     }
 
@@ -51,10 +54,12 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
         (data: HttpResponse<string>) => {
           this.returnedData = data;
           this.routerService.goToPage(this.returnUrl);
+          this.loading = false;
         },
         error => {
           console.log(error);
           this.message = "Incorrect login information";
+          this.loading = false;
           return error;
         });
   }

@@ -91,14 +91,14 @@ public class AuthorizationService {
 		}
 		DesktopUser user = authProvider.login(domain, username, password);
 		if (user != null) {
-			triggerOnLogin();
+			triggerOnLogin(user);
 		}
 		return user;
 	}
 
 	public DesktopUser loginWithCachedCredentials() throws InvalidUserLoginException {
 		DesktopUser user = getUser();
-		triggerOnLogin();
+		triggerOnLogin(user);
 		return user;
 	}
 
@@ -123,20 +123,20 @@ public class AuthorizationService {
 		loginListeners.remove(listener);
 	}
 
-	public void triggerOnLogin() {
+	public void triggerOnLogin(DesktopUser user) {
 		for (ILoginListener listener : loginListeners) {
-			listener.onLogin();
+			listener.onLogin(user);
 		}
 	}
 
-	protected void triggerOnLogout() {
+	public void triggerOnLogout() {
 		for (ILoginListener listener : loginListeners) {
 			listener.onLogout();
 		}
 	}
 
 	public static interface ILoginListener {
-		public void onLogin();
+		public void onLogin(DesktopUser user);
 
 		public void onLogout();
 	}

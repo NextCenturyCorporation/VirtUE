@@ -28,8 +28,6 @@ to get around the relative-path restriction, but it didn't make a difference for
    unless the destination path is actually on the same server as the request (???) - solveable only with a proxy.
     https://stackoverflow.com/questions/48002670/angular-5-unable-to-get-xsrf-token-from-httpxsrftokenextractor
 
-This page claims sufficiency to use
-
 will need this later if we decide to switch over to JWTs (would prevent csrf, bypassing the current issues)
 https://medium.com/@ryanchenkie_40935/angular-authentication-using-the-http-client-and-http-interceptors-2f9d1540eb8
 -- section titled "Looking for Unauthorized Responses"

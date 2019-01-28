@@ -102,7 +102,7 @@ public class AdminService {
 		addInitialUser();
 	}
 
-	protected void sync() {
+	public void sync() {
 		Runnable syncRunnable = () -> {
 			if (!test) {
 				try {
