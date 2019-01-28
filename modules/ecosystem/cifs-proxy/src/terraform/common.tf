@@ -92,6 +92,12 @@ variable "linux_instance_type" {
   default = "t2.micro"
 }
 
+variable "proxy_jar" {
+  # based on baseName and version set in ../../build.gradle
+  description = "Path to the jar file for the CIFS Proxy."
+  default = "../../build/libs/cifs-proxy-server-0.0.1.jar"
+}
+
 variable "helper_program_location" {
   default = "../.."
 }
