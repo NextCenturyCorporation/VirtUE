@@ -72,16 +72,28 @@ set -e
 [ $verbose -eq 1 ] && set -x
 
 # set hostname and make DHCP resolve against the DC
-hostnamectl set-hostname $hostname.$domain
+cat > /etc/netplan/99-virtue.yaml <<EOF
+network:
+    version: 2
+    ethernets:
+        eth0:
+          nameservers:
+            addresses: [${dcip}]
+            search: [${domain}]
+EOF
+netplan apply
+sudo sed -i '/preserve_hostname: false/c\preserve_hostname: true' /etc/cloud/cloud.cfg
+hostnamectl set-hostname $hostname
+domainname $domain
 sed -i "s/\(^127\.0\.0\.1 *\)/\1${hostname}.${domain} ${hostname} /" /etc/hosts
-(echo supersede domain-name-servers "${dcip}" ';'
-echo supersede domain-search \"${domain}\";
-echo supersede domain-name \"${domain}\";
-) >> /etc/dhcp/dhclient.conf
-systemctl restart network.service
 
 # join the domain
-echo "${domainAdminPassword}" | realm join --membership-software=samba --user ${domainAdmin} ${domain}
+echo "${domainAdminPassword}" | \
+	realm join \
+		  --membership-software=samba \
+		  --user-principal "http/${hostname}.${domain}@${domain^^}" \
+		  --user ${domainAdmin} \
+		  ${domain}
 # Making minimal smb.conf so net ads keytab works
 domainPrefix=${domain/.*}
 cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
@@ -100,6 +112,7 @@ echo "${domainAdminPassword}" | net -k ads keytab add http -U ${domainAdmin}
 echo "${domainAdminPassword}" | net -k ads keytab add HTTP -U ${domainAdmin}
 
 # Configuring Kerberos for our domain
+mkdir --parents /etc/krb5.conf.d
 cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 [libdefaults]
 	default_realm = ${domain^^}
@@ -115,17 +128,5 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 		admin_server = ${domain}
 	}
 EOCONF
- 
-# set userPrincipalName
-ldapfile=/tmp/ldap-$$
-domainparts=${domain//./,dc=}
-cat > $ldapfile <<EOLDAP
-dn: cn=${hostname},ou=Computers,ou=${domainPrefix},dc=$domainparts
-changetype: modify
-replace: userPrincipalName
-userPrincipalName: http/${hostname}.${domain}@${domain^^}
--
-EOLDAP
-ldapmodify -f $ldapfile -w "${domainAdminPassword}" -x -H ldap://${dcip} \
-		   -D "${domainAdmin}@${domain}" \
-	&& rm -f $ldapfile
+# savior.conf should be enough, but the CIFS Proxy has problems if default_realm isn't set in krb5.conf itself
+sed -i -e "/^\[libdefaults\] *\$/a\    default_realm = ${domain^^}" /etc/krb5.conf
