@@ -29,10 +29,8 @@ resource "aws_instance" "user_facing_server" {
 set -x
 exec > /var/log/user_data.log 2>&1
 date
+# prevent questions about kerberos configuration (it'll get set by post-deploy-config.sh)
 export DEBIAN_FRONTEND=noninteractive
-domain=${var.domain}
-echo krb5-config krb5-config/default_realm string $${domain^^} | sudo debconf-set-selections
-echo krb5-config krb5-config/add_servers_realm string $${domain^^} | sudo debconf-set-selections
 apt-get update && \
 apt-get -y install \
 	adcli \
@@ -79,6 +77,12 @@ EOF
 	destination = "/tmp/virtue.conf"
   }
 
+  # the CIFS Proxy jar file
+  provisioner "file" {
+	source = "${var.proxy_jar}"
+	destination = "/tmp/${basename(var.proxy_jar)}"
+  }
+
   #
   # Helper programs
   #
@@ -114,8 +118,9 @@ EOF
 	  "sudo touch /etc/samba/virtue-shares.conf",
 	  "sudo systemctl enable smbd nmbd",
 	  "sudo systemctl start smbd nmbd",
+	  "sudo cp --target-directory=/usr/local/lib /tmp/${basename(var.proxy_jar)}",
 	  # install will make them executable by default
-	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
+	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh"
 	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
 	  "sleep 5",
 	  "sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname} --verbose"
