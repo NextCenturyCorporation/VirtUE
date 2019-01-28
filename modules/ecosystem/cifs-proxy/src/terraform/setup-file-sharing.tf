@@ -33,5 +33,5 @@ resource "null_resource" "setup_file_sharing" {
 	]
   }
 
-  depends_on = [ "null_resource.user_creation" ]
+  depends_on = [ "aws_instance.file_server", "null_resource.user_creation" ]
 }
