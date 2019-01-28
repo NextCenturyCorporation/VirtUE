@@ -4,7 +4,7 @@
 	"enabled": true,
 	"awsTemplateName": "default-template",
 	"color": "#CB181D",
-	"virtualMachineTemplateIds": [
+	"vmTemplateIds": [
 		"c0b31b11-ed0d-43e6-a9da-a5270ae5c91b"
 	]
 }

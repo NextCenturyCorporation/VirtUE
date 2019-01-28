@@ -8,6 +8,7 @@ import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-//import org.springframework.http.HttpMethod;
-import javax.ws.rs.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -92,17 +91,28 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow
-																														// CORS
-																														// option
-																														// calls
-				.antMatchers("/login").permitAll().antMatchers("/logout")
-				.permitAll().antMatchers("/desktop/**").hasRole(USER_ROLE).antMatchers("/data/**").permitAll()
-				.anyRequest().authenticated().and().formLogin().failureHandler(authenticationFailureHandler)
-				.successHandler(successHandler).loginPage("/login").and().logout().clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN", "JSESSIONID").invalidateHttpSession(true);
-
+		http
+			.authorizeRequests()
+				.antMatchers("/").permitAll()
+				.antMatchers("/favicon.ico").permitAll()
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
+				.antMatchers("/login").permitAll()
+				.antMatchers("/logout").permitAll()
+				.antMatchers("/desktop/**").hasRole(USER_ROLE)
+				.antMatchers("/data/**").permitAll()// note this is a backdoor for development/testing.
+				.anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.failureHandler(authenticationFailureHandler)
+				.successHandler(successHandler)
+				.loginPage("/login")
+				.and()
+			.logout()
+				.clearAuthentication(true)
+				.deleteCookies("XSRF-TOKEN", "JSESSIONID")
+				.invalidateHttpSession(true)
+			;
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 		http.csrf().disable();
 
