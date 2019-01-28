@@ -207,7 +207,8 @@ public class CifsManager {
 					session.setConfig("StrictHostKeyChecking", "no");
 					session.setTimeout(1000);
 					session.connect();
-					SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
+					List<String> output = SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
+					logger.debug("allow-delegation output: "+ output);
 					// cifsProxyDao.saveVirtueParams(virtueParams);
 					CifsShareCreationParameter share = cifsRestWrapper.createShare(cifsProxyHostname,
 							user.getUsername(), password, virtue.getId(), fs);

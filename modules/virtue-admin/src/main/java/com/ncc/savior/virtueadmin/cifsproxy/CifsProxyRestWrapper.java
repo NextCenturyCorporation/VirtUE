@@ -68,7 +68,10 @@ public class CifsProxyRestWrapper {
 			node.put("type", "CIFS");
 			try {
 				KerberosRestTemplate krt = new KerberosRestTemplate(null, username, password, null);
-				CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 3,
+				// This call has a lot of retries because sometimes the timing of the AD server
+				// is not quite what we'd like. Typically, AD is ready on the first call, but if
+				// it isn't, it can take ~15 seconds before it is ready.
+				CifsShareCreationParameter shareOutput = kerberosRequestWithRetries(krt, shareUrl, node.toString(), 30,
 						CifsShareCreationParameter.class);
 				logger.debug("CIFS returned " + shareOutput);
 				return shareOutput;
@@ -126,7 +129,8 @@ public class CifsProxyRestWrapper {
 			String deleteShareUri = "http://" + cifsHostname + ":8080/share/" + exportedShareName;
 			krt.delete(deleteShareUri);
 		} catch (RestClientException e) {
-			String msg = "Error deleting share='" + exportedShareName + "' for CIFS Proxy";
+			String msg = "Error deleting share='" + exportedShareName
+					+ "' for CIFS Proxy.  This could be due to deleting a share that has previosly been deleted.";
 			logger.error(msg, e);
 			// error will be thrown if no share exists. So we may want to ignore or check.
 			// for now we'll ignore.
@@ -159,7 +163,8 @@ public class CifsProxyRestWrapper {
 			return output;
 		} catch (RestClientException e) {
 			if (retries > 0) {
-				logger.error("Error making kerberos request to CIFS Proxy.  Retrying", e);
+				logger.error("Error making kerberos request to CIFS Proxy.  Retrying with " + (retries - 1) + " retries",
+						e);
 				JavaUtil.sleepAndLogInterruption(1000);
 				return kerberosRequestWithRetries(krt, virtueUrl, body, retries - 1, returnType);
 			} else {

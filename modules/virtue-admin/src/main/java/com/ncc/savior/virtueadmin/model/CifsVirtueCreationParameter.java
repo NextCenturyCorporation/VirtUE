@@ -62,7 +62,7 @@ public class CifsVirtueCreationParameter {
 
 	@Override
 	public String toString() {
-		return "CifsShareCreationParameter [name=" + name + ", id=" + id + ", username=" + username + ", password="
+		return "CifsVirtueCreationParameter [name=" + name + ", id=" + id + ", username=" + username + ", password="
 				+ password + "]";
 	}
 }
