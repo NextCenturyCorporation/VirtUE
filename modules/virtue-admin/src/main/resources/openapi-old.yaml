@@ -1,5 +1,4 @@
-#resourcePackages:
-#- io.swagger.sample.resource
+resourceClasses: { com.ncc.savior.virtueadmin.rest.AdminResource, com.ncc.savior.virtueadmin.rest.HelloResource, com.ncc.savior.virtueadmin.rest.UserResource }
 prettyPrint: true
 cacheTTL: 0
 openAPI:

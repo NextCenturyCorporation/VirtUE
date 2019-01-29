@@ -40,6 +40,7 @@ public class HelloResource extends BaseOpenApiResource {
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(hidden = true)
 	public Response getHello() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 
@@ -49,6 +50,7 @@ public class HelloResource extends BaseOpenApiResource {
 	@GET
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
+	@Operation(hidden = true)
 	public Response getLogin(@Context HttpServletRequest request) throws URISyntaxException {
 		// String csrf = null;
 		// Cookie[] cookies = request.getCookies();
@@ -81,6 +83,7 @@ public class HelloResource extends BaseOpenApiResource {
 	@GET
 	@Path("/error")
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(hidden = true)
 	public Response getError() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(400).entity("Error for " + user.getUsername()).build();
@@ -89,6 +92,7 @@ public class HelloResource extends BaseOpenApiResource {
 	@GET
 	@Path("/logout")
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(summary = "Logout current session.", description = "Logout existing session.")
 	public Response getLogout() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(200).entity("logged out " + user.getUsername()).build();

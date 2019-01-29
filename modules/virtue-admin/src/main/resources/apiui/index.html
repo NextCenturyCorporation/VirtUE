@@ -49,7 +49,20 @@
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl
         ],
-        layout: "StandaloneLayout"
+        layout: "StandaloneLayout",
+        operationsSorter: (a, b) => {
+        	var result;
+            //var methodsOrder = ["get", "post", "put", "delete", "patch", "options", "trace"];
+            //var result = methodsOrder.indexOf( a.get("method") ) - methodsOrder.indexOf( b.get("method") );
+            // Or if you want to sort the methods alphabetically (delete, get, head, options, ...):
+            // var result = a.get("method").localeCompare(b.get("method"));
+
+            //if (result === 0) {
+              result = a.get("path").localeCompare(b.get("path"));
+            //}
+
+            return result;
+          }
       })
       // End Swagger UI call region
 
