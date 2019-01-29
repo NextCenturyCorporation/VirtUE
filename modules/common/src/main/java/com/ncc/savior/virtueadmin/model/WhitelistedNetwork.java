@@ -1,25 +1,17 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+
+import javax.persistence.Embeddable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
-import com.ncc.savior.virtueadmin.model.NetworkProtocol;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Application Data Transfer Object (DTO).
@@ -28,6 +20,7 @@ import com.ncc.savior.virtueadmin.model.NetworkProtocol;
  * When that is fixed, remember to remove the hard-coding to this.protocol in the default constructor.
  */
 @Embeddable
+@Schema(description="Unused")
 public class WhitelistedNetwork {
 	@JsonIgnore
 	private static final Logger logger = LoggerFactory.getLogger(WhitelistedNetwork.class);

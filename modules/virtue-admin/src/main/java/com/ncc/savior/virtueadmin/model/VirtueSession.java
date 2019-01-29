@@ -7,15 +7,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.userdetails.User;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Model object that represents a session.
  */
+@Schema(description = "Describes a session in virtue for a user.")
 public class VirtueSession {
-
+	@Schema(description = "ID for the session. Also the token for this session.")
 	private String sessionId;
+	@Schema(description = "User who owns this session.")
 	private String username;
+	@Schema(description = "Authorities or groups that the user is assigned to.  These authorities ties to access to the savior system and not access to certain virtues.")
 	private ArrayList<GrantedAuthority> authorities;
+	@Schema(description = "Date of the last request made on the session.")
 	private Date lastRequest;
+	@Schema(description = "Boolean as whether or not the session has expired.")
 	private boolean expired;
 
 	public VirtueSession(String sessionId, String username, ArrayList<GrantedAuthority> auths, Date lastRequest,
