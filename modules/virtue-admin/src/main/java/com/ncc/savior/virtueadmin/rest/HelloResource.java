@@ -9,7 +9,10 @@ import java.net.URISyntaxException;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
@@ -80,6 +83,16 @@ public class HelloResource extends BaseOpenApiResource {
 		return Response.status(200).entity(str.toString()).build();
 	}
 
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.TEXT_HTML)
+	@Operation(summary = "Login.", description = "Login endpoint.")
+	public Response getLogin(@FormParam("username") String username, @FormParam("password") String password) {
+		//This method is bypassed by spring securities login.  It is only here to force Swagger to produce API documentation.
+		return null;
+	}
+
 	@GET
 	@Path("/error")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -112,7 +125,8 @@ public class HelloResource extends BaseOpenApiResource {
 		return super.getOpenApi(headers, config, app, uriInfo, "json");
 	}
 
-	//TODO This is a hack to get the files we need exposed.  There is a much better way to just allow the server to bypass them.  Also, the PathParam didn't work.
+	// TODO This is a hack to get the files we need exposed. There is a much better
+	// way to just allow the server to bypass them. Also, the PathParam didn't work.
 	@GET
 	@Path("/api/{file}")
 	@Operation(hidden = true)
