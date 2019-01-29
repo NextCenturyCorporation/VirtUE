@@ -6,13 +6,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
+import io.swagger.v3.jaxrs2.integration.resources.BaseOpenApiResource;
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Rest resource designed for testing and login.
  */
 @Path("/")
-public class HelloResource {
+public class HelloResource extends BaseOpenApiResource {
 	private static final Logger logger = LoggerFactory.getLogger(HelloResource.class);
 	@Autowired
 	private SecurityUserService securityService;
@@ -84,5 +91,20 @@ public class HelloResource {
 	public Response getLogout() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(200).entity("logged out " + user.getUsername()).build();
+	}
+
+	@Context
+    ServletConfig config;
+
+    @Context
+    Application app;
+	
+	@GET
+	@Path("/api")
+	@Produces({MediaType.APPLICATION_JSON})
+    @Operation(hidden = true)
+	public Response getApi(@Context HttpHeaders headers, @Context UriInfo uriInfo) throws Exception {
+		VirtueUser user = securityService.getCurrentUser();
+		return super.getOpenApi(headers, config, app, uriInfo, "json");
 	}
 }

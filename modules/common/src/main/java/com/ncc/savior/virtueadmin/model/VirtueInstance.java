@@ -24,12 +24,15 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Virtue class models a virtual unit with the user, applications etc.
  *
  *
  */
 @Entity
+@Schema(description="")
 public class VirtueInstance {
 	@Id
 	private String id;

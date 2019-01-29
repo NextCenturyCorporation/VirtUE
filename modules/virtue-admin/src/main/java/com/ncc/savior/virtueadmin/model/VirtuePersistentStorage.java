@@ -8,6 +8,8 @@ import javax.persistence.IdClass;
 
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage.VirtuePersistentStorageId;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * POJO and JPA entity for persistent storage.
  *
@@ -17,6 +19,7 @@ import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage.VirtuePersistent
 public class VirtuePersistentStorage implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Id
+	@Schema(description="the user who this storage is assigned to.")
 	private String username;
 	private String infrastructureId;
 	@Id

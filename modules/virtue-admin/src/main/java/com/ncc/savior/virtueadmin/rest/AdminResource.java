@@ -52,11 +52,12 @@ import com.ncc.savior.virtueadmin.service.ImportExportService;
 import com.ncc.savior.virtueadmin.service.PermissionService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Rest resource that handles endpoints specifically for an administrator
  *
  */
-
 @Path("/admin")
 public class AdminResource {
 	private static final Logger logger = LoggerFactory.getLogger(AdminResource.class);
@@ -91,6 +92,7 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("application")
+	@Operation(summary = "Create new application", description="Creates and returns and new application definition")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
 		return adminService.createNewApplicationDefinition(appDef);
 	}
