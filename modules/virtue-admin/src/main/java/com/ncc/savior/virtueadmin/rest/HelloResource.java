@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -94,17 +95,50 @@ public class HelloResource extends BaseOpenApiResource {
 	}
 
 	@Context
-    ServletConfig config;
+	ServletConfig config;
 
-    @Context
-    Application app;
-	
+	@Context
+	Application app;
+
 	@GET
 	@Path("/api")
-	@Produces({MediaType.APPLICATION_JSON})
-    @Operation(hidden = true)
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(hidden = true)
 	public Response getApi(@Context HttpHeaders headers, @Context UriInfo uriInfo) throws Exception {
-		VirtueUser user = securityService.getCurrentUser();
 		return super.getOpenApi(headers, config, app, uriInfo, "json");
+	}
+
+	//TODO This is a hack to get the files we need exposed.  There is a much better way to just allow the server to bypass them.  Also, the PathParam didn't work.
+	@GET
+	@Path("/api/{file}")
+	@Operation(hidden = true)
+	public Response getApiUi(@Context HttpHeaders headers, @Context UriInfo uriInfo, @PathParam("file") String file)
+			throws Exception {
+		String filePath = "/apiui/" + uriInfo.getPathParameters().getFirst("file");
+
+		InputStream stream = this.getClass().getResourceAsStream(filePath);
+		BufferedReader buf = new BufferedReader(new InputStreamReader(stream));
+		StringBuffer str = new StringBuffer();
+		String line;
+		try {
+			while ((line = buf.readLine()) != null) {
+				// line = line.replaceAll("csrf-token", csrf);
+				str.append(line + "\n");
+			}
+		} catch (IOException e) {
+			String msg = "Unable to read html file=" + filePath + ". ";
+			logger.error(msg, e);
+			return Response.status(400).entity(msg + e.getMessage()).build();
+
+		}
+		String type = MediaType.TEXT_HTML;
+		if (filePath.endsWith(".js")) {
+			type = "text/javascript";
+		}
+		if (filePath.endsWith(".css")) {
+			type = "text/css";
+		}
+
+		return Response.status(200).type(type).entity(str.toString()).build();
 	}
 }

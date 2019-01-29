@@ -32,24 +32,32 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  */
 @Entity
-@Schema(description="")
+@Schema(description = "Object to describe a virtue instance that has been or is about to be provisioned")
 public class VirtueInstance {
 	@Id
+	@Schema(description = "ID of the virtue instance.")
 	private String id;
+	@Schema(description = "Name of the virtue instance.")
 	private String name;
+	@Schema(description = "Username of the user for which the virtue instance was created.")
 	private String username;
+	@Schema(description = "The template ID for the virtue template that this virtue instance was created from.")
 	private String templateId;
+	@Schema(description = "Color for which the virtue instance will be shown through the desktop application and workbench.")
 	private String color;
 	@OneToMany
 	private Collection<VirtualMachine> vms;
 	// private Set<String> transducers;
+	@Schema(description = "Current state of the virtue instance.  This value is typically a rollup of the virtual machine states.")
 	private VirtueState state;
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
 	@Transient
+	@Schema(description = "List of IDs for all the virtual machines that make up this virtue.")
 	private Collection<String> virtualMachineIds;
 	@Transient
+	@Schema(description = "List of IDs for all the applications that are runnable in this virtue.")
 	private Collection<String> applicationIds;
 
 	public VirtueInstance(String id, String name, String username, String templateId, String color,
