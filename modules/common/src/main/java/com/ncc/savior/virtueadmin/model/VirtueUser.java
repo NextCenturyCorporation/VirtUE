@@ -14,6 +14,8 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Class to represent a user that has been authenticated by the security
  * service. What we want in here is TDB.
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
+@Schema(description = "User representation for the Savior system.")
 public class VirtueUser {
 	private static final VirtueUser testUser;
 	private static final VirtueUser anonymousUser;
@@ -30,13 +33,17 @@ public class VirtueUser {
 	public static final String ROLE_USER = "ROLE_USER";
 
 	@Id
+	@Schema(description = "Username for the user.")
 	private String username;
 	@ElementCollection(targetClass = String.class)
+	@Schema(description = "Authorities or groups that the user is assigned to.  These authorities ties to access to the savior system and not access to certain virtues.")
 	private Collection<String> authorities;
 	@ManyToMany()
 	private Collection<VirtueTemplate> virtueTemplates;
 	@Transient
+	@Schema(description = "List of IDs of virtue templates for which the user has access to and can provision.")
 	private Collection<String> virtueTemplateIds;
+	@Schema(description = "Boolean to determine whether the user is enabled or not. Disabled users should not be able to login.")
 	private boolean enabled;
 
 	static {
@@ -142,7 +149,9 @@ public class VirtueUser {
 		}
 		return false;
 	}
+
 	public static final Comparator<? super VirtueUser> USERNAME_COMPARATOR = new UsernameComparator();
+
 	private static class UsernameComparator implements Comparator<VirtueUser> {
 		@Override
 		public int compare(VirtueUser o1, VirtueUser o2) {

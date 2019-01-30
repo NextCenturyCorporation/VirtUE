@@ -7,12 +7,17 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
+@Schema(description="Entry to store an icon.")
 public class IconModel {
 	@Id
+	@Schema(description="The ID to find the icon, also described as the key.")
 	private String id;
 	@Lob
 	@Column(length = 100000)
+	@Schema(description="The bytes for the image.")
 	private byte[] data;
 
 	// for Jackson serialization

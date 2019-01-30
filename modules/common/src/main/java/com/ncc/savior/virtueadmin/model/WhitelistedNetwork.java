@@ -11,13 +11,17 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Application Data Transfer Object (DTO).
  *
- * If get/set-Protocol are still commented out, then this still is broken - saving enums to the h2db like this doesn't work.
- * When that is fixed, remember to remove the hard-coding to this.protocol in the default constructor.
+ * If get/set-Protocol are still commented out, then this still is broken -
+ * saving enums to the h2db like this doesn't work. When that is fixed, remember
+ * to remove the hard-coding to this.protocol in the default constructor.
  */
 @Embeddable
+@Schema(description = "Unused")
 public class WhitelistedNetwork {
 	@JsonIgnore
 	private static final Logger logger = LoggerFactory.getLogger(WhitelistedNetwork.class);
@@ -71,7 +75,7 @@ public class WhitelistedNetwork {
 
 	// @JsonGetter
 	// public NetworkProtocol getProtocol() {
-	// 	return protocol;
+	// return protocol;
 	// }
 
 	// below setters used for jackson deserialization
@@ -95,14 +99,14 @@ public class WhitelistedNetwork {
 
 	// @JsonSetter
 	// public void setProtocol(NetworkProtocol protocol) {
-	// 	logger.debug("setProtocol " + protocol);
-	// 	this.protocol = protocol;
+	// logger.debug("setProtocol " + protocol);
+	// this.protocol = protocol;
 	// }
 
 	@Override
 	public String toString() {
-		return "Whitelisted Network: [host=" + host + ", localPort=" + localPort
-				+ ", remotePort=" + remotePort + ", protocol=" + protocol + "]";
+		return "Whitelisted Network: [host=" + host + ", localPort=" + localPort + ", remotePort=" + remotePort
+				+ ", protocol=" + protocol + "]";
 	}
 
 	/**
@@ -137,7 +141,7 @@ public class WhitelistedNetwork {
 			return false;
 		}
 		// if (protocol != other.protocol || !protocol.equals(other.getProtocol())) {
-		// 	return false;
+		// return false;
 		// }
 		if (localPort != other.getLocalPort()) {
 			return false;
@@ -147,7 +151,9 @@ public class WhitelistedNetwork {
 		}
 		return true;
 	}
+
 	public static final Comparator<? super WhitelistedNetwork> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+
 	private static class CaseInsensitiveNameComparator implements Comparator<WhitelistedNetwork> {
 		@Override
 		public int compare(WhitelistedNetwork o1, WhitelistedNetwork o2) {
