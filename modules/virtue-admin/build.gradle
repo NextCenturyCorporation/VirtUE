@@ -98,8 +98,8 @@ dependencies {
 
     //compile 'org.springframework.security.kerberos:spring-security-kerberos-client:1.0.3.BUILD-SNAPSHOT'
     //compile 'org.springframework.security.kerberos:spring-security-kerberos-web:1.0.3.BUILD-SNAPSHOT'
-    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.4.BUILD-SNAPSHOT'
-    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.4.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.5.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.5.BUILD-SNAPSHOT'
     //compile files('lib/spring-security-kerberos-client-1.0.3.BUILD-SNAPSHOT.jar', 'lib/spring-security-kerberos-web-1.0.3.BUILD-SNAPSHOT.jar', 'lib/spring-security-kerberos-core-1.0.3.BUILD-SNAPSHOT.jar')
 	//compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.7'
 	

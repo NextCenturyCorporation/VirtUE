@@ -95,7 +95,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				// .authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
 				.authenticationProvider(kerberosServiceAuthenticationProvider())
 				// for username/password
-				.authenticationProvider(kerberosAuthenticationProvider());
+				.authenticationProvider(kerberosAuthenticationProvider())
+				// Prevents password from being removed so we can pull it out and use it for
+				// CIFS.
+				.eraseCredentials(false);
 		logger.exit();
 	}
 
@@ -124,6 +127,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry(authenticationManager);
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
 		filter.setAuthenticationManager(authenticationManager);
+
 		filter.setFailureHandler(new AuthenticationFailureHandler() {
 
 			@Override
@@ -155,6 +159,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		ticketValidator.setServicePrincipal(servicePrincipal);
 		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		ticketValidator.setDebug(true);
+		ticketValidator.setHoldOnToGSSContext(true);
 		logger.exit(ticketValidator);
 		return ticketValidator;
 	}
@@ -186,6 +191,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				.accessDeniedHandler(getAccessDeniedHandler()).and()
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
-		//http.csrf().disable();
+		// http.csrf().disable();
 	}
 }

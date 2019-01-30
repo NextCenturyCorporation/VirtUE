@@ -1,0 +1,1 @@
+mkdir ${credentialsDir}; sudo mkdir /media/${cifsShare.exportedName}

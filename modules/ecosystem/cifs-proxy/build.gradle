@@ -77,6 +77,7 @@ task gsscacheJar(type: org.springframework.boot.gradle.tasks.bundling.BootJar, d
 }
 
 bootJar {
+    // if the baseName or version changes, update the value of proxy_jar in src/terraform/common.tf
 	baseName = "cifs-proxy-server"
 	version = "0.0.1"
 	mainClassName = "com.nextcentury.savior.cifsproxy.CifsProxy"

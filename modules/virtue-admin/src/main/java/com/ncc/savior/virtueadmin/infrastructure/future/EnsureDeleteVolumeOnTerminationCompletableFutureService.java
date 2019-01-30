@@ -47,7 +47,7 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 				onSuccess(id, vm, wrapper.future);
 			}
 		} catch (Exception e) {
-			logger.trace("Naming in AWS failed for vm=" + vm.getId());
+			logger.warn("Naming in AWS failed for vm=" + vm.getId());
 			return;
 		}
 	}

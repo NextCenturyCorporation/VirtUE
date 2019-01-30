@@ -212,7 +212,6 @@ public class VirtueTemplate {
 	 */
 	protected VirtueTemplate() {
 		super();
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}

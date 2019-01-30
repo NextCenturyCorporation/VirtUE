@@ -13,6 +13,7 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -134,6 +135,13 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	@Override
 	public void sync(List<String> ids) {
 		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
+	}
+
+	@Override
+	public void setCifsManager(CifsManager cifsManager) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "CIFS not implemented in this implementation");
+		
+		
 	}
 
 }
