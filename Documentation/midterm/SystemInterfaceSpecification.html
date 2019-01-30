@@ -1,0 +1,3910 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Savior Swagger</title>
+    <style type="text/css">
+      body {
+      	font-family: Trebuchet MS, sans-serif;
+      	font-size: 15px;
+      	color: #444;
+      	margin-right: 24px;
+      }
+      
+      h1	{
+      	font-size: 25px;
+      }
+      h2	{
+      	font-size: 20px;
+      }
+      h3	{
+      	font-size: 16px;
+      	font-weight: bold;
+      }
+      hr	{
+      	height: 1px;
+      	border: 0;
+      	color: #ddd;
+      	background-color: #ddd;
+      }
+      
+      .app-desc {
+        clear: both;
+        margin-left: 20px;
+      }
+      .param-name {
+        width: 100%;
+      }
+      .license-info {
+        margin-left: 20px;
+      }
+      
+      .license-url {
+        margin-left: 20px;
+      }
+      
+      .model {
+        margin: 0 0 0px 20px;
+      }
+      
+      .method {
+        margin-left: 20px;
+      }
+      
+      .method-notes	{
+      	margin: 10px 0 20px 0;
+      	font-size: 90%;
+      	color: #555;
+      }
+      
+      pre {
+        padding: 10px;
+        margin-bottom: 2px;
+      }
+      
+      .http-method {
+       text-transform: uppercase;
+      }
+      
+      pre.get {
+        background-color: #0f6ab4;
+      }
+      
+      pre.post {
+        background-color: #10a54a;
+      }
+      
+      pre.put {
+        background-color: #c5862b;
+      }
+      
+      pre.delete {
+        background-color: #a41e22;
+      }
+      
+      .huge	{
+      	color: #fff;
+      }
+      
+      pre.example {
+        background-color: #f3f3f3;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      
+      code {
+        white-space: pre;
+      }
+      
+      .nickname {
+        font-weight: bold;
+      }
+      
+      .method-path {
+        font-size: 1.5em;
+        background-color: #0f6ab4;
+      }
+      
+      .up {
+        float:right;
+      }
+      
+      .parameter {
+        width: 500px;
+      }
+      
+      .param {
+        width: 500px;
+        padding: 10px 0 0 20px;
+        font-weight: bold;
+      }
+      
+      .param-desc {
+        width: 700px;
+        padding: 0 0 0 20px;
+        color: #777;
+      }
+      
+      .param-type {
+        font-style: italic;
+      }
+      
+      .param-enum-header {
+      width: 700px;
+      padding: 0 0 0 60px;
+      color: #777;
+      font-weight: bold;
+      }
+      
+      .param-enum {
+      width: 700px;
+      padding: 0 0 0 80px;
+      color: #777;
+      font-style: italic;
+      }
+      
+      .field-label {
+        padding: 0;
+        margin: 0;
+        clear: both;
+      }
+      
+      .field-items	{
+      	padding: 0 0 15px 0;
+      	margin-bottom: 15px;
+      }
+      
+      .return-type {
+        clear: both;
+        padding-bottom: 10px;
+      }
+      
+      .param-header {
+        font-weight: bold;
+      }
+      
+      .method-tags {
+        text-align: right;
+      }
+      
+      .method-tag {
+        background: none repeat scroll 0% 0% #24A600;
+        border-radius: 3px;
+        padding: 2px 10px;
+        margin: 2px;
+        color: #FFF;
+        display: inline-block;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+  <h1>Savior Swagger</h1>
+    <div class="app-desc">Savior Swagger API documentation</div>
+    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
+    <div class="app-desc">Contact Info: <a href="hello@helloreverb.com">hello@helloreverb.com</a></div>
+    <div class="app-desc">Version: 1.0</div>
+    
+    <div class="license-info">TBD</div>
+    <div class="license-url">TBD</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Default">Default</a></h4>
+  <ul>
+  <li><a href="#assignTemplateToUser"><code><span class="http-method">post</span> /admin/user/{username}/assign/{templateId}</code></a></li>
+  <li><a href="#authorizePermissionFromTemplate"><code><span class="http-method">post</span> /admin/securityGroup/template/{templateId}/authorize</code></a></li>
+  <li><a href="#clearPermission"><code><span class="http-method">delete</span> /admin/permission/{sourceId}/{destId}</code></a></li>
+  <li><a href="#createFileSystem"><code><span class="http-method">post</span> /admin/fileSystem</code></a></li>
+  <li><a href="#createNewApplicationDefinition"><code><span class="http-method">post</span> /admin/application</code></a></li>
+  <li><a href="#createNewVirtueTemplate"><code><span class="http-method">post</span> /admin/virtue/template</code></a></li>
+  <li><a href="#createUpdateUser"><code><span class="http-method">post</span> /admin/user</code></a></li>
+  <li><a href="#createVirtue"><code><span class="http-method">post</span> /user/virtue/template/{templateId}</code></a></li>
+  <li><a href="#createVirtueFromTemplate"><code><span class="http-method">get</span> /admin/createvirtue/type/{templateId}</code></a></li>
+  <li><a href="#createVmTemplate"><code><span class="http-method">post</span> /admin/virtualMachine/template</code></a></li>
+  <li><a href="#deleteApplicationDefinitions"><code><span class="http-method">delete</span> /admin/application/{id}</code></a></li>
+  <li><a href="#deleteByGroupId"><code><span class="http-method">delete</span> /admin/securityGroup/id/{groupId}</code></a></li>
+  <li><a href="#deleteByTemplateId"><code><span class="http-method">delete</span> /admin/securityGroup/template/{templateId}</code></a></li>
+  <li><a href="#deleteFileSystem"><code><span class="http-method">delete</span> /admin/fileSystem/{fileSystemId}</code></a></li>
+  <li><a href="#deleteIcon"><code><span class="http-method">delete</span> /admin/icon/{iconKey}</code></a></li>
+  <li><a href="#deletePersistentStorage"><code><span class="http-method">delete</span> /admin/storage/{user}/{virtueTemplateId}</code></a></li>
+  <li><a href="#deleteVirtue"><code><span class="http-method">get</span> /admin/deletevirtue/instance/{instanceId}</code></a></li>
+  <li><a href="#deleteVirtue1"><code><span class="http-method">delete</span> /user/virtue/{virtueId}</code></a></li>
+  <li><a href="#deleteVirtueTemplate"><code><span class="http-method">delete</span> /admin/virtue/template/{id}</code></a></li>
+  <li><a href="#deleteVmTemplate"><code><span class="http-method">delete</span> /admin/virtualMachine/template/{id}</code></a></li>
+  <li><a href="#exportAllUsers"><code><span class="http-method">get</span> /admin/export/user</code></a></li>
+  <li><a href="#exportAllVirtuesZipped"><code><span class="http-method">get</span> /admin/export/virtue/template</code></a></li>
+  <li><a href="#exportSystem"><code><span class="http-method">get</span> /admin/export</code></a></li>
+  <li><a href="#exportSystemZipped"><code><span class="http-method">get</span> /admin/export/all</code></a></li>
+  <li><a href="#exportUser"><code><span class="http-method">get</span> /admin/export/user/{username}</code></a></li>
+  <li><a href="#exportVirtualMachineZipped"><code><span class="http-method">get</span> /admin/export/virtualMachine/template/{templateId}</code></a></li>
+  <li><a href="#exportVirtueTemplate"><code><span class="http-method">get</span> /admin/export/virtue/template/{templateId}</code></a></li>
+  <li><a href="#getActiveUsers"><code><span class="http-method">get</span> /admin/user/active</code></a></li>
+  <li><a href="#getActiveVirtue"><code><span class="http-method">get</span> /admin/virtues/{id}</code></a></li>
+  <li><a href="#getAllActiveVirtues"><code><span class="http-method">get</span> /admin/virtues</code></a></li>
+  <li><a href="#getAllApplicationDefinitions"><code><span class="http-method">get</span> /admin/application</code></a></li>
+  <li><a href="#getAllFileSystems"><code><span class="http-method">get</span> /admin/fileSystem</code></a></li>
+  <li><a href="#getAllIconKeys"><code><span class="http-method">get</span> /admin/icon</code></a></li>
+  <li><a href="#getAllPermissions"><code><span class="http-method">get</span> /admin/permissions</code></a></li>
+  <li><a href="#getAllSecurityGroupsAndPermissions"><code><span class="http-method">get</span> /admin/securityGroup</code></a></li>
+  <li><a href="#getAllSessions"><code><span class="http-method">get</span> /admin/session</code></a></li>
+  <li><a href="#getAllStorage"><code><span class="http-method">get</span> /admin/storage</code></a></li>
+  <li><a href="#getAllUsers"><code><span class="http-method">get</span> /admin/user</code></a></li>
+  <li><a href="#getAllVirtueTemplates"><code><span class="http-method">get</span> /admin/virtue/template</code></a></li>
+  <li><a href="#getAllVirtueTemplatesByUser"><code><span class="http-method">get</span> /user/virtue/template</code></a></li>
+  <li><a href="#getAllVmTemplates"><code><span class="http-method">get</span> /admin/virtualMachine/template</code></a></li>
+  <li><a href="#getAllVms"><code><span class="http-method">get</span> /admin/vm</code></a></li>
+  <li><a href="#getApplicationById"><code><span class="http-method">get</span> /user/application/{appId}</code></a></li>
+  <li><a href="#getApplicationDefinition"><code><span class="http-method">get</span> /admin/application/{id}</code></a></li>
+  <li><a href="#getFileSystem"><code><span class="http-method">get</span> /admin/fileSystem/{fileSystemId}</code></a></li>
+  <li><a href="#getGroupIdByTemplate"><code><span class="http-method">get</span> /admin/securityGroup/template/{templateId}</code></a></li>
+  <li><a href="#getIcon"><code><span class="http-method">get</span> /admin/icon/{iconKey}</code></a></li>
+  <li><a href="#getLogin"><code><span class="http-method">post</span> /login</code></a></li>
+  <li><a href="#getLogout"><code><span class="http-method">get</span> /logout</code></a></li>
+  <li><a href="#getPermission"><code><span class="http-method">get</span> /admin/permission/{sourceId}/{destId}</code></a></li>
+  <li><a href="#getPermissionsByGroupId"><code><span class="http-method">get</span> /admin/securityGroup/id/{groupId}</code></a></li>
+  <li><a href="#getPermissionsForSource"><code><span class="http-method">get</span> /admin/permission/{sourceId}</code></a></li>
+  <li><a href="#getPersistentStorage"><code><span class="http-method">get</span> /admin/storage/{user}/{virtueTemplateId}</code></a></li>
+  <li><a href="#getPersistentStorageForUser"><code><span class="http-method">get</span> /admin/storage/{user}</code></a></li>
+  <li><a href="#getSession"><code><span class="http-method">get</span> /admin/session/{sessionId}</code></a></li>
+  <li><a href="#getUser"><code><span class="http-method">get</span> /admin/user/{username}</code></a></li>
+  <li><a href="#getVirtueInstance"><code><span class="http-method">get</span> /user/virtue/{virtueId}</code></a></li>
+  <li><a href="#getVirtueInstances"><code><span class="http-method">get</span> /user/virtue</code></a></li>
+  <li><a href="#getVirtueTemplate"><code><span class="http-method">get</span> /admin/virtue/template/{id}</code></a></li>
+  <li><a href="#getVirtueTemplateByUser"><code><span class="http-method">get</span> /user/virtue/template/{templateId}</code></a></li>
+  <li><a href="#getVm"><code><span class="http-method">get</span> /admin/vm/{id}</code></a></li>
+  <li><a href="#getVmTemplate"><code><span class="http-method">get</span> /admin/virtualMachine/template/{id}</code></a></li>
+  <li><a href="#importAll"><code><span class="http-method">get</span> /admin/import/all</code></a></li>
+  <li><a href="#importItem"><code><span class="http-method">get</span> /admin/import/{type}/{name}</code></a></li>
+  <li><a href="#importSystem"><code><span class="http-method">post</span> /admin/import</code></a></li>
+  <li><a href="#invalidateSession"><code><span class="http-method">delete</span> /admin/session/{sessionId}</code></a></li>
+  <li><a href="#launchVirtue"><code><span class="http-method">post</span> /user/virtue/{virtueId}</code></a></li>
+  <li><a href="#logoutUser"><code><span class="http-method">get</span> /admin/user/{username}/logout</code></a></li>
+  <li><a href="#rebootVm"><code><span class="http-method">get</span> /admin/vm/reboot/{id}</code></a></li>
+  <li><a href="#removeUser"><code><span class="http-method">delete</span> /admin/user/{username}</code></a></li>
+  <li><a href="#revokePermissionForTemplate"><code><span class="http-method">post</span> /admin/securityGroup/template/{templateId}/revoke</code></a></li>
+  <li><a href="#revokeTemplateToUser"><code><span class="http-method">post</span> /admin/user/{username}/revoke/{templateId}</code></a></li>
+  <li><a href="#setFileSystemStatus"><code><span class="http-method">put</span> /admin/fileSystem/{fileSystemId}/setStatus</code></a></li>
+  <li><a href="#setPermission"><code><span class="http-method">post</span> /admin/permission/{sourceId}/{destId}</code></a></li>
+  <li><a href="#setServiceDefaultPermission"><code><span class="http-method">get</span> /admin/permission/default/{option}</code></a></li>
+  <li><a href="#setUserStatus"><code><span class="http-method">put</span> /admin/user/{username}/setStatus</code></a></li>
+  <li><a href="#setVirtualMachineTemplateStatus"><code><span class="http-method">put</span> /admin/virtualMachine/template/{id}/setStatus</code></a></li>
+  <li><a href="#setVirtueTemplateStatus"><code><span class="http-method">put</span> /admin/virtue/template/{id}/setStatus</code></a></li>
+  <li><a href="#startApplication"><code><span class="http-method">post</span> /user/virtue/{virtueId}/{applicationId}</code></a></li>
+  <li><a href="#stopVirtue"><code><span class="http-method">post</span> /user/virtue/{virtueId}/stop</code></a></li>
+  <li><a href="#updateApplicationDefinitions"><code><span class="http-method">put</span> /admin/application/{templateId}</code></a></li>
+  <li><a href="#updateFileSystem"><code><span class="http-method">put</span> /admin/fileSystem/{fileSystemId}</code></a></li>
+  <li><a href="#updateUser"><code><span class="http-method">put</span> /admin/user/{username}</code></a></li>
+  <li><a href="#updateVirtueTemplate"><code><span class="http-method">put</span> /admin/virtue/template/{id}</code></a></li>
+  <li><a href="#updateVmTemplate"><code><span class="http-method">put</span> /admin/virtualMachine/template/{id}</code></a></li>
+  <li><a href="#uploadIcon"><code><span class="http-method">put</span> /admin/icon/{iconKey}</code></a></li>
+  </ul>
+
+  <h1><a name="Default">Default</a></h1>
+  <div class="method"><a name="assignTemplateToUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/user/{username}/assign/{templateId}</code></pre></div>
+    <div class="method-summary">Assign virtue template to user. (<span class="nickname">assignTemplateToUser</span>)</div>
+    <div class="method-notes">Will add the virtue template associated with the template ID to the user associated by the username.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authorizePermissionFromTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/securityGroup/template/{templateId}/authorize</code></pre></div>
+    <div class="method-summary">Adds single network security group permission for a virtue template. (<span class="nickname">authorizePermissionFromTemplate</span>)</div>
+    <div class="method-notes">Adds a single security group permission to a virtue template&#x27;s security group.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#SecurityGroupPermission">SecurityGroupPermission</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="clearPermission"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/permission/{sourceId}/{destId}</code></pre></div>
+    <div class="method-summary">Delete clipboard permission. (<span class="nickname">clearPermission</span>)</div>
+    <div class="method-notes">Clears the clipboard permission for the given source ID and destination ID.  Source and destination IDs are virtue template IDs.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sourceId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">destId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createFileSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/fileSystem</code></pre></div>
+    <div class="method-summary">Creates metadata for a shared file system. (<span class="nickname">createFileSystem</span>)</div>
+    <div class="method-notes">Creates the metadata for a shared file system (I.E. Samba share).</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#FileSystem">FileSystem</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#FileSystem">FileSystem</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#FileSystem">FileSystem</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createNewApplicationDefinition"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/application</code></pre></div>
+    <div class="method-summary">Create new application (<span class="nickname">createNewApplicationDefinition</span>)</div>
+    <div class="method-notes">Creates and returns and new application definition.  Some values in the ApplicationDefinition structure will be ignored I.E. id, updated and created entries.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#ApplicationDefinition">ApplicationDefinition</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ApplicationDefinition">ApplicationDefinition</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#ApplicationDefinition">ApplicationDefinition</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createNewVirtueTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/virtue/template</code></pre></div>
+    <div class="method-summary">Create Virtue Template. (<span class="nickname">createNewVirtueTemplate</span>)</div>
+    <div class="method-notes">Creates a new virtue template from the request body.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtueTemplate">VirtueTemplate</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueTemplate">VirtueTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueTemplate">VirtueTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createUpdateUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/user</code></pre></div>
+    <div class="method-summary">Create or update user. (<span class="nickname">createUpdateUser</span>)</div>
+    <div class="method-notes">Creates or updates a user defined by the request body.  If a username with a matching username exists, that user will be updated, otherwise a new user will be created.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtueUser">VirtueUser</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueUser">VirtueUser</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueUser">VirtueUser</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createVirtue"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /user/virtue/template/{templateId}</code></pre></div>
+    <div class="method-summary">create virtue instance. (<span class="nickname">createVirtue</span>)</div>
+    <div class="method-notes">Creates a virtue instance from a virtue template for the user making the request.s</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueInstance">VirtueInstance</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueInstance">VirtueInstance</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createVirtueFromTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/createvirtue/type/{templateId}</code></pre></div>
+    <div class="method-summary">Provision virtue (<span class="nickname">createVirtueFromTemplate</span>)</div>
+    <div class="method-notes">Creates and starts the provisioning process of a virtue template into a virtue instance.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueInstance">VirtueInstance</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueInstance">VirtueInstance</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createVmTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/virtualMachine/template</code></pre></div>
+    <div class="method-summary">Create virtual machine template (<span class="nickname">createVmTemplate</span>)</div>
+    <div class="method-notes">Creates a virtual machine template from the structure sent.  Some entries will be automatically filled by the server. (ID, created, updated fields)</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteApplicationDefinitions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/application/{id}</code></pre></div>
+    <div class="method-summary">Delete application definition. (<span class="nickname">deleteApplicationDefinitions</span>)</div>
+    <div class="method-notes">Deletes the given application definition from the database.  Will fail if the application defintion exists in an existing virtual machine template or virtual machine.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteByGroupId"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/securityGroup/id/{groupId}</code></pre></div>
+    <div class="method-summary">Deletes the network security group by security group ID. (<span class="nickname">deleteByGroupId</span>)</div>
+    <div class="method-notes">Deletes the security group by security group ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">groupId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteByTemplateId"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/securityGroup/template/{templateId}</code></pre></div>
+    <div class="method-summary">Deletes the network security group for a virtue template. (<span class="nickname">deleteByTemplateId</span>)</div>
+    <div class="method-notes">Deletes the security group from a virtue template&#x27;s.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteFileSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/fileSystem/{fileSystemId}</code></pre></div>
+    <div class="method-summary">Delete metadata for a shared file system. (<span class="nickname">deleteFileSystem</span>)</div>
+    <div class="method-notes">Deletes the metadat for a shared file system (I.E. Samba share).</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">fileSystemId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteIcon"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/icon/{iconKey}</code></pre></div>
+    <div class="method-summary">Delete an icon. (<span class="nickname">deleteIcon</span>)</div>
+    <div class="method-notes">Deletes an icon associated with the given icon key.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">iconKey (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deletePersistentStorage"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/storage/{user}/{virtueTemplateId}</code></pre></div>
+    <div class="method-summary">Delete persistent storage entries for a user and virtue template. (<span class="nickname">deletePersistentStorage</span>)</div>
+    <div class="method-notes">Deletes a persistent storage entry for the given user and virtue template ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">user (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">virtueTemplateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteVirtue"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/deletevirtue/instance/{instanceId}</code></pre></div>
+    <div class="method-summary">Delete virtue instance. (<span class="nickname">deleteVirtue</span>)</div>
+    <div class="method-notes">Deletes the virtue instance associated with the given ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">instanceId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteVirtue1"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /user/virtue/{virtueId}</code></pre></div>
+    <div class="method-summary">Delete active virtue. (<span class="nickname">deleteVirtue1</span>)</div>
+    <div class="method-notes">Delete all the virtual machines in an existing virtue given by the virtue ID and remove the virtue instance.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">virtueId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteVirtueTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/virtue/template/{id}</code></pre></div>
+    <div class="method-summary">Delete virtue template. (<span class="nickname">deleteVirtueTemplate</span>)</div>
+    <div class="method-notes">Delete virtue template associated with the given ID.  Request will fail if there exist users associated with the virtue template.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteVmTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/virtualMachine/template/{id}</code></pre></div>
+    <div class="method-summary">Delete virtual machine template (<span class="nickname">deleteVmTemplate</span>)</div>
+    <div class="method-notes">Deletes the virtual machine template associated with the given ID.  The request will fail if there exist virtue templates associated with the virtual machine template.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportAllUsers"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/user</code></pre></div>
+    <div class="method-summary">Export all users to zip. (<span class="nickname">exportAllUsers</span>)</div>
+    <div class="method-notes">Exports all users to a zip file.  This export traverses the user to include virtue templates, virtual machine templates, applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportAllVirtuesZipped"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/virtue/template</code></pre></div>
+    <div class="method-summary">Export all virtue templates to zip. (<span class="nickname">exportAllVirtuesZipped</span>)</div>
+    <div class="method-notes">Exports all virtue templates to a zip file.  This export traverses the virtue templates to include virtual machine templates, applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export</code></pre></div>
+    <div class="method-summary">Export system to stream. (<span class="nickname">exportSystem</span>)</div>
+    <div class="method-notes">Exports the entire system metadata for users, virtues templates, virtual machines templates, and applications (does not include disk images) to a internally defined format to be used for import.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportSystemZipped"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/all</code></pre></div>
+    <div class="method-summary">Export active system to zip. (<span class="nickname">exportSystemZipped</span>)</div>
+    <div class="method-notes">Exports all users to a zip file.  This export traverses the users to include virtue templates, virtual machine templates, applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/user/{username}</code></pre></div>
+    <div class="method-summary">Export a single users to zip. (<span class="nickname">exportUser</span>)</div>
+    <div class="method-notes">Exports a single users to a zip file.  This export traverses the user to include virtue templates, virtual machine templates, applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportVirtualMachineZipped"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/virtualMachine/template/{templateId}</code></pre></div>
+    <div class="method-summary">Export virtual machine template to zip. (<span class="nickname">exportVirtualMachineZipped</span>)</div>
+    <div class="method-notes">Exports virtual machine template to a zip file.  This export traverses the virtual machine template to include applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="exportVirtueTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/export/virtue/template/{templateId}</code></pre></div>
+    <div class="method-summary">Export virtue template to zip. (<span class="nickname">exportVirtueTemplate</span>)</div>
+    <div class="method-notes">Exports a virtue template to a zip file.  This export traverses the virtue template to include virtual machine templates, applications, icons and disk images to a zip file.  Each type is stored in its own directory.  Since this export contains images, it may take a long time to download.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/zip</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getActiveUsers"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/user/active</code></pre></div>
+    <div class="method-summary">Get all active users. (<span class="nickname">getActiveUsers</span>)</div>
+    <div class="method-notes">Returns a list of users who are considered active.  Users are considered active if they have an active session.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getActiveVirtue"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtues/{id}</code></pre></div>
+    <div class="method-summary">Get virtue instance. (<span class="nickname">getActiveVirtue</span>)</div>
+    <div class="method-notes">Returns a single virtue instance associated with the given ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueInstance">VirtueInstance</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueInstance">VirtueInstance</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllActiveVirtues"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtues</code></pre></div>
+    <div class="method-summary">Get all virtue instances (<span class="nickname">getAllActiveVirtues</span>)</div>
+    <div class="method-notes">Returns a list of virtue instances which are optionally filtered by user.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">user (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllApplicationDefinitions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/application</code></pre></div>
+    <div class="method-summary">Get all application definitions in the system. (<span class="nickname">getAllApplicationDefinitions</span>)</div>
+    <div class="method-notes">Returns a list of all the application definitions in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllFileSystems"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/fileSystem</code></pre></div>
+    <div class="method-summary">Get all shared file systems. (<span class="nickname">getAllFileSystems</span>)</div>
+    <div class="method-notes">Returns a list of all the metadata for a shared file systems(I.E. Samba share) on the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllIconKeys"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/icon</code></pre></div>
+    <div class="method-summary">Get all icon keys. (<span class="nickname">getAllIconKeys</span>)</div>
+    <div class="method-notes">Returns a list of all the icon keys defined by the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      array[String]
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllPermissions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/permissions</code></pre></div>
+    <div class="method-summary">Get all clipboard permissions. (<span class="nickname">getAllPermissions</span>)</div>
+    <div class="method-notes">Returns a list of all the available clipboard permissions.  Permissions contain an heirarchy where if no permission is explicitly set, a higher permission will take its place.  The heirarchy is system default, source default, and then source/destination combination.  All permissions will be returned by default.  If the query parameter &#x27;raw&#x27; is true, then only permissions that are explicitly set are returned.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">raw (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllSecurityGroupsAndPermissions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/securityGroup</code></pre></div>
+    <div class="method-summary">Get all network security group permissions. (<span class="nickname">getAllSecurityGroupsAndPermissions</span>)</div>
+    <div class="method-notes">Returns a list of all network security group permissions in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Map
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllSessions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/session</code></pre></div>
+    <div class="method-summary">Get all sessions. (<span class="nickname">getAllSessions</span>)</div>
+    <div class="method-notes">Returns a list of all sessions currently active in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Map
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllStorage"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/storage</code></pre></div>
+    <div class="method-summary">Get all persistent storage. (<span class="nickname">getAllStorage</span>)</div>
+    <div class="method-notes">Returns a list of all persistent storage entries in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllUsers"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/user</code></pre></div>
+    <div class="method-summary">Get all users. (<span class="nickname">getAllUsers</span>)</div>
+    <div class="method-notes">Returns a list of all the users in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllVirtueTemplates"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtue/template</code></pre></div>
+    <div class="method-summary">Get all virtue templates. (<span class="nickname">getAllVirtueTemplates</span>)</div>
+    <div class="method-notes">Returns a list of all the virtue templates in the system.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">user (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllVirtueTemplatesByUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/virtue/template</code></pre></div>
+    <div class="method-summary">Get virtue templates. (<span class="nickname">getAllVirtueTemplatesByUser</span>)</div>
+    <div class="method-notes">Returns a list of all virtue templates available for the user making the request.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#VirtueTemplate">VirtueTemplate</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllVmTemplates"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtualMachine/template</code></pre></div>
+    <div class="method-summary">Get all virtual machine templates. (<span class="nickname">getAllVmTemplates</span>)</div>
+    <div class="method-notes">Returns a list of all the virtual machine template metadata for the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllVms"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/vm</code></pre></div>
+    <div class="method-summary">Get all virtual machines. (<span class="nickname">getAllVms</span>)</div>
+    <div class="method-notes">Returns a list of all metadata for active virtual machines.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getApplicationById"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/application/{appId}</code></pre></div>
+    <div class="method-summary">Get application definition (<span class="nickname">getApplicationById</span>)</div>
+    <div class="method-notes">Gets a specific application definition based on the ID in the path.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">appId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ApplicationDefinition">ApplicationDefinition</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#ApplicationDefinition">ApplicationDefinition</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getApplicationDefinition"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/application/{id}</code></pre></div>
+    <div class="method-summary">Get application definition (<span class="nickname">getApplicationDefinition</span>)</div>
+    <div class="method-notes">Gets a specific application definition based on the ID in the path.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ApplicationDefinition">ApplicationDefinition</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#ApplicationDefinition">ApplicationDefinition</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getFileSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/fileSystem/{fileSystemId}</code></pre></div>
+    <div class="method-summary">Get metadata for a shared file system. (<span class="nickname">getFileSystem</span>)</div>
+    <div class="method-notes">Returns the metadata for a shared file system (I.E. Samba share).</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">fileSystemId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#FileSystem">FileSystem</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#FileSystem">FileSystem</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getGroupIdByTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/securityGroup/template/{templateId}</code></pre></div>
+    <div class="method-summary">Get network security group permissions for a virtue template. (<span class="nickname">getGroupIdByTemplate</span>)</div>
+    <div class="method-notes">Returns a list of all network security group permissions for a virtue template ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#SecurityGroupPermission">SecurityGroupPermission</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getIcon"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/icon/{iconKey}</code></pre></div>
+    <div class="method-summary">Get application icon. (<span class="nickname">getIcon</span>)</div>
+    <div class="method-notes">Returns an application icon associated with the given icon key.  If the icon key does not exist, the default will be returned.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">iconKey (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      array[byte[]]
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>image/png</code></li>
+      <li><code>image/jpeg</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getLogin"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /login</code></pre></div>
+    <div class="method-summary">Login. (<span class="nickname">getLogin</span>)</div>
+    <div class="method-notes">Login endpoint.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/x-www-form-urlencoded</code></li>
+    </ul>
+
+
+
+
+    <h3 class="field-label">Form parameters</h3>
+    <div class="field-items">
+      <div class="param">username (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash;  </div>      <div class="param">password (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>text/html</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getLogout"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /logout</code></pre></div>
+    <div class="method-summary">Logout current session. (<span class="nickname">getLogout</span>)</div>
+    <div class="method-notes">Logout existing session.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>text/plain</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPermission"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/permission/{sourceId}/{destId}</code></pre></div>
+    <div class="method-summary">Get clipboard permission. (<span class="nickname">getPermission</span>)</div>
+    <div class="method-notes">Returns the clipboard permission for the given source ID and destination ID.  Source and destination IDs are virtue template IDs.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sourceId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">destId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">raw (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ClipboardPermission">ClipboardPermission</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#ClipboardPermission">ClipboardPermission</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPermissionsByGroupId"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/securityGroup/id/{groupId}</code></pre></div>
+    <div class="method-summary">Get network security group permissions for a single security group. (<span class="nickname">getPermissionsByGroupId</span>)</div>
+    <div class="method-notes">Returns a list of all network security group permissions for a security group ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">groupId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#SecurityGroupPermission">SecurityGroupPermission</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPermissionsForSource"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/permission/{sourceId}</code></pre></div>
+    <div class="method-summary">Get default permission for source. (<span class="nickname">getPermissionsForSource</span>)</div>
+    <div class="method-notes">Returns the clipboard permission for the given source ID.  This permission will be used if a specific source and destination combination for this source is not explicitly defined.  Source and destination IDs are virtue template IDs.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sourceId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">raw (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#ClipboardPermission">ClipboardPermission</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPersistentStorage"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/storage/{user}/{virtueTemplateId}</code></pre></div>
+    <div class="method-summary">Get persistent storage entries for a user and virtue template. (<span class="nickname">getPersistentStorage</span>)</div>
+    <div class="method-notes">Returns a persistent storage entry for the given user and virtue template ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">user (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">virtueTemplateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtuePersistentStorage">VirtuePersistentStorage</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtuePersistentStorage">VirtuePersistentStorage</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getPersistentStorageForUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/storage/{user}</code></pre></div>
+    <div class="method-summary">Get persistent storage entries for a user. (<span class="nickname">getPersistentStorageForUser</span>)</div>
+    <div class="method-notes">Returns a list of all persistent storage entries for the given user.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">user (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      Object
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#Object">Object</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getSession"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/session/{sessionId}</code></pre></div>
+    <div class="method-summary">Get session. (<span class="nickname">getSession</span>)</div>
+    <div class="method-notes">Returns metadata for a session associated with the given sessionId or token.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sessionId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueSession">VirtueSession</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueSession">VirtueSession</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/user/{username}</code></pre></div>
+    <div class="method-summary">Get user. (<span class="nickname">getUser</span>)</div>
+    <div class="method-notes">Returns user data associated with given username.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueUser">VirtueUser</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueUser">VirtueUser</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVirtueInstance"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/virtue/{virtueId}</code></pre></div>
+    <div class="method-summary">Get active virtue instance. (<span class="nickname">getVirtueInstance</span>)</div>
+    <div class="method-notes">Returns an active virtue instance by ID if virtue instance is owned by user making the request.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">virtueId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueInstance">VirtueInstance</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueInstance">VirtueInstance</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVirtueInstances"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/virtue</code></pre></div>
+    <div class="method-summary">Get all active virtue instances. (<span class="nickname">getVirtueInstances</span>)</div>
+    <div class="method-notes">Returns a list of all virtue instances owned by the user making the request.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#VirtueInstance">VirtueInstance</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVirtueTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtue/template/{id}</code></pre></div>
+    <div class="method-summary">Get virtue template (<span class="nickname">getVirtueTemplate</span>)</div>
+    <div class="method-notes">Returns a single virtue template associated with the given ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueTemplate">VirtueTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueTemplate">VirtueTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVirtueTemplateByUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/virtue/template/{templateId}</code></pre></div>
+    <div class="method-summary">Get virtue template. (<span class="nickname">getVirtueTemplateByUser</span>)</div>
+    <div class="method-notes">Returns a virtue template if vailable for the user making the request.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueTemplate">VirtueTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueTemplate">VirtueTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVm"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/vm/{id}</code></pre></div>
+    <div class="method-summary">Get virtual machine. (<span class="nickname">getVm</span>)</div>
+    <div class="method-notes">Returns the metadata for a single virtual machine.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtualMachine">VirtualMachine</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtualMachine">VirtualMachine</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getVmTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/virtualMachine/template/{id}</code></pre></div>
+    <div class="method-summary">Get virtual machine template. (<span class="nickname">getVmTemplate</span>)</div>
+    <div class="method-notes">Returns the virtual machine template metadata for the given virtual machine template ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="importAll"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/import/all</code></pre></div>
+    <div class="method-summary">Import all test objects (<span class="nickname">importAll</span>)</div>
+    <div class="method-notes">Imports all test objects in the system.</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>text/plain</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="importItem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/import/{type}/{name}</code></pre></div>
+    <div class="method-summary">Import test objects (<span class="nickname">importItem</span>)</div>
+    <div class="method-notes">Imports test objects from internal system into database.  When objects require other objects (I.E. virtue templates require virtual machine templates), the required objects will also be imported.  Objects can be of type: user, application, virtue, virtualmachines.  Users include admin, alice, bob.  Virtue templates include document_editor, external_internet_consumer, linux_corporate_email_user, linux_test_devel, power_user, router_admin, windows_corporate_email_user, windows_test_devel.  Virtual machine templates include external_internet_consumer, linux_all, linux_corporate_email_user, linux_power_user,	linux_router_admin,	linux_lo_impress, windows_all, windows_corporate_email_user, windows_document_editor, windows_power_user.  Applications include linux_calc, linux_chrome, linux_firefox, linux_lo_calc, linux_lo_draw, linux_lo_impress, linux_lo_writer, linux_terminal, linux_thunderbird, windows_chrome, windows_cmd, windows_edge, windows_excel, windows_outlook, windows_powershell, windows_skype, windows_word</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">type (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">name (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>text/plain</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="importSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/import</code></pre></div>
+    <div class="method-summary">Import system from stream (<span class="nickname">importSystem</span>)</div>
+    <div class="method-notes">Imports the system metadata from a provided stream file.  This format is the same as the Export system to stream.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#object">object</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="invalidateSession"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/session/{sessionId}</code></pre></div>
+    <div class="method-summary">Invalidate session. (<span class="nickname">invalidateSession</span>)</div>
+    <div class="method-notes">Invalidates a single session based on the provided session ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sessionId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="launchVirtue"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /user/virtue/{virtueId}</code></pre></div>
+    <div class="method-summary">Launch active virtue. (<span class="nickname">launchVirtue</span>)</div>
+    <div class="method-notes">Launch or start all the virtual machines in an existing virtue given by the virtue ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">virtueId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="logoutUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/user/{username}/logout</code></pre></div>
+    <div class="method-summary">Force user logout. (<span class="nickname">logoutUser</span>)</div>
+    <div class="method-notes">Forces all sessions for the given user to be logged out.  This will include desktop application sessions as well as workbench sessions.  The user will then have to log back in.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="rebootVm"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/vm/reboot/{id}</code></pre></div>
+    <div class="method-summary">Reboot virtual machine. (<span class="nickname">rebootVm</span>)</div>
+    <div class="method-notes">Reboots a single virtual machine associated with the given ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="removeUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /admin/user/{username}</code></pre></div>
+    <div class="method-summary">Delete user. (<span class="nickname">removeUser</span>)</div>
+    <div class="method-notes">Deletes the user associated with the given username.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="revokePermissionForTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/securityGroup/template/{templateId}/revoke</code></pre></div>
+    <div class="method-summary">Remove single network security group permission from a virtue template. (<span class="nickname">revokePermissionForTemplate</span>)</div>
+    <div class="method-notes">Removes a single security group permission from a virtue template&#x27;s security group.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#SecurityGroupPermission">SecurityGroupPermission</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="revokeTemplateToUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/user/{username}/revoke/{templateId}</code></pre></div>
+    <div class="method-summary">revoke virtue template from the user. (<span class="nickname">revokeTemplateToUser</span>)</div>
+    <div class="method-notes">Will remove the virtue template associated with the template ID from the user associated by the username.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setFileSystemStatus"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/fileSystem/{fileSystemId}/setStatus</code></pre></div>
+    <div class="method-summary">Enable/disable a shared file system. (<span class="nickname">setFileSystemStatus</span>)</div>
+    <div class="method-notes">Enables/disables a shared file system (I.E. Samba share).</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">fileSystemId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#boolean">boolean</a> (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setPermission"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /admin/permission/{sourceId}/{destId}</code></pre></div>
+    <div class="method-summary">Set clipboard permission. (<span class="nickname">setPermission</span>)</div>
+    <div class="method-notes">Sets the clipboard permission from the request body for the given source ID and destination ID.  Source and destination IDs are virtue template IDs.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sourceId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">destId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#string">string</a> (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setServiceDefaultPermission"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /admin/permission/default/{option}</code></pre></div>
+    <div class="method-summary">Set system default clipboard permission. (<span class="nickname">setServiceDefaultPermission</span>)</div>
+    <div class="method-notes">Sets the clipboard permission default for the system.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">option (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; Clipboard permission option </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setUserStatus"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/user/{username}/setStatus</code></pre></div>
+    <div class="method-summary">Enable/disable user. (<span class="nickname">setUserStatus</span>)</div>
+    <div class="method-notes">For the user associated with given username, will enable or disable the user if the request body is true or false respectively.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#string">string</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setVirtualMachineTemplateStatus"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/virtualMachine/template/{id}/setStatus</code></pre></div>
+    <div class="method-summary">Enable/disable virtual machine template. (<span class="nickname">setVirtualMachineTemplateStatus</span>)</div>
+    <div class="method-notes">Sets the virtual machine template with the given ID enabled flag to true or false based on the body text.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#string">string</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="setVirtueTemplateStatus"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/virtue/template/{id}/setStatus</code></pre></div>
+    <div class="method-summary">Enable/disable virtue template. (<span class="nickname">setVirtueTemplateStatus</span>)</div>
+    <div class="method-notes">Sets the virtue template with the given ID enabled flag to true or false based on the body text.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#string">string</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueTemplate">VirtueTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueTemplate">VirtueTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="startApplication"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /user/virtue/{virtueId}/{applicationId}</code></pre></div>
+    <div class="method-summary">Start virtue application. (<span class="nickname">startApplication</span>)</div>
+    <div class="method-notes">Attempt to start an application given by application ID on a virtue instance given by virtueId.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">virtueId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>      <div class="param">applicationId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="stopVirtue"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /user/virtue/{virtueId}/stop</code></pre></div>
+    <div class="method-summary">Stop active virtue. (<span class="nickname">stopVirtue</span>)</div>
+    <div class="method-notes">Stop all the virtual machines in an existing virtue given by the virtue ID.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">virtueId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateApplicationDefinitions"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/application/{templateId}</code></pre></div>
+    <div class="method-summary">Update an application definition (<span class="nickname">updateApplicationDefinitions</span>)</div>
+    <div class="method-notes">Pass in an application defintion to update an existing application definition.  Sending the ID in the structure is not necessary.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">templateId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#ApplicationDefinition">ApplicationDefinition</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ApplicationDefinition">ApplicationDefinition</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#ApplicationDefinition">ApplicationDefinition</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateFileSystem"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/fileSystem/{fileSystemId}</code></pre></div>
+    <div class="method-summary">Updates metadata for a shared file system. (<span class="nickname">updateFileSystem</span>)</div>
+    <div class="method-notes">Updates the metadata for a shared file system (I.E. Samba share).</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">fileSystemId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#FileSystem">FileSystem</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#FileSystem">FileSystem</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#FileSystem">FileSystem</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateUser"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/user/{username}</code></pre></div>
+    <div class="method-summary">Update user. (<span class="nickname">updateUser</span>)</div>
+    <div class="method-notes">Updates a user based on the username included in the path.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">username (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtueUser">VirtueUser</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueUser">VirtueUser</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueUser">VirtueUser</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateVirtueTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/virtue/template/{id}</code></pre></div>
+    <div class="method-summary">Update virtue template. (<span class="nickname">updateVirtueTemplate</span>)</div>
+    <div class="method-notes">Updates a virtue template associated with the ID in the path based on the request body.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtueTemplate">VirtueTemplate</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtueTemplate">VirtueTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtueTemplate">VirtueTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateVmTemplate"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/virtualMachine/template/{id}</code></pre></div>
+    <div class="method-summary">Update virtual machine template, (<span class="nickname">updateVmTemplate</span>)</div>
+    <div class="method-notes">Updates a virtual machine template for the ID given in the path.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">body <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a> (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#VirtualMachineTemplate">VirtualMachineTemplate</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="uploadIcon"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /admin/icon/{iconKey}</code></pre></div>
+    <div class="method-summary">Upload an application icon (<span class="nickname">uploadIcon</span>)</div>
+    <div class="method-notes">Uploads an application icon to a given icon key.  The icon key here needs to match the applications icon key.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">iconKey (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>multipart/form-data</code></li>
+    </ul>
+
+
+
+
+    <h3 class="field-label">Form parameters</h3>
+    <div class="field-items">
+      <div class="param">file (optional)</div>
+      
+            <div class="param-desc"><span class="param-type">Form Parameter</span> &mdash;  </div>    </div>  <!-- field-items -->
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">default</h4>
+    default response
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#ApplicationDefinition"><code>ApplicationDefinition</code></a></li>
+    <li><a href="#ClipboardPermission"><code>ClipboardPermission</code></a></li>
+    <li><a href="#FileSystem"><code>FileSystem</code></a></li>
+    <li><a href="#FormDataContentDisposition"><code>FormDataContentDisposition</code></a></li>
+    <li><a href="#GrantedAuthority"><code>GrantedAuthority</code></a></li>
+    <li><a href="#SecurityGroupPermission"><code>SecurityGroupPermission</code></a></li>
+    <li><a href="#VirtualMachine"><code>VirtualMachine</code></a></li>
+    <li><a href="#VirtualMachineTemplate"><code>VirtualMachineTemplate</code></a></li>
+    <li><a href="#VirtueInstance"><code>VirtueInstance</code></a></li>
+    <li><a href="#VirtuePersistentStorage"><code>VirtuePersistentStorage</code></a></li>
+    <li><a href="#VirtueSession"><code>VirtueSession</code></a></li>
+    <li><a href="#VirtueTemplate"><code>VirtueTemplate</code></a></li>
+    <li><a href="#VirtueUser"><code>VirtueUser</code></a></li>
+    <li><a href="#WhitelistedNetwork"><code>WhitelistedNetwork</code></a></li>
+    <li><a href="#body"><code>body</code></a></li>
+    <li><a href="#body_1"><code>body_1</code></a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="ApplicationDefinition"><code>ApplicationDefinition</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Describes an application and how to execute the application.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> the application id </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> the application name </div>
+<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> the version of this application </div>
+<div class="param">os (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Descriptor for which Operating System is being used for a virtual machine or application. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">LINUX</div><div class="param-enum">WINDOWS</div><div class="param-enum">MAC</div>
+<div class="param">launchCommand (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> command used to launch the application </div>
+<div class="param">iconKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> key to find the icon for the application </div>
+<div class="param">parameters (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> parameters for a specific use of the application.  This entry does not get saved in the database and is only used for default applications. </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> Tags to represent extra information about an application.  I.E. Can be used to specify as a browser to be used a when a hyperlink is clicked via the &#x27;BROWSER&#x27; tag. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ClipboardPermission"><code>ClipboardPermission</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Controls permissions for cross virtue clipboard actions.</div>
+    <div class="field-items">
+      <div class="param">sourceGroupId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the source of the clipboard message.  In Savior, this is the virtue template ID. </div>
+<div class="param">destinationGroupId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the destination of the clipboard message.  In Savior, this is the virtue template ID. </div>
+<div class="param">permission (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The option for a clipboard message permission. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">ALLOW</div><div class="param-enum">DENY</div><div class="param-enum">ASK</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="FileSystem"><code>FileSystem</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Represents an external file system, usually a windows share, that can be attached to the virtual machines of a virtue.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the given file system. </div>
+<div class="param">address (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Full path to the share.  Typically in the format &#x27;\hostname\path\to\share&#x27;. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Human readable name of the share. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Toggle to whether the share is enabled or not.  May not be implemented. </div>
+<div class="param">readPerm (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True/false for read permission to the share.  May not be implemented. </div>
+<div class="param">writePerm (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True/false for write permission to the share.  May not be implemented. </div>
+<div class="param">executePerm (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True/false for execute permission to the share.  May not be implemented. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="FormDataContentDisposition"><code>FormDataContentDisposition</code></a> <a class="up" href="#__Models">Up</a></h3>
+    
+    <div class="field-items">
+      <div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">parameters (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">Map</a></span>  </div>
+<div class="param">fileName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">creationDate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">modificationDate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">readDate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">size (optional)</div><div class="param-desc"><span class="param-type"><a href="#long">Long</a></span>  format: int64</div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="GrantedAuthority"><code>GrantedAuthority</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Authorities or groups that the user is assigned to.  These authorities ties to access to the savior system and not access to certain virtues.</div>
+    <div class="field-items">
+      <div class="param">authority (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="SecurityGroupPermission"><code>SecurityGroupPermission</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Network permission for a given virtue</div>
+    <div class="field-items">
+      <div class="param">ingress (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> True if the security group pertains to connections coming into into the virtue, false if the connection is outgoing. </div>
+<div class="param">fromPort (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Port the connection came from. format: int32</div>
+<div class="param">toPort (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Port the connection came to. format: int32</div>
+<div class="param">cidrIp (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> CIDR block of that the permission should pertain to. </div>
+<div class="param">ipProtocol (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Protocol for.  Usually TCP or UDP. </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Human readable description of the purpose of this security group. </div>
+<div class="param">securityGroupId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the security group. </div>
+<div class="param">templateId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Virtue template ID that this permission pertains to. </div>
+<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtualMachine"><code>VirtualMachine</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Object to describe a virtual machine instance.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the virtual machine. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name of the virtual machine. </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Describes the status of the virtual machine. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">CREATING</div><div class="param-enum">STOPPED</div><div class="param-enum">LAUNCHING</div><div class="param-enum">RUNNING</div><div class="param-enum">PAUSING</div><div class="param-enum">PAUSED</div><div class="param-enum">RESUMING</div><div class="param-enum">STOPPING</div><div class="param-enum">DELETING</div><div class="param-enum">ERROR</div><div class="param-enum">DELETED</div>
+<div class="param">os (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Descriptor for which Operating System is being used for a virtual machine or application. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">LINUX</div><div class="param-enum">WINDOWS</div><div class="param-enum">MAC</div>
+<div class="param">hostname (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Hostname of virtual machine.  If public IPs are used by the system, this will be the AWS public hostname. </div>
+<div class="param">sshPort (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Port the server has SSH exposed on. format: int32</div>
+<div class="param">infrastructureId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID used by the infrastructure system.  Typically set by AWS or Xen. </div>
+<div class="param">userName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Username to use to login to the virtual machine </div>
+<div class="param">privateKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Private key to access the virtual machine via ssh. </div>
+<div class="param">privateKeyName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name that maps to a private key stored via a key manager </div>
+<div class="param">ipAddress (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> IP address of virtual machine.  If public IPs are used by the system, this will be the AWS public IP address. </div>
+<div class="param">applicationIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> IDs for the applications that this virtual machine has available for the user. </div>
+<div class="param">internalHostname (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Hostname for the internal network that the virtual machine resides. </div>
+<div class="param">internalIpAddress (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtualMachineTemplate"><code>VirtualMachineTemplate</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Object to describe a virtual machine template.  This is just metadata and does not include the image directly.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the virtual machine template.  Typically set by the system. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name of the virtual machine template. </div>
+<div class="param">os (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Descriptor for which Operating System is being used for a virtual machine or application. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">LINUX</div><div class="param-enum">WINDOWS</div><div class="param-enum">MAC</div>
+<div class="param">templatePath (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Infrastructure specific path to the virtual machine template image. This value can be different depending on whether the virtual machine should be run directly in AWS (template path is AMI) or run on Xen (template path is path in S3 to image). </div>
+<div class="param">loginUser (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> User to be used to login as. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Toggle for enabling or diabling the virtual machine.  May not be implemented. </div>
+<div class="param">lastModification (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> Date of last modification for virtual machine template metadata. format: date-time</div>
+<div class="param">lastEditor (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Username of last editor of this virtual machine template metadata. </div>
+<div class="param">applicationIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The list of application IDs that this template provides for the users. </div>
+<div class="param">securityTag (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Security tag used by Xen (linux VM&#x27;s only) to determine how to setup the firewall.  Options: god, power, TBD </div>
+<div class="param">userCreatedBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> User who originally created this virtual machine template. </div>
+<div class="param">timeCreatedAt (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> Time at which this virtual machine was originally created. format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtueInstance"><code>VirtueInstance</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Object to describe a virtue instance that has been or is about to be provisioned</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the virtue instance. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name of the virtue instance. </div>
+<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Username of the user for which the virtue instance was created. </div>
+<div class="param">templateId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The template ID for the virtue template that this virtue instance was created from. </div>
+<div class="param">color (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Color for which the virtue instance will be shown through the desktop application and workbench. </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Describes the status of the Virtue. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">ERROR</div><div class="param-enum">RUNNING</div><div class="param-enum">RESUMING</div><div class="param-enum">LAUNCHING</div><div class="param-enum">CREATING</div><div class="param-enum">PAUSED</div><div class="param-enum">PAUSING</div><div class="param-enum">STOPPING</div><div class="param-enum">STOPPED</div><div class="param-enum">DELETING</div><div class="param-enum">DELETED</div><div class="param-enum">UNPROVISIONED</div>
+<div class="param">virtualMachineIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> List of IDs for all the virtual machines that make up this virtue. </div>
+<div class="param">applicationIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> List of IDs for all the applications that are runnable in this virtue. </div>
+<div class="param">templateid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtuePersistentStorage"><code>VirtuePersistentStorage</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Description of storage for a user/virtue combination that will persist even when a virtue is destroyed.</div>
+    <div class="field-items">
+      <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> the user who this storage is assigned to. </div>
+<div class="param">infrastructureId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Implementation specific ID for the storage related to the infrastructure.  This is an AWS ID. </div>
+<div class="param">virtueTemplateId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the virtue template that this storage will be attached to when that template is provisioned into a virtue instance. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtueSession"><code>VirtueSession</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Describes a session in virtue for a user.</div>
+    <div class="field-items">
+      <div class="param">sessionId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID for the session. Also the token for this session. </div>
+<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> User who owns this session. </div>
+<div class="param">authorities (optional)</div><div class="param-desc"><span class="param-type"><a href="#GrantedAuthority">array[GrantedAuthority]</a></span> Authorities or groups that the user is assigned to.  These authorities ties to access to the savior system and not access to certain virtues. </div>
+<div class="param">lastRequest (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> Date of the last request made on the session. format: date-time</div>
+<div class="param">expired (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Boolean as whether or not the session has expired. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtueTemplate"><code>VirtueTemplate</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Object to describe a virtue template.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the virtue template. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name of the virtue template. </div>
+<div class="param">version (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Version of the virtue template. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Boolean as to whether the virtue template is enabled and allowed to be provisioned.  May not be implemented. </div>
+<div class="param">lastModification (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> Date of last modification for virtual machine template metadata. format: date-time</div>
+<div class="param">lastEditor (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Username of last editor of this virtual machine template metadata. </div>
+<div class="param">userCreatedBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> User who originally created this virtual machine template. </div>
+<div class="param">timeCreatedAt (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> Time at which this virtual machine was originally created. format: date-time</div>
+<div class="param">awsTemplateName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Unused </div>
+<div class="param">color (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Color for which the virtue instance will be shown through the desktop application and workbench. </div>
+<div class="param">fileSystems (optional)</div><div class="param-desc"><span class="param-type"><a href="#FileSystem">array[FileSystem]</a></span>  </div>
+<div class="param">allowedPasteTargetIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> Unused </div>
+<div class="param">networkWhitelist (optional)</div><div class="param-desc"><span class="param-type"><a href="#WhitelistedNetwork">array[WhitelistedNetwork]</a></span> Unused </div>
+<div class="param">printerIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> Unused </div>
+<div class="param">fileSystemIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> List of IDs of the file systems that will be attached to the VMs when this virute is provisioned. </div>
+<div class="param">vmTemplateIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> List of IDs of the virtual machine templates that will be provisioned when this virtue is provisioned. </div>
+<div class="param">applicationIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="VirtueUser"><code>VirtueUser</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>User representation for the Savior system.</div>
+    <div class="field-items">
+      <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Username for the user. </div>
+<div class="param">authorities (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> Authorities or groups that the user is assigned to.  These authorities ties to access to the savior system and not access to certain virtues. </div>
+<div class="param">virtueTemplateIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> List of IDs of virtue templates for which the user has access to and can provision. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Boolean to determine whether the user is enabled or not. Disabled users should not be able to login. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="WhitelistedNetwork"><code>WhitelistedNetwork</code></a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Unused</div>
+    <div class="field-items">
+      <div class="param">host (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">localPort (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+<div class="param">remotePort (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  format: int32</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="body"><code>body</code></a> <a class="up" href="#__Models">Up</a></h3>
+    
+    <div class="field-items">
+      <div class="param">file (optional)</div><div class="param-desc"><span class="param-type"><a href="#FormDataContentDisposition">FormDataContentDisposition</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="body_1"><code>body_1</code></a> <a class="up" href="#__Models">Up</a></h3>
+    
+    <div class="field-items">
+      <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">password (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  </body>
+</html>
