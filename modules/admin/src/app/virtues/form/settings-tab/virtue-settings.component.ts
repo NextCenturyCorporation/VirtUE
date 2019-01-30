@@ -11,6 +11,7 @@ import { DictList } from '../../../shared/models/dictionary.model';
 
 import {
   Column,
+  BlankColumn,
   TextColumn,
   ListColumn,
   CheckboxColumn,
@@ -398,8 +399,9 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
       new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
-      new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
+      // new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
+      new BlankColumn(2),
       new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }

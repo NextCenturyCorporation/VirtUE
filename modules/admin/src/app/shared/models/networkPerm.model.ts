@@ -55,23 +55,27 @@ export class NetworkPermission {
     // instead of checking  '<=='
     // first make sure that the ports aren't 0, because checking !port will be true
     // if port === 0. Which would make the wrong error message appear.
-    if (this.localPort === 0 || this.remotePort === 0) {
+    if (
+        // this.localPort === 0
+        this.remotePort === 0
+        ) {
       console.log("Ports on network permissions must be greater than zero.");
       return false;
     }
 
-    if ( !this.host       || !this.protocol
-      || !this.localPort  || !this.remotePort ) {
+    if (
+      !this.host
+      || !this.protocol
+      // || !this.localPort
+      || !this.remotePort
+        ) {
       console.log("Network permission fields cannot be blank");
       return false;
     }
 
-    // if ( !(this.localPort instanceof Number) || !(this.remotePort instanceof Number) ) {
-    //   console.log("Local and Remote ports must be numbers.");
-    //   return false;
-    // }
-
-    if (this.localPort < 0 || this.remotePort < 0) {
+    if (
+      // this.localPort < 0
+      this.remotePort < 0) {
       console.log("Ports on network permissions must be greater than zero.");
       return false;
     }

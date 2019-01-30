@@ -58,7 +58,7 @@ export class VirtueListComponent extends ItemListComponent {
    * called after all the datasets have loaded. Pass the virtue list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VIRTUES].asList());
+    this.setItems(this.datasets[DatasetNames.VIRTUE_TS].asList());
     this.tempAddRandomPrinter();
   }
 
@@ -90,7 +90,7 @@ export class VirtueListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
   }
 
 

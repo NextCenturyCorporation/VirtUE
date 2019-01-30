@@ -98,7 +98,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     this.item = new User();
 
     this.datasetName = DatasetNames.USERS;
-    this.childDatasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
   /**
@@ -182,7 +182,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS, DatasetNames.USERS];
   }
 
   /**

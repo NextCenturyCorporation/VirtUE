@@ -6,7 +6,9 @@ import { Item } from '../../models/item.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { User } from '../../models/user.model';
 import { Virtue } from '../../models/virtue.model';
+import { VirtueInstance } from '../../models/virtue-instance.model';
 import { VirtualMachine } from '../../models/vm.model';
+import { VirtualMachineInstance } from '../../models/vm-instance.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
@@ -68,20 +70,30 @@ export class DatasetsMeta {
       datasetName: DatasetNames.APPS,
       depends: []
     };
-    this.dict[DatasetNames.VMS] = {
+    this.dict[DatasetNames.VM_TS] = {
       class: VirtualMachine,
-      datasetName: DatasetNames.VMS,
+      datasetName: DatasetNames.VM_TS,
       depends: [DatasetNames.APPS]
     };
-    this.dict[DatasetNames.VIRTUES] = {
+    this.dict[DatasetNames.VIRTUE_TS] = {
       class: Virtue,
-      datasetName: DatasetNames.VIRTUES,
-      depends: [DatasetNames.VMS, DatasetNames.PRINTERS, DatasetNames.FILE_SYSTEMS]
+      datasetName: DatasetNames.VIRTUE_TS,
+      depends: [DatasetNames.VM_TS, DatasetNames.PRINTERS, DatasetNames.FILE_SYSTEMS]
     };
     this.dict[DatasetNames.USERS] = {
       class: User,
       datasetName: DatasetNames.USERS,
-      depends: [DatasetNames.VIRTUES]
+      depends: [DatasetNames.VIRTUE_TS]
+    };
+    this.dict[DatasetNames.VMS] = {
+      class: VirtualMachineInstance,
+      datasetName: DatasetNames.VMS,
+      depends: [DatasetNames.VM_TS]
+    };
+    this.dict[DatasetNames.VIRTUES] = {
+      class: VirtueInstance,
+      datasetName: DatasetNames.VIRTUES,
+      depends: [DatasetNames.VIRTUE_TS, DatasetNames.VMS]
     };
   }
 

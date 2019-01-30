@@ -102,7 +102,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
 
     this.item = new VirtualMachine();
 
-    this.datasetName = DatasetNames.VMS;
+    this.datasetName = DatasetNames.VM_TS;
     this.childDatasetName = DatasetNames.APPS;
 
   }
@@ -159,7 +159,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
+    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUE_TS], mode: this.mode});
   }
 
   /**
@@ -168,7 +168,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
   }
 
   /**

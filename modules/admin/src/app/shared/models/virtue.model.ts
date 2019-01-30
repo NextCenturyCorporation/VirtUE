@@ -106,8 +106,10 @@ export class Virtue extends Item {
       this.printerIds = virtueObj.printerIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
 
-      for (let fs of virtueObj.fileSystems) {
-        this.fileSystems.add(fs.id, fs);
+      if (virtueObj.fileSystems) {
+        for (let fs of virtueObj.fileSystems) {
+          this.fileSystems.add(fs.id, fs);
+        }
       }
 
       this.lastEditor = virtueObj.lastEditor;
@@ -133,18 +135,18 @@ export class Virtue extends Item {
    * @return the VIRTUES subdomain
    */
   getSubdomain(): string {
-    return Subdomains.VIRTUES;
+    return Subdomains.VIRTUE_TS;
   }
 
   /**
    * #uncommented
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
-    if (datasetName === DatasetNames.VIRTUES) {
+    if (datasetName === DatasetNames.VIRTUE_TS) {
       this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
       this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIds) as DictList<Virtue>;
     }
-    if (datasetName === DatasetNames.VMS) {
+    if (datasetName === DatasetNames.VM_TS) {
       this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
     }
     else if (datasetName === DatasetNames.FILE_SYSTEMS) {
@@ -176,11 +178,11 @@ export class Virtue extends Item {
 
 
   getVms(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VMS);
+    return this.getChildren(DatasetNames.VM_TS);
   }
 
   getVmApps(): IndexedObj[] {
-    return this.getGrandChildren(DatasetNames.VMS, DatasetNames.APPS);
+    return this.getGrandChildren(DatasetNames.VM_TS, DatasetNames.APPS);
   }
 
   getPrinters(): IndexedObj[] {
@@ -208,7 +210,7 @@ export class Virtue extends Item {
   }
 
   removeVm(vm: VirtualMachine) {
-    this.removeChild(vm.getID(), DatasetNames.VMS);
+    this.removeChild(vm.getID(), DatasetNames.VM_TS);
   }
 
   removePrinter(printer: Printer) {
@@ -223,14 +225,14 @@ export class Virtue extends Item {
   /** @override [[Item.getRelatedDict]] */
   getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
     switch (datasetName) {
-      case DatasetNames.VMS:
+      case DatasetNames.VM_TS:
         return this.vmTemplates;
       case DatasetNames.PRINTERS:
         return this.printers;
       case DatasetNames.FILE_SYSTEMS:
         return this.fileSystems;
       default:
-        console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS}, was", datasetName);
+        console.log("You shouldn't be here. Requested dataset: ", datasetName);
         return null;
     }
   }
@@ -242,14 +244,14 @@ export class Virtue extends Item {
    */
   getRelatedIDList(datasetName: DatasetNames): string[] {
     switch (datasetName) {
-      case DatasetNames.VMS:
+      case DatasetNames.VM_TS:
         return this.vmTemplateIds;
       case DatasetNames.PRINTERS:
         return this.printerIds;
       case DatasetNames.FILE_SYSTEMS:
         return this.fileSystemIds;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    console.log("You shouldn't be here. Requested dataset: ", datasetName);
     return [];
   }
 

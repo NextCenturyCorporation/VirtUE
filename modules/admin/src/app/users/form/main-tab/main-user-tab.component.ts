@@ -54,7 +54,7 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
    */
   public roleAdmin: boolean;
 
-  /** re-classing parent's item object 
+  /** re-classing parent's item object
   * Must be public to be used in template html file in production mode.*/
   public item: User;
 
@@ -65,7 +65,7 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
       routerService: RouterService,
       dialog: MatDialog) {
     super(routerService, dialog);
-    this.childDatasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
   /**

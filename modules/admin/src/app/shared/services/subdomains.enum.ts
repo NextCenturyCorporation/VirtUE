@@ -5,10 +5,12 @@
  */
 export enum Subdomains {
   APPS = "admin/application/",
-  VMS = "admin/virtualMachine/template/",
-  VIRTUES = "admin/virtue/template/",
+  VM_TS = "admin/virtualMachine/template/",
+  VIRTUE_TS = "admin/virtue/template/",
   USERS = "admin/user/",
   PRINTERS = "admin/printer/",
   FILE_SYSTEMS = "admin/fileSystem/",
-  SENSORS = "admin/????"
+  SENSORS = "admin/sensing",
+  VIRTUES = "admin/virtues",
+  VMS = "admin/vm"
 }

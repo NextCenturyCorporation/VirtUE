@@ -75,7 +75,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS];
   }
 
   /**
@@ -89,6 +89,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.datasets[DatasetNames.VMS].asList());
+    this.fillTable(this.datasets[DatasetNames.VM_TS].asList());
   }
 }

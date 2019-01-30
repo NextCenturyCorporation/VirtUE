@@ -73,7 +73,7 @@ export class UserListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.VIRTUES, DatasetNames.USERS];
+    return [DatasetNames.VIRTUE_TS, DatasetNames.USERS];
 
   }
 

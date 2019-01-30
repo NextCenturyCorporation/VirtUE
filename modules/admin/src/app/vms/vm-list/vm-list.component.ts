@@ -52,7 +52,7 @@ export class VmListComponent extends ItemListComponent {
    * called after all the datasets have loaded. Pass the vm list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VMS].asList());
+    this.setItems(this.datasets[DatasetNames.VM_TS].asList());
   }
 
   /**
@@ -76,7 +76,7 @@ export class VmListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS];
   }
 
 

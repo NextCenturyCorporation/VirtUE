@@ -8,9 +8,11 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
+import { VirtueInstanceListComponent } from './virtues/virtue-instance-list/virtue-instance-list.component';
 import { VirtueComponent } from './virtues/virtue.component';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmInstanceListComponent } from './vms/vm-instance-list/vm-instance-list.component';
 import { VmComponent } from './vms/vm.component';
 
 import { AppsListComponent } from './apps/apps-list/apps-list.component';
@@ -122,6 +124,12 @@ const routes: Routes = [
           }
         ]
       }, {
+        path: 'virtue-instances',
+        component: VirtueInstanceListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Virtue Instances', '/virtueInstances')
+        }
+      }, {
         path: 'virtues',
         component: VirtueListComponent,
         data: {
@@ -159,6 +167,12 @@ const routes: Routes = [
             }
           }
         ]
+      }, {
+        path: 'vm-instances',
+        component: VmInstanceListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
+        }
       }, {
         path: 'vm-templates',
         component: VmListComponent,

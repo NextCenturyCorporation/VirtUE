@@ -89,7 +89,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   * then those references
   *   will simply remain references, instead of having links to the actual objects. Everything else should work fine.
   *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down
-  *   `[DatasetNames.VMS, DatasetNames.VIRTUES]`
+  *   `[DatasetNames.VM_TS, DatasetNames.VIRTUE_TS]`
   *
   * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between
   *   the two sets (say you just want the names of all of them, and don't want to waste time building anything else),
@@ -205,13 +205,13 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *                     },
    *                     {
    *                       class: VirtualMachine,
-   *                       datasetName: DatasetNames.VMS,
+   *                       datasetName: DatasetNames.VM_TS,
    *                       depends: DatasetNames.APPS
    *                     },
    *                     {
    *                       class: Virtue,
-   *                       datasetName: DatasetNames.VIRTUES,
-   *                       depends: DatasetNames.VMS
+   *                       datasetName: DatasetNames.VIRTUE_TS,
+   *                       depends: DatasetNames.VM_TS
    *                     }
    *                 ],
    * Where
@@ -221,7 +221,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *   at end:
    *     {
    *       updateQueue = []
-   *       this.loadedDatasets  = [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
+   *       this.loadedDatasets  = [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS]
    *     }
    *
    ******************************************************************************
