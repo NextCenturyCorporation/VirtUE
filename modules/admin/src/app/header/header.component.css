@@ -33,7 +33,7 @@ mat-toolbar.mat-primary {
   color: rgb(255,255,255);
   display: block;
   margin: 0;
-  padding: 0 2.4rem;
+  padding: 0 1.4rem;
 }
 
 .mat-toolbar span.navbar-brand {
