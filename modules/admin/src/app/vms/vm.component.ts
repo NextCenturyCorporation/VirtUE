@@ -159,17 +159,20 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUE_TS], mode: this.mode});
+    this.usageTab.update({
+      mode: this.mode,
+      [DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS],
+      [DatasetNames.VMS]: this.datasets[DatasetNames.VMS],
+    });
   }
 
   /**
-   * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
-   * been given.
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS,DatasetNames.VIRTUE_TS];
   }
+
 
   /**
    * create and fill the fields the backend expects to see, pull in/record any

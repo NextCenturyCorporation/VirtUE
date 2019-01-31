@@ -108,26 +108,8 @@ export class VmInstanceListComponent extends ItemListComponent {
   getSubMenu(): SubMenuOptions[] {
     return [
       // new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => {}),
-      new SubMenuOptions("Stop",   (v: VirtualMachineInstance) => this.vmIsStopped(v), (v: VirtualMachineInstance) => this.stopVm(v)),
+      new SubMenuOptions("Stop",   (v: VirtualMachineInstance) => !v.isStopped(), (v: VirtualMachineInstance) => v.stop()),
     ];
-  }
-
-  vmIsStopped(v: VirtualMachineInstance): boolean {
-    return  v.state === VmState.STOPPED ||
-            v.state === VmState.STOPPING ||
-            v.state === VmState.DELETING ||
-            v.state === VmState.DELETED;
-            // v.state === "CREATING"||
-            // v.state === "LAUNCHING"||
-            // v.state === "RUNNING"||
-            // v.state === "PAUSING"||
-            // v.state === "PAUSED"||
-            // v.state === "RESUMING"||
-            // v.state === "ERROR"||
-  }
-
-  stopVm(v: VirtualMachineInstance): void {
-
   }
 
   /**
@@ -146,7 +128,7 @@ export class VmInstanceListComponent extends ItemListComponent {
   }
 
   getNoDataMsg(): string {
-    return "No virtual machines are running at this time.";
+    return "No virtual machine instances exist at this time.";
   }
 
 }

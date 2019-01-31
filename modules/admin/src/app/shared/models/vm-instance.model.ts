@@ -68,11 +68,30 @@ export class VirtualMachineInstance extends IndexedObj {
   }
 
   getName(): string {
-    return this.name.split("-").slice(0, 5).join("-");
+    // return this.name.split("-").slice(0, 5).join("-");
+    return this.name.split("-").slice(1).join("-");
   }
 
   getSubdomain(): string {
     return Subdomains.VMS;
+  }
+
+  isStopped(): boolean {
+    return  this.state === VmState.STOPPED ||
+            this.state === VmState.STOPPING ||
+            this.state === VmState.DELETING ||
+            this.state === VmState.DELETED;
+            // this.state === VmState.CREATING ||
+            // this.state === VmState.LAUNCHING ||
+            // this.state === VmState.RUNNING ||
+            // this.state === VmState.PAUSING ||
+            // this.state === VmState.PAUSED ||
+            // this.state === VmState.RESUMING ||
+            // this.state === VmState.ERROR
+  }
+
+  stop(): void {
+    //
   }
   //
   // getApps(): IndexedObj[] {
