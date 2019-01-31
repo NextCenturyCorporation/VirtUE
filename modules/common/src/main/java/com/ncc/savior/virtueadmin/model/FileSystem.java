@@ -7,18 +7,28 @@ import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  *
  */
 @Entity
+@Schema(description="Represents an external file system, usually a windows share, that can be attached to the virtual machines of a virtue.")
 public class FileSystem {
 	@Id
+	@Schema(description="ID of the given file system.")
 	protected String id;
+	@Schema(description="Full path to the share.  Typically in the format '\\\\hostname\\path\\to\\share'.")
 	protected String address;
+	@Schema(description="Human readable name of the share.")
 	protected String name;
+	@Schema(description="Toggle to whether the share is enabled or not.  May not be implemented.")
 	protected boolean enabled;
+	@Schema(description="True/false for read permission to the share.  May not be implemented.")
 	protected boolean readPerm;
+	@Schema(description="True/false for write permission to the share.  May not be implemented.")
 	protected boolean writePerm;
+	@Schema(description="True/false for execute permission to the share.  May not be implemented.")
 	protected boolean executePerm;
 
 	public FileSystem(String id, String name, String address, boolean enabled,

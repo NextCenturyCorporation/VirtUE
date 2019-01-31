@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Options for the clipboard permissions.
  * <ul>
@@ -9,6 +11,7 @@ package com.ncc.savior.virtueadmin.model;
  * transfered
  * </ul>
  */
+@Schema(description="The option for a clipboard message permission.")
 public enum ClipboardPermissionOption {
 	ALLOW, DENY, ASK
 }
