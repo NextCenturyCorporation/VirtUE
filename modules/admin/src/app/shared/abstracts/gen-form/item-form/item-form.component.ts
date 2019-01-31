@@ -211,9 +211,20 @@ but got: \n       " + this.routerService.getRouterUrl());
       }
       this.setUpTabs();
     }
-
+    this.routerService.submitPageTitle(this.getCrumbTitle());
     this.updatePage();
     this.initialPullComplete = true;
+  }
+
+  getCrumbTitle(): string {
+    let title = this.getTitle();
+    let pieces = title.split(" ");
+    if (pieces[0] === "View" || pieces[0] === "Edit" || pieces[0] === "Duplicate" ) {
+      return pieces.slice(1).join(" "); // remove the first word
+    }
+    else {
+      return title;
+    }
   }
 
   /**
@@ -389,4 +400,5 @@ but got: \n       " + this.routerService.getRouterUrl());
    */
   abstract finalizeItem(): boolean;
 
+  abstract getTitle(): string;
 }

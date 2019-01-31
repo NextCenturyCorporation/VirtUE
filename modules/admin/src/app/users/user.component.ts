@@ -49,7 +49,7 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} User Account: &nbsp;&nbsp;{{item.name}}</h1>
+        <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
     <div id="content-main">
       <div id="content" class="content">
@@ -214,6 +214,10 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     // if not editing, make sure username isn't taken
 
     return true;
+  }
+
+  getTitle(): string {
+    return this.mode + " User Account:  " + this.item.name;
   }
 
   /**

@@ -96,19 +96,6 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   }
 
   /**
-   * returns the default parameters for the table on a list page, using subclass-defined features.
-   */
-  defaultTableParams() {
-    return {
-      cols: this.getColumns(),
-      filters: this.getTableFilters(),
-      tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
-      noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Toggleable) => !i.enabled
-    };
-  }
-
-  /**
    * Sets up the table of Items.
    *
    * If all subclass-lists' tables have an attribute, but require different values for it, then it should be set via a method in
@@ -128,11 +115,38 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   }
 
   /**
+   * returns the default parameters for the table on a list page, using subclass-defined features.
+   */
+  defaultTableParams() {
+    return {
+      cols: this.getColumns(),
+      filters: this.getTableFilters(),
+      tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Toggleable) => !i.enabled
+    };
+  }
+
+  /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
    * @param paramsObject the parameters to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 
+  /**
+   * called after all the datasets have loaded. Pass the app list to the table.
+   */
+  onPullComplete(): void {
+    this.setItems(this.datasets[this.getDatasetToDisplay()].asList());
+    this.routerService.submitPageTitle(this.prettyTitle);
+
+    this.afterPullComplete();
+  }
+
+  abstract getDatasetToDisplay(): DatasetNames;
+
+  /** override-able, for any subclass-specific functionality */
+  afterPullComplete(): void {}
 
   /**
    * Populates the table with the input list of items.

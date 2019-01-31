@@ -47,13 +47,11 @@ export class UserListComponent extends ItemListComponent {
     dialog: MatDialog
   ) {
     super(routerService, baseUrlService, dataRequestService, dialog);
+
   }
 
-  /**
-   * called after all the datasetNames have loaded. Pass the user list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.USERS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.USERS;
   }
 
   /**

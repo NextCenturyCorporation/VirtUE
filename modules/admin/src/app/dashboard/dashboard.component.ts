@@ -89,7 +89,11 @@ export class DashboardComponent extends ItemListComponent {
    * @return
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
+    return [DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES, DatasetNames.SENSORS];
+  }
+
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.SENSORS;
   }
 
   /**

@@ -54,12 +54,8 @@ export class VirtueListComponent extends ItemListComponent {
     super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the virtue list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VIRTUE_TS].asList());
-    this.tempAddRandomPrinter();
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.VIRTUE_TS;
   }
 
   /**

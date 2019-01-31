@@ -55,7 +55,7 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} Virtue: &nbsp;&nbsp;{{item.name}}</h1>
+      <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
     <div id="content-main">
       <div id="content" class="content">
@@ -235,6 +235,11 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
             DatasetNames.VIRTUES,
             DatasetNames.USERS];
   }
+
+  getTitle(): string {
+    return this.mode + " Virtue Template:  " + this.item.name;
+  }
+
 
   /**
    * Pull in/record any uncollected inputs, and check that the item is valid to be saved

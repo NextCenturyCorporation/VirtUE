@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Output, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 
@@ -7,6 +7,8 @@ import 'rxjs/add/operator/pairwise';
 
 import { Router, ActivationEnd, NavigationStart, NavigationEnd, RoutesRecognized } from '@angular/router';
 
+import { Breadcrumb } from '../../shared/models/breadcrumb.model';
+
 
 /**
  * @class
@@ -14,44 +16,103 @@ import { Router, ActivationEnd, NavigationStart, NavigationEnd, RoutesRecognized
 @Injectable()
 export class RouterService {
 
-  private previousUrl: string;
+  // The component really pivots around this variable
+  private fullCrumb: Breadcrumb = new Breadcrumb(undefined, undefined);
 
-  private history: string[] = [];
+  // private previousUrl: string;
+
+  private history: Breadcrumb[] = [];
+
+  @Output()
+  public onNewPage: EventEmitter<Breadcrumb> = new EventEmitter<Breadcrumb>();
 
   constructor(
     private router: Router,
     private location: Location
   ) {
-    this.router.events
-        .filter(e => e instanceof RoutesRecognized)
-        .pairwise()
-        .subscribe((event: any[]) => {
-          this.previousUrl = event[0].urlAfterRedirects;
-        });
+    // this.router.events
+    //     .filter(e => e instanceof RoutesRecognized)
+    //     .pairwise()
+    //     .subscribe((event: any[]) => {
+    //       this.previousUrl = event[0].urlAfterRedirects;
+    //     });
 
     // Tell angular to load a fresh, new, component every time the router navigates to a URL, even if the user has been there before.
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
+    // ActivateEnd routings work from the deepest level, out. So the first one that finishes, is the actual endpoint.
+    let thisCrumb: Breadcrumb = undefined;
 
     // make the page reload if the user clicks on a link to the same page they're on.
     this.router.events.subscribe((event) => {
+
+      // This relies on the timing of these events, but they seem to only ever happen in turn..
+      // The worst that could happen is a breadcrumb's label could be wrong.
+      if (event instanceof ActivationEnd && thisCrumb === undefined) {
+        thisCrumb = event.snapshot.data.breadcrumb;
+      }
+
       if (event instanceof NavigationEnd) {
-        this.updateHistory(event.url);
         this.router.navigated = false;
         window.scrollTo(0, 0);
+        console.log(event.url);
+        this.setBreadcrumbHref(event.url);
+        // let fullCrumb = { href: event.url, label: thisCrumb.label };
+        // this.onNewPage.emit(fullCrumb);
+        // this.updateHistory(fullCrumb);
+        // thisCrumb = undefined;
       }
     });
   }
+  setBreadcrumbHref( href: string ): void {
+    this.fullCrumb.href = href;
+  }
 
-  updateHistory( newUrl: string ): void {
-    let indxExistingEntry: number = this.history.indexOf(newUrl);
+  setBreadcrumbLabel( label: string ): void {
+    // This function will be called when data returns from the backend to whatever component is loaded.
+    // fullCrumb's href is set around render time.
+    // Therefore we can be pretty confident this function will always be called second.
 
-    if (indxExistingEntry !== -1) {
-      this.history = this.history.slice(0, indxExistingEntry);
+    // It can, apparently, get called more than once though. So guard against that - otherwise you'll have extra breadcrumbs
+    if (this.fullCrumb.href !== undefined && this.fullCrumb.label === undefined) {
+      this.fullCrumb.label = label;
+      this.fullCrumb = this.cleanCrumb(this.fullCrumb);
+      this.onNewPage.emit(this.fullCrumb);
+      this.updateHistory(this.fullCrumb);
+      console.log(this.fullCrumb.label, this.fullCrumb.href );
+      this.fullCrumb = new Breadcrumb(undefined, undefined);
+    }
+  }
+
+  // just have pages notify the router manually of their title.
+  public submitPageTitle( title: string ): void {
+    this.setBreadcrumbLabel(title);
+  }
+
+  updateHistory( newPage: Breadcrumb ): void {
+    let i: number = this.history.length - 1;
+    for (; i >= 0; i-- ) {
+      if (newPage.href === this.history[i].href) {
+        break;
+      }
     }
 
-    this.history.push(newUrl);
+    if (i !== -1) {
+      this.history = this.history.slice(0, i);
+    }
+
+    this.history.push(newPage);
+  }
+
+  cleanCrumb(crumb: Breadcrumb): Breadcrumb {
+    // Navigation should only happen from a view page, so if you aren't on a view page and navigate,
+    // go back to the view page. To prevent accidentally making extra duplicates, and to prevent weird circles
+    // with the breadcrumbs, like: View U1 > View V1 > View U2 > Edit V1 > Edit U1 > Duplicate V2 > Edit U2
+    // With, of course, much longer names.
+    crumb.href = crumb.href.replace("edit", "view")
+                           .replace("duplicate", "view");
+    return crumb
   }
 
   private hasPreviousPage(): boolean {
@@ -59,7 +120,7 @@ export class RouterService {
   }
 
   private getPreviousPage(): string {
-    return this.history[this.history.length - 2];
+    return this.history[this.history.length - 2].href;
   }
 
   toPreviousPage(): void {
@@ -69,6 +130,10 @@ export class RouterService {
     else {
       this.toTopDomainPage();
     }
+  }
+
+  isTopDomainPage(url: string): boolean {
+    return this.getUrlPieces( url ).length == 1;
   }
 
   toTopDomainPage(): void {
@@ -87,7 +152,10 @@ export class RouterService {
   }
 
   getRouterUrlPieces(): string[] {
-    let url = this.getRouterUrl();
+    return this.getUrlPieces( this.getRouterUrl() );
+  }
+
+  getUrlPieces(url: string): string[] {
     if (url[0] === '/') {
       url = url.substr(1);
     }

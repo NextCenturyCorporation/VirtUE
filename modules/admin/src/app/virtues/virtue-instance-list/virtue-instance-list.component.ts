@@ -64,11 +64,8 @@ export class VirtueInstanceListComponent extends ItemListComponent {
     super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the virtue list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VIRTUES].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.VIRTUES;
   }
 
   defaultTableParams() {
@@ -88,7 +85,7 @@ export class VirtueInstanceListComponent extends ItemListComponent {
     return [
       new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC, undefined, () => this.getSubMenu()),
       new TextColumn('User',          2, (v: VirtueInstance) => v.user,       SORT_DIR.ASC),
-      new ListColumn('Active VMs',        2, (v: VirtueInstance) => v.getVms(),  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Active VMs',        2, (v: VirtueInstance) => v.getVms(),  this.formatName, undefined),
       // new ListColumn('Applications',      2, (v: VirtueInstance) => []),
 
       // put this in once you actually pull the template in

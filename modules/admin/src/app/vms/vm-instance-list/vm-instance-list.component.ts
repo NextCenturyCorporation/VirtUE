@@ -64,11 +64,8 @@ export class VmInstanceListComponent extends ItemListComponent {
     super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the virtue list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VMS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.VMS;
   }
 
   defaultTableParams() {

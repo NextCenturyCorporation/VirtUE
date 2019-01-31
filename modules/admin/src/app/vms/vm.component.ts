@@ -44,7 +44,7 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} Virtual Machine: &nbsp;&nbsp;{{item.name}}</h1>
+      <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
     <div id="content-main">
       <div id="content" class="content">
@@ -171,6 +171,10 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
    */
   getNeededDatasets(): DatasetNames[] {
     return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS,DatasetNames.VIRTUE_TS];
+  }
+
+  getTitle(): string {
+    return this.mode + " Virtual Machine Template:  " + this.item.name;
   }
 
 
