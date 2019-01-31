@@ -106,6 +106,19 @@
 		<constructor-arg value="${virtue.cifs.instanceType}"></constructor-arg>
 	</bean>
 
+	<bean name="windowsDisplayServerDao"
+		class="com.ncc.savior.virtueadmin.data.jpa.JpaWindowsDisplayServerProxyDao">
+	</bean>
+
+	<bean name="windowsDisplayServerManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.windows.WindowsDisplayServerManager"
+		init-method="init">
+		<constructor-arg ref="serverIdProvider"></constructor-arg>
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
+		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+	</bean>
+
 	<!-- <bean name="awsVmUpdater" -->
 	<!-- class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater"> -->
 	<!-- <constructor-arg ref="awsEc2Provider"></constructor-arg> -->

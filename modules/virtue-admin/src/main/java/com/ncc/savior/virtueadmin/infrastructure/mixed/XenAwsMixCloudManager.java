@@ -22,6 +22,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.infrastructure.windows.WindowsDisplayServerManager;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -73,9 +74,12 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private CifsManager cifsManager;
 
+	private WindowsDisplayServerManager windowsDisplayManager;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
-			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
+			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager,
+			WindowsDisplayServerManager windowsDisplayManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
@@ -84,6 +88,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		this.securityGroupManager = securityGroupManager;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
+		this.windowsDisplayManager = windowsDisplayManager;
 	}
 
 	@Override
@@ -102,6 +107,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		cifsManager.cifsBeforeVirtueDelete(virtueInstance);
 		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
+		windowsDisplayManager.deleteWindowsDisplay(windowsVms);
 		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture, null);
 		// Database needs to be updated when we delete, but we don't have access here.
 		// This is one of a couple ways to handle this and could be reviewed. Most
@@ -144,9 +150,13 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
 		virtueMods.setVirtueId(vi.getId());
 		virtueMods.setVirtueTemplateId(vi.getTemplateId());
-		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,
-				virtueMods);
-		vi.setVms(vms);
+		Collection<VirtualMachine> windowsVms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
+				windowsFuture, virtueMods);
+		vi.setVms(windowsVms);
+
+		for (VirtualMachine windowsVm : windowsVms) {
+			windowsDisplayManager.setupWindowsDisplay(vi, windowsVm, subnetId);
+		}
 
 		// if (!linuxVmts.isEmpty()) {
 
@@ -154,14 +164,15 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
-//		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+		// Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();
 		try {
 			Future<Exception> cifsPriorTask = cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
 			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			linuxFuture.thenAccept((myLinuxVms) -> {
-//			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
+				// Authentication auth2 =
+				// SecurityContextHolder.getContext().getAuthentication();
 				try {
 					Exception e = cifsPriorTask.get();
 					if (e == null) {
@@ -197,10 +208,16 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
 			// Once startup services are done on windows machines, set VM state to running
 			// and notify (notify saves to DB typically)
-			logger.debug("finished with windows boxes.  Setting to running vms=" + vms);
+			logger.debug("finished with windows boxes.  Setting to running vms=" + finishedWindowsBoxes);
 			for (VirtualMachine winBox : finishedWindowsBoxes) {
-				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox,
-						VmState.RUNNING);
+				VmState state = VmState.RUNNING;
+				try {
+					windowsDisplayManager.waitForDisplayServerRunning(winBox.getId());
+				} catch (SaviorException e) {
+					logger.error("Error setting up windows display server for VM=" + winBox, e);
+					state = VmState.ERROR;
+				}
+				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox, state);
 				serviceProvider.getVmNotifierService().chainFutures(myCf, null);
 			}
 		});
