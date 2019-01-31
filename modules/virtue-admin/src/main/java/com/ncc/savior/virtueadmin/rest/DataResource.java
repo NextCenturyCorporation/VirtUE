@@ -293,7 +293,7 @@ public class DataResource {
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, "System",
 				new Date());
-		vmRouterAdmin.setSecurityTag("power");
+		vmRouterAdmin.setSecurityTag("god");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
 				systemName, "System", new Date());
