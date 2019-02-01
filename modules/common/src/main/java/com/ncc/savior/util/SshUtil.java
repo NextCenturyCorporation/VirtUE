@@ -285,6 +285,17 @@ public class SshUtil {
 		}
 		return output;
 	}
+	
+	public static List<String> runCommandsFromFileWithTimeout(ITemplateService templateService, Session session,
+			String templateName, Map<String, Object> dataModel, long timeoutMillis) throws TemplateException, JSchException, IOException {
+		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
+		List<String> output = new ArrayList<String>();
+		for (String line : lines) {
+			List<String> o = SshUtil.sendCommandFromSessionWithTimeout(session, line, timeoutMillis);
+			output.addAll(o);
+		}
+		return output;
+	}
 
 	public static String getKeyFromFile(File privateKey) {
 		FileReader reader = null;

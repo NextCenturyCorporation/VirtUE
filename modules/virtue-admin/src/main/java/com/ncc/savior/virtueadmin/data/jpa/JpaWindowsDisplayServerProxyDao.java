@@ -30,10 +30,6 @@ public class JpaWindowsDisplayServerProxyDao implements IWindowsDisplayServerDao
 
 	@Override
 	public VirtualMachine getDisplayServerVmByWindowsApplicationVmId(String windowsApplicationVmId) {
-		Iterable<WindowsDisplayServerData> all = wdsRepo.findAll();
-		for(WindowsDisplayServerData wdsd:all) {
-			System.out.println(wdsd);
-		}
 		Optional<WindowsDisplayServerData> val = wdsRepo.findById(windowsApplicationVmId);
 		if (val.isPresent()) {
 			return val.get().getWdsVm();

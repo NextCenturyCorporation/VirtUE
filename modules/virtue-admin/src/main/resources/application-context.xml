@@ -117,6 +117,8 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="keyManager"></constructor-arg>
+		<constructor-arg ref="templateService"></constructor-arg>
 	</bean>
 
 	<!-- <bean name="awsVmUpdater" -->

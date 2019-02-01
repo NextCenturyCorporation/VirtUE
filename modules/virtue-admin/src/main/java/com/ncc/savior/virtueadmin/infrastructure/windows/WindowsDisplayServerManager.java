@@ -1,9 +1,13 @@
 package com.ncc.savior.virtueadmin.infrastructure.windows;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -15,8 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
@@ -31,16 +40,27 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class WindowsDisplayServerManager {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsDisplayServerManager.class);
+	private static final String MODEL_KEY_APP_VM = "applicationVm";
+	private static final String MODEL_KEY_DISPLAY_VM = "displayVm";
+	private static final String MODEL_KEY_APPLICATION = "application";
+	private static final String MODEL_KEY_PARAMS = "params";
+	private static final String RDP_TEMPLATE_NAME = "xfreerdp-start-app.tpl";
+	private static final String MODEL_KEY_WINDOWS_PASSWORD = "windowsPassword";
+	private static final String MODEL_KEY_DISPLAY = "display";
 	private CompletableFutureServiceProvider serviceProvider;
 	private InstanceType instanceType;
 	private String serverId;
 	private AwsEc2Wrapper wrapper;
 	private VirtualMachineTemplate windowsDisplayTemplate;
 	private IVpcSubnetProvider vpcSubnetProvider;
+	private IKeyManager keyManager;
+	private ITemplateService templateService;
 	private Collection<String> securityGroupIds;
 	@Autowired
 	private IWindowsDisplayServerDao wdsDao;
@@ -59,16 +79,21 @@ public class WindowsDisplayServerManager {
 	private long displayServerTimeoutMillis;
 	@Value("${virtue.winDisplay.instanceType}")
 	private String instanceTypeString;
+	@Value("${virtue.aws.windows.password}")
+	private String windowsPassword;
 
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>> wdsVmUpdater;
 
 	public WindowsDisplayServerManager(ServerIdProvider serverIdProvider, AwsEc2Wrapper awsEc2Wrapper,
-			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider) {
+			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
+			IKeyManager keyManager, ITemplateService templateService) {
 		super();
 		this.wrapper = awsEc2Wrapper;
 		this.serviceProvider = serviceProvider;
 		this.serverId = serverIdProvider.getServerId();
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.keyManager = keyManager;
+		this.templateService = templateService;
 
 		this.wdsVmUpdater = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>>(
 				"WindowsDisplayServerUpdater") {
@@ -79,7 +104,7 @@ public class WindowsDisplayServerManager {
 				String username = usernameAndWindowsApplicationVmId.getLeft();
 				String windowsApplicationVmId = usernameAndWindowsApplicationVmId.getRight();
 				wdsDao.updateDisplayServerVm(username, windowsApplicationVmId, param);
-				logger.debug("Saving WindowsDisplayServer: "+windowsApplicationVmId +" "+ param);
+				logger.debug("Saving WindowsDisplayServer: " + windowsApplicationVmId + " " + param);
 				return param;
 			}
 		};
@@ -137,6 +162,7 @@ public class WindowsDisplayServerManager {
 		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
 		// cf = addScriptsToRunLaterTemplated(vm, cf);
 		// cf = addScriptsToRunLaterOld(vm, cf);
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
@@ -164,7 +190,7 @@ public class WindowsDisplayServerManager {
 		// returning is correct path
 		while (System.currentTimeMillis() <= timeoutTime) {
 			VirtualMachine dsvm = wdsDao.getDisplayServerVmByWindowsApplicationVmId(winAppVmId);
-			if (dsvm != null ) {
+			if (dsvm != null) {
 				logger.debug("test");
 				VmState state = dsvm.getState();
 				if (VmState.RUNNING.equals(state)) {
@@ -183,9 +209,72 @@ public class WindowsDisplayServerManager {
 		if (!enabled) {
 			return;
 		}
-		List<String> windowsApplicationVmIds = windowsAppVms.stream().map(VirtualMachine::getId).collect(Collectors.toList());
-		Collection<VirtualMachine> displayVms = wdsDao.getDisplayServerVmsByWindowsApplicationVmIds(windowsApplicationVmIds);
+		List<String> windowsApplicationVmIds = windowsAppVms.stream().map(VirtualMachine::getId)
+				.collect(Collectors.toList());
+		Collection<VirtualMachine> displayVms = wdsDao
+				.getDisplayServerVmsByWindowsApplicationVmIds(windowsApplicationVmIds);
 		wrapper.deleteVirtualMachines(displayVms);
+	}
+
+	public VirtualMachine getWindowsDisplayVm(String windowsApplicationVmId) {
+		return wdsDao.getDisplayServerVmByWindowsApplicationVmId(windowsApplicationVmId);
+	}
+
+	public void startApplication(VirtualMachine appVm, ApplicationDefinition application, String params, int retries) {
+		if (!enabled) {
+			return;
+		}
+		SimpleApplicationManager sam = new SimpleApplicationManager();
+		Session session;
+		VirtualMachine displayVm = null;
+		String templateName = RDP_TEMPLATE_NAME;
+		Map<String, Object> dataModel = null;
+		try {
+
+			displayVm = getWindowsDisplayVm(appVm.getId());
+			File keyFile = keyManager.getKeyFileByName(displayVm.getPrivateKeyName());
+			int display = sam.startOrGetXpraServerWithRetries(displayVm, keyFile, 15);
+			if (params == null) {
+				params = "";
+			} else {
+				params = " " + params;
+			}
+
+			session = SshUtil.getConnectedSession(displayVm, keyFile);
+			dataModel = new HashMap<String, Object>();
+			dataModel.put(MODEL_KEY_APP_VM, appVm);
+			dataModel.put(MODEL_KEY_DISPLAY_VM, displayVm);
+			dataModel.put(MODEL_KEY_APPLICATION, application);
+			dataModel.put(MODEL_KEY_PARAMS, params);
+			dataModel.put(MODEL_KEY_WINDOWS_PASSWORD, windowsPassword);
+			dataModel.put(MODEL_KEY_DISPLAY, display);
+			Map<String, Object> dataModelFinal = dataModel;
+			VirtualMachine displayVmFinal = displayVm;
+			// create runnable because connection must remain open
+			Runnable con = () -> {
+				try {
+					List<String> line = SshUtil.runCommandsFromFileWithTimeout(templateService, session, templateName,
+							dataModelFinal, 3000);
+					logger.debug("returned!**" + line);
+				} catch (JSchException | IOException e) {
+					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+							"Error connection to windows display VM to start application. DisplayVm=" + displayVmFinal
+									+ " AppVm=" + appVm + " application=" + application,
+							e);
+				} catch (TemplateException e) {
+					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+							"Error creating template. Template=" + templateName + " model=" + dataModelFinal, e);
+				}
+			};
+			Thread t = new Thread(con, "WindowsApplication");
+			t.setDaemon(true);
+			t.start();
+		} catch (JSchException e) {
+			throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+					"Error connection to windows display VM to start application. DisplayVm=" + displayVm + " AppVm="
+							+ appVm + " application=" + application,
+					e);
+		}
 	}
 
 }

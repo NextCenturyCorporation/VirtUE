@@ -76,7 +76,7 @@ public class VirtueService {
 		this.clipboardManager = clipboardManager;
 		this.authorizationService = authService;
 		this.colorManager = colorManager;
-		this.locks=new HashMap<String,Object>();
+		this.locks = new HashMap<String, Object>();
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
@@ -116,11 +116,11 @@ public class VirtueService {
 	 */
 	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
-		if (OS.LINUX.equals(app.getOs())) {
-			ensureConnectionLinux(app, virtue, color);
-		} else {
-			ensureConnectionWindows(app, virtue, color);
-		}
+		// if (OS.LINUX.equals(app.getOs())) {
+		ensureConnectionLinux(app, virtue, color);
+		// } else {
+		// ensureConnectionWindows(app, virtue, color);
+		// }
 	}
 
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
@@ -176,8 +176,10 @@ public class VirtueService {
 					logger.debug("needed new connection");
 					try {
 						connectionManager.createXpraServerAndAddDisplayToParams(params);
-						logger.debug("connecting clipboard");
-						clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+						if (app.getOs().equals(OS.LINUX)) {
+							logger.debug("connecting clipboard");
+							clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+						}
 					} catch (IOException e) {
 						logger.error("clipboard manager connection failed!", e);
 						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
@@ -238,8 +240,7 @@ public class VirtueService {
 					itr.remove();
 					Thread t = new Thread(() -> {
 						try {
-							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue,
-									appDefn);
+							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue, appDefn);
 							ensureConnection(app, virtue, color);
 						} catch (Exception e) {
 							logger.error("error starting pending application", e);

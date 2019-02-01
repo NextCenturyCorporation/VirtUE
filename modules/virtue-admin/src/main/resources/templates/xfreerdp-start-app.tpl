@@ -1,0 +1,1 @@
+export DISPLAY=:${display} ; xfreerdp /v:${applicationVm.internalHostname} /u:${applicationVm.userName} /p:'${windowsPassword}' /app:'${application.launchCommand}${params}' /cert-ignore /span 
