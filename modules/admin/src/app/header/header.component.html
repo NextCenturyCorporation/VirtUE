@@ -5,21 +5,27 @@
       <ul class="nav navbar-nav">
           <li *ngFor="let option of getNavOptions()" class="nav-item" routerLinkActive="active">
 
-            <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.value }}">{{ option.value }}</a>
-            <!-- <div *ngIf="option.dropdownOptions !== undefined">
-              <ng2-dropdown>
-                  <ng2-dropdown-button _ngcontent-c0="" class="ng2-dropdown-button customButton">
-                    <div NgClass="{}">
-                      <span _ngcontent-c2="" class="ng2-dropdown-button__label"> {{ option.value }} </span>
-                    </div>
-                  </ng2-dropdown-button>
-                  <ng2-dropdown-menu  class="nav-item" >
-                      <ng2-menu-item class="nav-item"  *ngFor="let page of option.dropdownOptions">
-                          <a class="nav-link" routerLink="{{ page.link }}" title="{{ page.value }}">{{ page.value }}</a>
-                      </ng2-menu-item>
-                  </ng2-dropdown-menu>
-              </ng2-dropdown>
-            </div> -->
+            <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.label }}">{{ option.label }}</a>
+            <ng-container *ngIf="option.dropdownOptions !== undefined">
+
+                <!--
+                  The writer pleads guilty to one count of abuse of an angular component.
+                  This is a selection field, beaten into the shape of a drop-down navigation menu.
+                  The options can't have values, and for some reason the width had to be approximated programmatically.
+                -->
+                <!-- <mat-form-field floatLabel="never">
+                  <mat-select (ngModel)="option.label" placeholder="{{option.label}}" [ngStyle]="{'width': getWidth(option.label)}">
+                      <mat-option *ngFor="let page of option.dropdownOptions" class="nav-link" routerLink="{{ page.link }}"
+                                  (click)="fixDropdownName(option.label)" [value]="">{{page.label}}</mat-option>
+                  </mat-select>
+                </mat-form-field> -->
+
+                <!-- Nvrmind, I found the right way to do it :/ -->
+                <button mat-button class="nav-link" [matMenuTriggerFor]="menu" >{{option.label}}</button>
+                <mat-menu #menu="matMenu" yPosition="below" [overlapTrigger]="false">
+                  <button *ngFor="let page of option.dropdownOptions" routerLink="{{ page.link }}" mat-menu-item>{{page.label}}</button>
+                </mat-menu>
+            </ng-container>
 
           </li>
       </ul>
