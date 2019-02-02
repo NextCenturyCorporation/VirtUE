@@ -128,7 +128,6 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
         this.setItemAvailability(this.item, newStatus);
       }
     });
-
   }
 
   /**
@@ -170,7 +169,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS,DatasetNames.VIRTUE_TS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS];
   }
 
   getTitle(): string {

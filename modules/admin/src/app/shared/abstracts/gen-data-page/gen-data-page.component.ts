@@ -253,7 +253,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
-
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
         // Like a User needs to have a list of Virtues, populated based on the virtueTemplateIDs list it comes in with.
         // Virtue has one list each for vms, printers, and filesystems.
@@ -367,7 +366,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
     let sub = this.dataRequestService.updateRecord(obj.getSubdomain(), obj.getID(), obj.getFormatForSave()).subscribe(
       updatedObject => {
-        console.log(updatedObject);
         if (redirect) {
           redirect();
         }

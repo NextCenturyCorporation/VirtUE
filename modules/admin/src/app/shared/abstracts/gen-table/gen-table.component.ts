@@ -582,6 +582,6 @@ export class GenericTableComponent<T> {
   }
 
   getColSortField(col) {
-    return (col.sortField ? col.sortField : undefined )
+    return (col.sortField ? col.sortField : undefined );
   }
 }
