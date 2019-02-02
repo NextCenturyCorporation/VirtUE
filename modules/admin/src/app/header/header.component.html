@@ -8,19 +8,6 @@
             <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.label }}">{{ option.label }}</a>
             <ng-container *ngIf="option.dropdownOptions !== undefined">
 
-                <!--
-                  The writer pleads guilty to one count of abuse of an angular component.
-                  This is a selection field, beaten into the shape of a drop-down navigation menu.
-                  The options can't have values, and for some reason the width had to be approximated programmatically.
-                -->
-                <!-- <mat-form-field floatLabel="never">
-                  <mat-select (ngModel)="option.label" placeholder="{{option.label}}" [ngStyle]="{'width': getWidth(option.label)}">
-                      <mat-option *ngFor="let page of option.dropdownOptions" class="nav-link" routerLink="{{ page.link }}"
-                                  (click)="fixDropdownName(option.label)" [value]="">{{page.label}}</mat-option>
-                  </mat-select>
-                </mat-form-field> -->
-
-                <!-- Nvrmind, I found the right way to do it :/ -->
                 <button mat-button class="nav-link" [matMenuTriggerFor]="menu" >{{option.label}}</button>
                 <mat-menu #menu="matMenu" yPosition="below" [overlapTrigger]="false">
                   <button *ngFor="let page of option.dropdownOptions" routerLink="{{ page.link }}" mat-menu-item>{{page.label}}</button>
