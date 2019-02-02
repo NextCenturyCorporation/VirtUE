@@ -41,27 +41,14 @@ export class RouterService {
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
-    // ActivateEnd routings work from the deepest level, out. So the first one that finishes, is the actual endpoint.
-    let thisCrumb: Breadcrumb = undefined;
 
     // make the page reload if the user clicks on a link to the same page they're on.
     this.router.events.subscribe((event) => {
 
-      // This relies on the timing of these events, but they seem to only ever happen in turn..
-      // The worst that could happen is a breadcrumb's label could be wrong.
-      if (event instanceof ActivationEnd && thisCrumb === undefined) {
-        thisCrumb = event.snapshot.data.breadcrumb;
-      }
-
       if (event instanceof NavigationEnd) {
         this.router.navigated = false;
         window.scrollTo(0, 0);
-        console.log(event.url);
         this.setBreadcrumbHref(event.url);
-        // let fullCrumb = { href: event.url, label: thisCrumb.label };
-        // this.onNewPage.emit(fullCrumb);
-        // this.updateHistory(fullCrumb);
-        // thisCrumb = undefined;
       }
     });
   }
@@ -80,7 +67,6 @@ export class RouterService {
       this.fullCrumb = this.cleanCrumb(this.fullCrumb);
       this.onNewPage.emit(this.fullCrumb);
       this.updateHistory(this.fullCrumb);
-      console.log(this.fullCrumb.label, this.fullCrumb.href );
       this.fullCrumb = new Breadcrumb(undefined, undefined);
     }
   }
@@ -112,7 +98,7 @@ export class RouterService {
     // With, of course, much longer names.
     crumb.href = crumb.href.replace("edit", "view")
                            .replace("duplicate", "view");
-    return crumb
+    return crumb;
   }
 
   private hasPreviousPage(): boolean {
@@ -133,7 +119,7 @@ export class RouterService {
   }
 
   isTopDomainPage(url: string): boolean {
-    return this.getUrlPieces( url ).length == 1;
+    return this.getUrlPieces( url ).length === 1;
   }
 
   toTopDomainPage(): void {
