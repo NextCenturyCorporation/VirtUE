@@ -97,6 +97,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
+				.antMatchers(HttpMethod.OPTIONS,"/sensing/**").permitAll()//allow CORS option calls
 				.antMatchers("/login").permitAll()
 				.antMatchers("/logout").permitAll()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
