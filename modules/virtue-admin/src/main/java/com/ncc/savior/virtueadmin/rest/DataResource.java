@@ -61,6 +61,8 @@ import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
 import com.ncc.savior.virtueadmin.service.PermissionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
  * deployment.
@@ -112,6 +114,7 @@ public class DataResource {
 	@GET
 	@Path("import/all")
 	@Produces("text/plain")
+	@Operation(hidden = true)
 	public String importAll() {
 		int items = importExportService.importAll();
 		return "imported " + items + " items.";
@@ -120,6 +123,7 @@ public class DataResource {
 	@GET
 	@Path("import/user/admin")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public VirtueUser ensureAdminExists() {
 		String username = "admin";
 		try {
@@ -136,6 +140,7 @@ public class DataResource {
 
 	@GET
 	@Path("templates/preload")
+	@Operation(hidden = true)
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
 		try {
@@ -293,7 +298,7 @@ public class DataResource {
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, "System",
 				new Date());
-		vmRouterAdmin.setSecurityTag("power");
+		vmRouterAdmin.setSecurityTag("god");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
 				systemName, "System", new Date());
@@ -528,6 +533,7 @@ public class DataResource {
 
 	@GET
 	@Path("user/{sourceUser}/{newUser}")
+	@Operation(hidden = true)
 	public Response assignUser(@PathParam("sourceUser") String sourceUserName,
 			@PathParam("newUser") String newUserName) {
 		VirtueUser source = userManager.getUser(sourceUserName);
@@ -555,6 +561,7 @@ public class DataResource {
 	@GET
 	@Path("user/{sourceUser}")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Map<String, VirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
 		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>(), true);
 		Map<String, VirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
@@ -567,6 +574,7 @@ public class DataResource {
 	@GET
 	@Path("template/user")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Collection<String> getAllUsersWithTemplates() {
 		return templateManager.getUsersWithTemplate();
 	}
@@ -574,6 +582,7 @@ public class DataResource {
 	@GET
 	@Path("user")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Iterable<VirtueUser> getUsers() {
 		return userManager.getAllUsers();
 	}
@@ -581,6 +590,7 @@ public class DataResource {
 	@GET
 	@Path("user/{username}/enable")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public void enableUser(@PathParam("username") String username) {
 		userManager.enableDisableUser(username, true);
 	}
@@ -588,6 +598,7 @@ public class DataResource {
 	@GET
 	@Path("user/current")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Iterable<VirtueUser> getCurrentLoggedInUsers() {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		List<VirtueUser> users = new ArrayList<VirtueUser>(principals.size());
@@ -606,6 +617,7 @@ public class DataResource {
 	@GET
 	@Path("vm/status")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Map<String, VmState> getAllVmStatus() {
 		Map<String, VmState> result = new TreeMap<String, VmState>();
 		activeVirtueDao.getAllVirtualMachines().forEach((VirtualMachine vm) -> {
@@ -617,6 +629,7 @@ public class DataResource {
 	@GET
 	@Path("vm")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
 	}
@@ -624,6 +637,7 @@ public class DataResource {
 	@GET
 	@Path("vm/{id}")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public VirtualMachine getVm(@PathParam("id") String id) {
 		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
 		if (vm.isPresent()) {
@@ -636,6 +650,7 @@ public class DataResource {
 	@GET
 	@Path("vm/reboot/{vmId}")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public void rebootVm(@PathParam("vmId") String vmId) {
 		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(vmId);
 		VirtualMachine vmToReboot;
@@ -658,6 +673,7 @@ public class DataResource {
 	@GET
 	@Path("session")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Map<String, List<String>> getAllSessions() {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		Map<String, List<String>> sessionMap = new HashMap<String, List<String>>();
@@ -675,6 +691,7 @@ public class DataResource {
 
 	@GET
 	@Path("templates/clear")
+	@Operation(hidden = true)
 	public String clearTemplatesDatabase() {
 		templateManager.clear();
 		return "database cleared.";
@@ -682,6 +699,7 @@ public class DataResource {
 
 	@GET
 	@Path("resources/clear")
+	@Operation(hidden = true)
 	public String clearResourcesDatabase() {
 		resourceManager.clear();
 		return "database cleared.";
@@ -689,6 +707,7 @@ public class DataResource {
 
 	@GET
 	@Path("active/clear")
+	@Operation(hidden = true)
 	public String clearActiveDatabase() {
 		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
 		for (VirtueInstance vi : all) {
@@ -705,6 +724,7 @@ public class DataResource {
 
 	@GET
 	@Path("user/clear")
+	@Operation(hidden = true)
 	public String clearUsers() {
 		userManager.clear(false);
 		return "Users cleared.";
@@ -712,6 +732,7 @@ public class DataResource {
 
 	@GET
 	@Path("storage")
+	@Operation(hidden = true)
 	@Produces("application/json")
 	public Iterable<VirtuePersistentStorage> getAllStorage() {
 		return persistentStorageManager.getAllPersistentStorage();
@@ -719,6 +740,7 @@ public class DataResource {
 
 	@GET
 	@Path("storage/clear")
+	@Operation(hidden = true)
 	public String clearStorage() {
 		persistentStorageManager.deleteAllPersistentStorage();
 		return "storage cleared";
@@ -726,6 +748,7 @@ public class DataResource {
 
 	@GET
 	@Path("clear")
+	@Operation(hidden = true)
 	public String clearAll() {
 		clearActiveDatabase();
 		clearUsers();
@@ -738,6 +761,7 @@ public class DataResource {
 	@GET
 	@Path("permissions/raw")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Iterable<ClipboardPermission> getAllRawPermissions() {
 		Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
 		return p;
@@ -746,6 +770,7 @@ public class DataResource {
 	@GET
 	@Path("permissions/computed")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public Map<Pair<String, String>, ClipboardPermissionOption> getAllComputedPermissions() {
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		Collection<String> sourceIds = new ArrayList<String>();
@@ -758,6 +783,7 @@ public class DataResource {
 
 	@GET
 	@Path("permission/{sourceId}/{destId}/{option}")
+	@Operation(hidden = true)
 	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
 			@PathParam("option") String optionStr) {
 		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
@@ -767,6 +793,7 @@ public class DataResource {
 
 	@GET
 	@Path("permission/default/{option}")
+	@Operation(hidden = true)
 	public String setServiceDefaultPermission(@PathParam("option") String optionStr) {
 		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
 		permissionService.setDefaultClipboardPermission(option);
@@ -784,6 +811,7 @@ public class DataResource {
 	 */
 	@GET
 	@Path("permissions/html")
+	@Operation(hidden = true)
 	public Response getAllPermissionsHtmlView() {
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		Collection<String> destIds = new ArrayList<String>();

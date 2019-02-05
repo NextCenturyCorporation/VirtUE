@@ -5,6 +5,8 @@ import java.util.Comparator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A domain object for a single security group permission. This maps to AWS
  * IpPermission. Each security group can have many Security Group Permissions.
@@ -12,15 +14,24 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  *
  */
 @JsonInclude(Include.NON_NULL)
+@Schema(description = "Network permission for a given virtue")
 public class SecurityGroupPermission {
 	public static final Comparator<? super SecurityGroupPermission> TEMPLATE_ID_COMPARATOR = new TemplateIdComparator();
+	@Schema(description = "True if the security group pertains to connections coming into into the virtue, false if the connection is outgoing.")
 	private boolean ingress;
+	@Schema(description = "Port the connection came from.")
 	private Integer fromPort;
+	@Schema(description = "Port the connection came to.")
 	private Integer toPort;
+	@Schema(description = "CIDR block of that the permission should pertain to.")
 	private String cidrIp;
+	@Schema(description = "Protocol for.  Usually TCP or UDP.")
 	private String ipProtocol;
+	@Schema(description = "Human readable description of the purpose of this security group.")
 	private String description;
+	@Schema(description = "ID of the security group.")
 	private String securityGroupId;
+	@Schema(description = "Virtue template ID that this permission pertains to.")
 	private String templateId;
 
 	// for jackson deserialization only
@@ -39,8 +50,6 @@ public class SecurityGroupPermission {
 		this.ipProtocol = ipProtocol;
 		this.description = desc;
 	}
-
-	
 
 	public boolean isIngress() {
 		return ingress;

@@ -6,13 +6,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +29,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
+import io.swagger.v3.jaxrs2.integration.resources.BaseOpenApiResource;
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Rest resource designed for testing and login.
  */
 @Path("/")
-public class HelloResource {
+public class HelloResource extends BaseOpenApiResource {
 	private static final Logger logger = LoggerFactory.getLogger(HelloResource.class);
 	@Autowired
 	private SecurityUserService securityService;
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(hidden = true)
 	public Response getHello() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 
@@ -41,6 +53,7 @@ public class HelloResource {
 	@GET
 	@Path("/login")
 	@Produces(MediaType.TEXT_HTML)
+	@Operation(hidden = true)
 	public Response getLogin(@Context HttpServletRequest request) throws URISyntaxException {
 		// String csrf = null;
 		// Cookie[] cookies = request.getCookies();
@@ -70,9 +83,20 @@ public class HelloResource {
 		return Response.status(200).entity(str.toString()).build();
 	}
 
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.TEXT_HTML)
+	@Operation(summary = "Login.", description = "Login endpoint.")
+	public Response getLogin(@FormParam("username") String username, @FormParam("password") String password) {
+		//This method is bypassed by spring securities login.  It is only here to force Swagger to produce API documentation.
+		return null;
+	}
+
 	@GET
 	@Path("/error")
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(hidden = true)
 	public Response getError() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(400).entity("Error for " + user.getUsername()).build();
@@ -81,8 +105,58 @@ public class HelloResource {
 	@GET
 	@Path("/logout")
 	@Produces(MediaType.TEXT_PLAIN)
+	@Operation(summary = "Logout current session.", description = "Logout existing session.")
 	public Response getLogout() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(200).entity("logged out " + user.getUsername()).build();
+	}
+
+	@Context
+	ServletConfig config;
+
+	@Context
+	Application app;
+
+	@GET
+	@Path("/api")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(hidden = true)
+	public Response getApi(@Context HttpHeaders headers, @Context UriInfo uriInfo) throws Exception {
+		return super.getOpenApi(headers, config, app, uriInfo, "json");
+	}
+
+	// TODO This is a hack to get the files we need exposed. There is a much better
+	// way to just allow the server to bypass them. Also, the PathParam didn't work.
+	@GET
+	@Path("/api/{file}")
+	@Operation(hidden = true)
+	public Response getApiUi(@Context HttpHeaders headers, @Context UriInfo uriInfo, @PathParam("file") String file)
+			throws Exception {
+		String filePath = "/apiui/" + uriInfo.getPathParameters().getFirst("file");
+
+		InputStream stream = this.getClass().getResourceAsStream(filePath);
+		BufferedReader buf = new BufferedReader(new InputStreamReader(stream));
+		StringBuffer str = new StringBuffer();
+		String line;
+		try {
+			while ((line = buf.readLine()) != null) {
+				// line = line.replaceAll("csrf-token", csrf);
+				str.append(line + "\n");
+			}
+		} catch (IOException e) {
+			String msg = "Unable to read html file=" + filePath + ". ";
+			logger.error(msg, e);
+			return Response.status(400).entity(msg + e.getMessage()).build();
+
+		}
+		String type = MediaType.TEXT_HTML;
+		if (filePath.endsWith(".js")) {
+			type = "text/javascript";
+		}
+		if (filePath.endsWith(".css")) {
+			type = "text/css";
+		}
+
+		return Response.status(200).type(type).entity(str.toString()).build();
 	}
 }

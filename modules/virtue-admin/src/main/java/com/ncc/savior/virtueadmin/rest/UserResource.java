@@ -17,6 +17,8 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.UserDataService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Rest resource that handles endpoints specifically to satisfy API for a given
  * user.
@@ -36,6 +38,7 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("application/{appId}")
+	@Operation(summary = "Get application definition", description = "Gets a specific application definition based on the ID in the path.")
 	public ApplicationDefinition getApplicationById(@PathParam("appId") String appId) {
 		ApplicationDefinition app = userVirtueService.getApplication(appId);
 		return app;
@@ -45,6 +48,7 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}")
+	@Operation(summary = "Get virtue template.", description = "Returns a virtue template if vailable for the user making the request.")
 	public VirtueTemplate getVirtueTemplateByUser(@PathParam("templateId") String templateId) {
 		VirtueTemplate vt = userVirtueService.getVirtueTemplate(templateId);
 		return vt;
@@ -54,6 +58,7 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template")
+	@Operation(summary = "Get virtue templates.", description = "Returns a list of all virtue templates available for the user making the request.")
 	public Collection<VirtueTemplate> getAllVirtueTemplatesByUser() {
 		Collection<VirtueTemplate> vts = userVirtueService.getVirtueTemplatesForUser();
 		return vts;
@@ -63,6 +68,7 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}")
+	@Operation(summary = "Get active virtue instance.", description = "Returns an active virtue instance by ID if virtue instance is owned by user making the request.")
 	public VirtueInstance getVirtueInstance(@PathParam("virtueId") String virtueId) {
 		VirtueInstance vi = userVirtueService.getVirtueInstanceForUserById(virtueId);
 		return vi;
@@ -72,6 +78,7 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue")
+	@Operation(summary = "Get all active virtue instances.", description = "Returns a list of all virtue instances owned by the user making the request.")
 	public Collection<VirtueInstance> getVirtueInstances() {
 		Collection<VirtueInstance> vis = userVirtueService.getVirtueInstancesForUser();
 		return vis;
@@ -81,6 +88,7 @@ public class UserResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}")
+	@Operation(summary = "create virtue instance.", description = "Creates a virtue instance from a virtue template for the user making the request.s")
 	public VirtueInstance createVirtue(@PathParam("templateId") String templateId) {
 		VirtueInstance vi = desktopService.createVirtue(templateId);
 		return vi;
@@ -90,6 +98,7 @@ public class UserResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/{virtueId}")
+	@Operation(summary = "Launch active virtue.", description = "Launch or start all the virtual machines in an existing virtue given by the virtue ID.")
 	public void launchVirtue(@PathParam("virtueId") String virtueId) {
 		desktopService.startVirtue(virtueId);
 	}
@@ -98,6 +107,7 @@ public class UserResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/stop")
+	@Operation(summary = "Stop active virtue.", description = "Stop all the virtual machines in an existing virtue given by the virtue ID.")
 	public void stopVirtue(@PathParam("virtueId") String virtueId) {
 		desktopService.stopVirtue(virtueId);
 	}
@@ -106,6 +116,7 @@ public class UserResource {
 	@DELETE
 	@Produces("application/json")
 	@Path("virtue/{virtueId}")
+	@Operation(summary = "Delete active virtue.", description = "Delete all the virtual machines in an existing virtue given by the virtue ID and remove the virtue instance.")
 	public void deleteVirtue(@PathParam("virtueId") String virtueId) {
 		desktopService.deleteVirtue(virtueId);
 	}
@@ -114,6 +125,7 @@ public class UserResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}")
+	@Operation(summary = "Start virtue application.", description = "Attempt to start an application given by application ID on a virtue instance given by virtueId.")
 	public void startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		desktopService.startApplication(virtueId, applicationId, null);
@@ -124,6 +136,7 @@ public class UserResource {
 	@DELETE
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}")
+	@Operation(hidden = true)
 	public void stopApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		desktopService.stopApplication(virtueId, applicationId);
