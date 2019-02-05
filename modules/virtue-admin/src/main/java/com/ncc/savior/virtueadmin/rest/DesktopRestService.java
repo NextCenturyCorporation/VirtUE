@@ -21,6 +21,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.PermissionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 /**
  * Rest resource that handles endpoints specifically for the desktop
  * application.
@@ -47,6 +49,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue")
+	@Operation(hidden = true)
 	public Set<DesktopVirtue> getAllVirtueByUser() {
 		Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser();
 		return virtues;
@@ -63,6 +66,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("applications/{tag}")
+	@Operation(hidden = true)
 	public Set<DesktopVirtue> getVirtueApplicationsByUserAndTag(@PathParam("tag") String tag) {
 		Set<DesktopVirtue> virtues = desktopService.getVirtueApplicationsByUserAndTag(tag);
 		return virtues;
@@ -78,13 +82,15 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}/start")
+	@Operation(hidden = true)
 	public DesktopVirtueApplication startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId, @QueryParam("cliParams") String params) {
 		return desktopService.startApplication(virtueId, applicationId, params);
 	}
 
 	/**
-	 * Returns a list of "applications" to enable the desktop to reconnect to a virtue.
+	 * Returns a list of "applications" to enable the desktop to reconnect to a
+	 * virtue.
 	 * 
 	 * @param virtueId
 	 * @return
@@ -92,10 +98,10 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/reconnect")
+	@Operation(hidden = true)
 	public Collection<DesktopVirtueApplication> reconnectToVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.getReconnectApps(virtueId);
 	}
-
 
 	/**
 	 * Starts the given application after provisioning a new virtue from the given
@@ -108,6 +114,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("template/{templateId}/{applicationId}/start")
+	@Operation(hidden = true)
 	public DesktopVirtueApplication startApplicationFromTemplate(@PathParam("templateId") String templateId,
 			@PathParam("applicationId") String applicationId) {
 		return desktopService.startApplicationFromTemplate(templateId, applicationId);
@@ -116,6 +123,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("template/{templateId}/start")
+	@Operation(hidden = true)
 	public DesktopVirtue createVirtue(@PathParam("templateId") String templateId) {
 		return desktopService.createVirtueAsDesktopVirtue(templateId);
 	}
@@ -123,6 +131,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/start")
+	@Operation(hidden = true)
 	public DesktopVirtue startVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.startVirtue(virtueId);
 	}
@@ -130,6 +139,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/stop")
+	@Operation(hidden = true)
 	public DesktopVirtue stopVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.stopVirtue(virtueId);
 	}
@@ -137,6 +147,7 @@ public class DesktopRestService {
 	@GET
 	@Produces({ "image/png", "image/jpeg" })
 	@Path("icon/{iconKey}")
+	@Operation(hidden = true)
 	public byte[] getIcon(@PathParam("iconKey") String iconKey) {
 		IconModel iconModel = desktopService.getIcon(iconKey);
 		return iconModel.getData();
@@ -145,6 +156,7 @@ public class DesktopRestService {
 	@GET
 	@Path("permissions")
 	@Produces("application/json")
+	@Operation(hidden = true)
 	public List<ClipboardPermission> getAllComputedPermissions() {
 		Iterable<DesktopVirtue> templates = desktopService.getDesktopVirtuesForUser();
 		Collection<String> sourceIds = new ArrayList<String>();
@@ -157,6 +169,7 @@ public class DesktopRestService {
 
 	@GET
 	@Path("permissions/default")
+	@Operation(hidden = true)
 	public ClipboardPermissionOption getServiceDefaultPermission() {
 		ClipboardPermissionOption option = permissionService.getDefaultClipboardPermission();
 		return option;
@@ -164,6 +177,7 @@ public class DesktopRestService {
 
 	@GET
 	@Path("virtue/{virtueId}/terminate")
+	@Operation(hidden = true)
 	public DesktopVirtue terminateVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.terminateVirtue(virtueId);
 	}

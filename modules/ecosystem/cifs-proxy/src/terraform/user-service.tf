@@ -29,20 +29,26 @@ resource "aws_instance" "user_facing_server" {
 set -x
 exec > /var/log/user_data.log 2>&1
 date
-# samba-dc provides samba-tool
-yum -y install \
+# prevent questions about kerberos configuration (it'll get set by post-deploy-config.sh)
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && \
+apt-get -y install \
 	adcli \
+	auth-client-config \
 	cifs-utils \
-	java-1.8.0-openjdk-headless \
-	krb5-workstation \
-	oddjob \
-	oddjob-mkhomedir \
-	openldap-clients \
+	keyutils \
+	krb5-user \
+	libnss-sss \
+	libpam-ccreds \
+	libpam-krb5 \
+	libpam-sss \
+	openjdk-8-jdk-headless \
+	packagekit \
 	realmd \
 	samba \
-	samba-common-tools \
-	samba-dc \
-	sssd
+	samba-dsdb-modules \
+	sssd \
+	sssd-tools
 
 sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
 
@@ -69,6 +75,12 @@ EOF
   provisioner "file" {
 	source = "virtue.conf"
 	destination = "/tmp/virtue.conf"
+  }
+
+  # the CIFS Proxy jar file
+  provisioner "file" {
+	source = "${var.proxy_jar}"
+	destination = "/tmp/${basename(var.proxy_jar)}"
   }
 
   #
@@ -104,8 +116,9 @@ EOF
 	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
 	  "sudo cp /tmp/virtue.conf /etc/samba/",
 	  "sudo touch /etc/samba/virtue-shares.conf",
-	  "sudo systemctl enable smb nmb",
-	  "sudo systemctl start smb nmb",
+	  "sudo systemctl enable smbd nmbd",
+	  "sudo systemctl start smbd nmbd",
+	  "sudo cp --target-directory=/usr/local/lib /tmp/${basename(var.proxy_jar)}",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
 	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
@@ -115,9 +128,13 @@ EOF
   }  
 
   provisioner "remote-exec" {
+	connection {
+	  timeout = "30s"
+	}
 	when = "destroy"
+	on_failure = "continue"
 	inline = [
-	  "echo '${var.admin_password}' | sudo realm leave --remove --user ${var.domain_admin_user} ${var.domain}"
+	  "echo '${var.admin_password}' | sudo realm leave --remove --user ${var.domain_admin_user} ${var.domain} || true"
 	]
   }
 }

@@ -4,7 +4,7 @@
 	"enabled": true,
 	"awsTemplateName": "default-template",
 	"color": "#7FBC41",
-	"virtualMachineTemplateIds": [
+	"vmTemplateIds": [
 		"IMPORT_windows_all"
 	]
 }

@@ -8,6 +8,8 @@ import javax.persistence.IdClass;
 
 import com.ncc.savior.virtueadmin.model.ClipboardPermission.PermissionId;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Permission data transfer object (DTO) for clipboard permissions. Each
  * permission only contains a source and destination as well as a value as
@@ -19,6 +21,7 @@ import com.ncc.savior.virtueadmin.model.ClipboardPermission.PermissionId;
 @IdClass(PermissionId.class)
 // @Table(uniqueConstraints = { @UniqueConstraint(columnNames = {
 // "sourceGroupId", "destinationGroupId" }) })
+@Schema(description="Controls permissions for cross virtue clipboard actions.")
 public class ClipboardPermission implements Serializable {
 	private static final long serialVersionUID = 1L;
 	/**
@@ -29,10 +32,13 @@ public class ClipboardPermission implements Serializable {
 	public static final String DESKTOP_CLIENT_GROUP_ID = "Desktop-client";
 	// @Column(nullable = false)
 	@Id
+	@Schema(description="ID of the source of the clipboard message.  In Savior, this is the virtue template ID.")
 	private String sourceGroupId;
 	// @Column(nullable = false)
 	@Id
+	@Schema(description="ID of the destination of the clipboard message.  In Savior, this is the virtue template ID.")
 	private String destinationGroupId;
+	@Schema(description="The actual permission option for the given source and destination of a clipboard message.")
 	private ClipboardPermissionOption permission;
 
 	public ClipboardPermission(String sourceGroupId, String destinationGroupId, ClipboardPermissionOption permission) {

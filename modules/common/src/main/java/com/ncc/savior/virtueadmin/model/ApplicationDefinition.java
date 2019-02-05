@@ -9,23 +9,34 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Application Data Transfer Object (DTO).
  *
  *
  */
 @Entity
+@Schema(description = "Describes an application and how to execute the application.")
 public class ApplicationDefinition {
 	@Id
+	@Schema(description = "the application id")
 	private String id;
+	@Schema(description = "the application name")
 	private String name;
+	@Schema(description = "the version of this application")
 	private String version;
+	@Schema(description = "the operating system this application runs on")
 	private OS os;
+	@Schema(description = "command used to launch the application")
 	private String launchCommand;
+	@Schema(description = "key to find the icon for the application")
 	private String iconKey;
 	@Transient
+	@Schema(description = "parameters for a specific use of the application.  This entry does not get saved in the database and is only used for default applications.")
 	private String parameters;
 	@ElementCollection
+	@Schema(description = "Tags to represent extra information about an application.  I.E. Can be used to specify as a browser to be used a when a hyperlink is clicked via the 'BROWSER' tag.")
 	private List<String> tags;
 
 	public ApplicationDefinition(String id, String name, String version, OS os, String iconKey, List<String> tags) {
@@ -193,7 +204,9 @@ public class ApplicationDefinition {
 
 		return true;
 	}
+
 	public static final Comparator<? super ApplicationDefinition> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+
 	private static class CaseInsensitiveNameComparator implements Comparator<ApplicationDefinition> {
 		@Override
 		public int compare(ApplicationDefinition o1, ApplicationDefinition o2) {
