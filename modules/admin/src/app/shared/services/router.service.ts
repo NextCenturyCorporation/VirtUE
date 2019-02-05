@@ -42,7 +42,7 @@ export class RouterService {
       return false;
     };
     // ActivateEnd routings work from the deepest level, out. So the first one that finishes, is the actual endpoint.
-    let thisCrumb: Breadcrumb = undefined;
+    let thisCrumb: Breadcrumb;
 
     // make the page reload if the user clicks on a link to the same page they're on.
     this.router.events.subscribe((event) => {
@@ -112,7 +112,7 @@ export class RouterService {
     // With, of course, much longer names.
     crumb.href = crumb.href.replace("edit", "view")
                            .replace("duplicate", "view");
-    return crumb
+    return crumb;
   }
 
   private hasPreviousPage(): boolean {
@@ -133,7 +133,7 @@ export class RouterService {
   }
 
   isTopDomainPage(url: string): boolean {
-    return this.getUrlPieces( url ).length == 1;
+    return this.getUrlPieces( url ).length === 1;
   }
 
   toTopDomainPage(): void {

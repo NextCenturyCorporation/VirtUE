@@ -13,7 +13,7 @@ import { Subdomains } from '../services/subdomains.enum';
 
 
 export enum VmState {
-	CREATING = "CREATING",
+  CREATING = "CREATING",
   STOPPED = "STOPPED",
   LAUNCHING = "LAUNCHING",
   RUNNING = "RUNNING",

@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule,ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, NgModule, ViewEncapsulation } from '@angular/core';
 
 import { AuthenticationService } from '../shared/services/authentication.service';
 

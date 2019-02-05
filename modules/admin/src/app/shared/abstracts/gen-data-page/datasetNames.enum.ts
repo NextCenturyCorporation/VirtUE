@@ -12,5 +12,6 @@ export enum DatasetNames {
   PRINTERS = "allPrinters",
   FILE_SYSTEMS = "allFileSystems",
   VIRTUES = "allVirtues",
-  VMS = "allVms"
+  VMS = "allVms",
+  SENSORS = "allSensors"
 }
