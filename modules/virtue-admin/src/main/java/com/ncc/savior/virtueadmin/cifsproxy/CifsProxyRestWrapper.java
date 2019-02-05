@@ -134,7 +134,7 @@ public class CifsProxyRestWrapper {
 			logger.error(msg, e);
 			// error will be thrown if no share exists. So we may want to ignore or check.
 			// for now we'll ignore.
-//			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
+			// throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 		}
 	}
 
@@ -163,13 +163,15 @@ public class CifsProxyRestWrapper {
 			return output;
 		} catch (RestClientException e) {
 			if (retries > 0) {
-				logger.error("Error making kerberos request to CIFS Proxy.  Retrying with " + (retries - 1) + " retries");
+				logger.error(
+						"Error making kerberos request to CIFS Proxy.  Retrying with " + (retries - 1) + " retries");
 				JavaUtil.sleepAndLogInterruption(1000);
 				return kerberosRequestWithRetries(krt, virtueUrl, body, retries - 1, returnType);
 			} else {
 				String msg = "Error making kerberos request to CIFS Proxy.  url=" + virtueUrl + " error="
 						+ e.getLocalizedMessage();
-				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+				logger.error(msg, e);
+				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 			}
 		}
 
