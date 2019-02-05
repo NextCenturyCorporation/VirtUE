@@ -12,28 +12,45 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
+@Schema(description = "Object to describe a virtual machine instance.")
 public class VirtualMachine {
 	@Id
+	@Schema(description = "ID of the virtual machine.")
 	private String id;
+	@Schema(description = "Name of the virtual machine.")
 	private String name;
+	@Schema(description = "State of virtual machine.")
 	private VmState state;
+	@Schema(description = "Operating system that the VM is running.")
 	private OS os;
+	@Schema(description = "Hostname of virtual machine.  If public IPs are used by the system, this will be the AWS public hostname.")
 	private String hostname;
+	@Schema(description = "Port the server has SSH exposed on.")
 	private int sshPort;
+	@Schema(description = "ID used by the infrastructure system.  Typically set by AWS or Xen.")
 	private String infrastructureId;
+	@Schema(description = "Username to use to login to the virtual machine")
 	private String userName;
 	@Column(length = 6000)
+	@Schema(description = "Private key to access the virtual machine via ssh.")
 	private String privateKey;
+	@Schema(description = "Name that maps to a private key stored via a key manager")
 	private String privateKeyName;
+	@Schema(description = "IP address of virtual machine.  If public IPs are used by the system, this will be the AWS public IP address.")
 	private String ipAddress;
 	// app ID to application
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
 	@Transient
+	@Schema(description = "IDs for the applications that this virtual machine has available for the user.")
 	private Collection<String> applicationIds;
+	@Schema(description = "Hostname for the internal network that the virtual machine resides.")
 	private String internalHostname;
+	@Schema(description = "IP address for the internal network that the virtual machine resides.")
 	private String privateIpAddress;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,

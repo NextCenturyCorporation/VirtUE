@@ -57,6 +57,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -497,5 +498,11 @@ public class AwsManager implements ICloudManager {
 	@Override
 	public void sync(List<String> ids) {
 		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
+	}
+
+	@Override
+	public void setCifsManager(CifsManager cifsManager) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "CIFS not implemented in this implementation");
+		
 	}
 }

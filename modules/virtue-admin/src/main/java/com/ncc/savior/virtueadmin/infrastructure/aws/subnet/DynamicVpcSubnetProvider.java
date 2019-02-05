@@ -95,6 +95,10 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				// database. We should clear it (because AWS is king) and save one that reflects
 				// AWS.
 				logger.debug("Save to database failed, attempted to overwrite", e);
+				
+				Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
+				logger.debug(all.toString());
+				
 				Iterable<CidrBlockAssignment> col = cidrRepo.findByCidrBlock(assignment.getCidrBlock());
 				logger.debug("Deleting " + col);
 				cidrRepo.deleteAll(col);

@@ -138,6 +138,12 @@ public class ShareService {
 	protected String SAMBA_CONFIG_HELPER;
 
 	/**
+	 * Required: Active Directory security domain.
+	 */
+	@Value("${savior.security.ad.domain}")
+	private String adDomain;
+
+	/**
 	 * It's not safe to run the {@link #SAMBA_CONFIG_HELPER} multiple times
 	 * simultaneously, so use this object to serialize runs.
 	 */
@@ -450,7 +456,7 @@ public class ShareService {
 	 */
 	private void initCCache(String cCacheFilename, String keytabFilename) {
 		LOGGER.entry(cCacheFilename, keytabFilename);
-		String serviceName = DelegatingAuthenticationManager.getServiceName('/');
+		String serviceName = DelegatingAuthenticationManager.getServiceName('/') + "." + adDomain;
 		ProcessBuilder processBuilder = createProcessBuilder(cCacheFilename);
 		processBuilder.command("kinit", "-k", "-t", keytabFilename, serviceName);
 		runProcess(processBuilder, "kinit");

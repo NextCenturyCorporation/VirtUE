@@ -3,13 +3,19 @@ package com.ncc.savior.virtueadmin.data;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.cifsproxy.ICifsProxyDao;
 import com.ncc.savior.virtueadmin.model.CifsProxyData;
+import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Test Cifs DAO.  Not used in production and may have unimplemented methods. 
+ *
+ */
 public class MemoryCifsProxyDao implements ICifsProxyDao {
 
 	private HashMap<String, CifsProxyData> userMap;
@@ -86,5 +92,18 @@ public class MemoryCifsProxyDao implements ICifsProxyDao {
 		return set;
 	}
 
-	
+	@Override
+	public void saveShareParams(CifsShareCreationParameter share) {
+		throw notImplemented();
+	}
+
+	@Override
+	public List<CifsShareCreationParameter> getSharesForVirtue(String virtueId) {
+		throw notImplemented();
+	}
+
+	private RuntimeException notImplemented() {
+		throw new RuntimeException("Not implemented");
+	}
+
 }
