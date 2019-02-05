@@ -122,7 +122,7 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
   }
 
   getNeededDatasets() {
-    return [this.neededDataset]
+    return [this.neededDataset];
   }
 
 }
