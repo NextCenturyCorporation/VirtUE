@@ -1,0 +1,14 @@
+resourceClasses: { com.ncc.savior.virtueadmin.rest.AdminResource, com.ncc.savior.virtueadmin.rest.HelloResource, com.ncc.savior.virtueadmin.rest.UserResource }
+prettyPrint: true
+cacheTTL: 0
+openAPI:
+  info:
+    version: '1.0'
+    title: Savior Swagger Config File
+    description: 'Savior config file for Swagger API documentation'
+    #termsOfService: 
+#    contact:
+#      email: a
+#    license:
+#      name: 
+#      url: 

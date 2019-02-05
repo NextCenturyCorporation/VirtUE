@@ -42,10 +42,6 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
  */
 public class WindowsStartupAppsService {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsStartupAppsService.class);
-	private String command1File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat\"";
-	private String command = "echo mount -o mtype=hard %s:/disk/nfs t: > " + command1File;
-	private String command2File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\startSensors.bat\"";
-	private String command2 = "echo C:\\Users\\Administrator\\savior\\bin\\run-all.bat > " + command2File;
 	private IActiveVirtueDao activeVirtueDao;
 	private Thread pollingThread;
 	private IKeyManager keyManager;

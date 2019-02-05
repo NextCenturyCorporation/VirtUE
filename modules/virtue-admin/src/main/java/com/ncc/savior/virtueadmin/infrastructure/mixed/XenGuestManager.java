@@ -281,8 +281,10 @@ public class XenGuestManager {
 				+ " > " + PORTS_FILE + "\"";
 		String cmd2 = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"echo dns=" + dns + " >> "
 				+ PORTS_FILE + "\"";
-		SshUtil.sendCommandFromSession(session, cmd);
-		SshUtil.sendCommandFromSession(session, cmd2);
+		List<String> lines = SshUtil.sendCommandFromSession(session, cmd);
+		logger.debug("output: "+lines);
+		lines=SshUtil.sendCommandFromSession(session, cmd2);
+		logger.debug("output: "+lines);
 	}
 
 	private void setupPortForwarding(Session session, int externalSensingPort, int startingInternalPort,
@@ -331,7 +333,11 @@ public class XenGuestManager {
 	private void catFile(Session session, String ipAddress, String username, String file)
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"cat " + file + "\"";
-		SshUtil.sendCommandFromSession(session, cmd);
+		List<String> lines = SshUtil.sendCommandFromSession(session, cmd);
+		logger.info("Output of file "+file);
+		for (String line : lines) {
+			logger.info("  " + line);
+		}
 	}
 
 	private String getIpFromConsole(CommandHandler ch, String name) {

@@ -1,0 +1,22 @@
+{
+	"resourceClasses": [
+		"com.ncc.savior.virtueadmin.rest.AdminResource",
+		"com.ncc.savior.virtueadmin.rest.HelloResource",
+		"com.ncc.savior.virtueadmin.rest.UserResource"
+	],
+	"prettyPrint": true,
+	"openAPI": {
+		"info": {
+			"version": "1.0",
+			"title": "Savior Swagger",
+			"description": "Savior Swagger API documentation",
+			"contact": {
+				"email": "TBD"
+			},
+			"license": {
+				"name": "TBD",
+				"url": "TBD"
+			}
+		}
+	}
+}

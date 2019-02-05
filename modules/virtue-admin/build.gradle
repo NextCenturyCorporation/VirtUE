@@ -20,6 +20,7 @@ buildscript {
 }
 plugins {
     id 'org.unbroken-dome.test-sets' version '1.4.5'
+    id 'org.hidetake.swagger.generator' version '2.16.0'
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -51,7 +52,7 @@ repositories {
     maven { url "https://repo.spring.io/milestone" }
     mavenLocal()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-
+	jcenter()
    // flatDir {
    // 	dirs 'lib'
    // }
@@ -65,6 +66,9 @@ testSets {
 
 dependencies {
 	compile project(':common')
+	
+	swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'             // Swagger Codegen V2
+  	swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.0'  // or Swagger Codegen V3
 	
 	compile group: 'com.amazonaws', name: 'aws-java-sdk', version: awsVersion
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsVersion
@@ -94,8 +98,8 @@ dependencies {
 
     //compile 'org.springframework.security.kerberos:spring-security-kerberos-client:1.0.3.BUILD-SNAPSHOT'
     //compile 'org.springframework.security.kerberos:spring-security-kerberos-web:1.0.3.BUILD-SNAPSHOT'
-    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.4.BUILD-SNAPSHOT'
-    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.4.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.5.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.5.BUILD-SNAPSHOT'
     //compile files('lib/spring-security-kerberos-client-1.0.3.BUILD-SNAPSHOT.jar', 'lib/spring-security-kerberos-web-1.0.3.BUILD-SNAPSHOT.jar', 'lib/spring-security-kerberos-core-1.0.3.BUILD-SNAPSHOT.jar')
 	//compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.7'
 	
@@ -138,6 +142,15 @@ dependencies {
 	testCompile 'io.rest-assured:rest-assured:3.0.7'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-webflux', version: '2.0.1.RELEASE'
+}
+
+swaggerSources {
+  savior {
+    inputFile = file('savior.yaml')
+    code {
+      language = 'html2'
+    }
+  }
 }
 
 eclipse {
