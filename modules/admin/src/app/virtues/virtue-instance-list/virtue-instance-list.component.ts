@@ -82,7 +82,8 @@ export class VirtueInstanceListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC, undefined, () => this.getSubMenu()),
+      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC,
+                                                                (v: VirtueInstance) => this.toDetailsPage(v), () => this.getSubMenu()),
       new TextColumn('User',          2, (v: VirtueInstance) => v.user,       SORT_DIR.ASC),
       new ListColumn('Active VMs',        2, (v: VirtueInstance) => v.getVms(),  this.formatName, undefined),
       // new ListColumn('Applications',      2, (v: VirtueInstance) => []),

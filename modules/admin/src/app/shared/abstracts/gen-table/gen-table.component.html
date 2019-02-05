@@ -113,9 +113,9 @@
             <a class="edit" *ngIf="column.link !== undefined && !disableLinks()" (click)="column.link(elem.obj)">
               {{ column.formatElement(elem.obj) }}
             </a>
-            <div class="edit" *ngIf="column.link === undefined || disableLinks()">
+            <p class="edit" style="white-space: pre;" *ngIf="column.link === undefined || disableLinks()">
               {{ column.formatElement(elem.obj) }}
-            </div>
+            </p>
           </ng-container>
 
 
