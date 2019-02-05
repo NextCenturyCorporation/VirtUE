@@ -114,8 +114,8 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Application Name', 5, (a: Application) => a.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
-                                                                                                () => this.getSubMenu()),
+      new TextColumn('Application Name', 5, (a: Application) => a.getName(), SORT_DIR.ASC,
+                                                        (a: Application) => this.toDetailsPage(a), () => this.getSubMenu()),
       new TextColumn('Version',          3, (a: Application) => String(a.version), SORT_DIR.ASC),
       new TextColumn('Operating System', 4, (a: Application) => a.os, SORT_DIR.DESC)
     ];

@@ -51,6 +51,9 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
     <div id="content-header">
         <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
+    <button mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+      <label>View all User details</label>
+    </button>
     <div id="content-main">
       <div id="content" class="content">
         <mat-tab-group dynamicHeight=true>

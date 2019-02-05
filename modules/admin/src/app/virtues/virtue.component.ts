@@ -57,6 +57,9 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
     <div id="content-header">
       <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
+    <button mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+      <label>View all Virtue details</label>
+    </button>
     <div id="content-main">
       <div id="content" class="content">
         <mat-tab-group dynamicHeight=true>

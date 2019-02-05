@@ -8,7 +8,6 @@ import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * Represents a virtual machine template.
@@ -59,12 +58,8 @@ export class VirtualMachine extends Item {
 
   }
 
-
-  /**
-   * @return the VM_TS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.VM_TS;
+  getDatasetName(): string {
+    return DatasetNames.VM_TS;
   }
 
   /**

@@ -55,6 +55,9 @@ import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fi
 import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
+import { SimpleTableComponent } from './shared/abstracts/gen-table/simple-table/simple-table.component';
+
+import { BasicObjectDetailsComponent } from './basic-object-details/basic-object-details.component';
 
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
@@ -92,7 +95,6 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { DialogsComponent } from './dialogs/dialogs.component';
 
-
 import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -126,6 +128,10 @@ import { LoginComponent } from './shared/authentication/login.component';
     DashboardComponent,
 
     GenericTableComponent,
+    SimpleTableComponent,
+
+    BasicObjectDetailsComponent,
+    // SensorDetailsComponent,
 
     UserListComponent,
     UserComponent,

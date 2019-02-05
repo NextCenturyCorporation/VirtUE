@@ -73,8 +73,7 @@ export class VmInstanceListComponent extends ItemListComponent {
       cols: this.getColumns(),
       filters: this.getTableFilters(),
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
-      noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: i => false
+      noDataMsg: this.getNoDataMsg()
     };
   }
 

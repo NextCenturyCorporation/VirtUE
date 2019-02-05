@@ -62,6 +62,10 @@ export abstract class GenericPageComponent {
     return obj.enabled ? 'Enabled' : 'Disabled';
   }
 
+  toDetailsPage( obj: IndexedObj ) {
+    this.routerService.goToPage("view", [obj.getDatasetName(), obj.getID()]);
+  }
+
   /**
    * Navigates to the form page for this item.
    */

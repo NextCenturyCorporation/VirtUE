@@ -1,0 +1,18 @@
+<div id="content-container">
+  <div id="content-header">
+      <h1 class="titlebar-title">{{prettyTitle}}</h1>
+  </div>
+  <div id="content-main">
+    <div id="content" class="content">
+          <app-simple-table #table></app-simple-table>
+    </div>
+    <div class="mui-row">
+      <hr>
+      <div class="mui-col-md-4">&nbsp;</div>
+      <div class="mui-col-md-4 form-item text-align-center">
+      <button class="button-cancel" (click)="toPreviousPage();" >Return</button>
+      </div>
+      <div class="mui-col-md-4"></div>
+    </div>
+  </div>
+</div>

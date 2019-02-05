@@ -7,7 +7,6 @@ import { VirtualMachine } from './vm.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 import { DictList } from './dictionary.model';
 
@@ -131,11 +130,8 @@ export class Virtue extends Item {
 
   }
 
-  /**
-   * @return the VIRTUES subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.VIRTUE_TS;
+  getDatasetName(): string {
+    return DatasetNames.VIRTUE_TS;
   }
 
   /**
