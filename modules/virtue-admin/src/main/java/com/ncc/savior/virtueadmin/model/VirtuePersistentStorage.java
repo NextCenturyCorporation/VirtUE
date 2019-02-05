@@ -8,18 +8,24 @@ import javax.persistence.IdClass;
 
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage.VirtuePersistentStorageId;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * POJO and JPA entity for persistent storage.
  *
  */
 @Entity
 @IdClass(VirtuePersistentStorageId.class)
+@Schema(description = "Description of storage for a user/virtue combination that will persist even when a virtue is destroyed.")
 public class VirtuePersistentStorage implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Id
+	@Schema(description = "the user who this storage is assigned to.")
 	private String username;
+	@Schema(description = "Implementation specific ID for the storage related to the infrastructure.  This is an AWS ID.")
 	private String infrastructureId;
 	@Id
+	@Schema(description = "ID of the virtue template that this storage will be attached to when that template is provisioned into a virtue instance.")
 	private String virtueTemplateId;
 
 	public VirtuePersistentStorage(String username, String infrastructureId, String virtueTemplateId) {

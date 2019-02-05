@@ -1,8 +1,10 @@
 package com.ncc.savior.virtueadmin.cifsproxy;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
+import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
@@ -26,5 +28,9 @@ public interface ICifsProxyDao {
 	Set<VirtueUser> getAllUsers();
 
 	Collection<VirtualMachine> getAllCifsVms();
+
+	void saveShareParams(CifsShareCreationParameter share);
+
+	List<CifsShareCreationParameter> getSharesForVirtue(String virtueId);
 
 }

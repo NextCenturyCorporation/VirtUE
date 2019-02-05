@@ -4,18 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ElementCollection;
 import javax.persistence.Transient;
-import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.Embedded;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -23,40 +21,50 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-import com.ncc.savior.virtueadmin.model.Printer;
-import com.ncc.savior.virtueadmin.model.FileSystem;
-import com.ncc.savior.virtueadmin.model.WhitelistedNetwork;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Data Transfer Object (DTO) for templates.
  *
- * Note that while the workbench keeps track of ids, and generates the related object lists as needed (e.g. vmTemplateIds vs vmTemplates),
- * this keeps track of vmTemplates, and generates their ids when requested. The ids are taken from the front end, used to build the
- * objects, and thereafter the objects are the final authority. When passed to the frontend again, its the id list that matters - it doesn't
- * get rebuilt.
+ * Note that while the workbench keeps track of ids, and generates the related
+ * object lists as needed (e.g. vmTemplateIds vs vmTemplates), this keeps track
+ * of vmTemplates, and generates their ids when requested. The ids are taken
+ * from the front end, used to build the objects, and thereafter the objects are
+ * the final authority. When passed to the frontend again, its the id list that
+ * matters - it doesn't get rebuilt.
  */
 @Entity
+@Schema(description = "Object to describe a virtue template.")
 public class VirtueTemplate {
 	@Id
+	@Schema(description = "ID of the virtue template.")
 	private String id;
+	@Schema(description = "Name of the virtue template.")
 	private String name;
+	@Schema(description = "Version of the virtue template.")
 	private String version;
 	@ColumnDefault("true")
+	@Schema(description = "Boolean as to whether the virtue template is enabled and allowed to be provisioned.  May not be implemented.")
 	private boolean enabled;
-	private Date lastModification;
-	private String lastEditor;
 
+	@Schema(description = "Date of last modification for virtual machine template metadata.")
+	private Date lastModification;
+	@Schema(description = "Username of last editor of this virtual machine template metadata.")
+	private String lastEditor;
+	@Schema(description = "User who originally created this virtual machine template.")
 	private String userCreatedBy;
+	@Schema(description = "Time at which this virtual machine was originally created.")
 	private Date timeCreatedAt;
 
+	@Schema(description = "Unused")
 	private String awsTemplateName;
-
+	@Schema(description = "Color for which the virtue instance will be shown through the desktop application and workbench.")
 	private String color;
 
 	@ManyToMany()
 	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
+	@Schema(description = "Unused")
 	private Collection<Printer> printers;
 
 	@ManyToMany()
@@ -64,17 +72,22 @@ public class VirtueTemplate {
 	private Collection<FileSystem> fileSystems;
 
 	@ElementCollection()
+	@Schema(description = "Unused")
 	private Collection<String> allowedPasteTargetIds;
 
 	@Embedded
 	@ElementCollection(targetClass = WhitelistedNetwork.class)
+	@Schema(description = "Unused")
 	private Collection<WhitelistedNetwork> networkWhitelist;
 
 	@Transient
+	@Schema(description = "Unused")
 	private Collection<String> printerIds;
 	@Transient
+	@Schema(description = "List of IDs of the file systems that will be attached to the VMs when this virute is provisioned.")
 	private Collection<String> fileSystemIds;
 	@Transient
+	@Schema(description = "List of IDs of the virtual machine templates that will be provisioned when this virtue is provisioned.")
 	private Collection<String> vmTemplateIds;
 
 	// private Set<String> startingResourceIds;
@@ -175,7 +188,8 @@ public class VirtueTemplate {
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor, String userCreatedBy, Date timeCreatedAt) {
+			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor,
+			String userCreatedBy, Date timeCreatedAt) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -198,7 +212,6 @@ public class VirtueTemplate {
 	 */
 	protected VirtueTemplate() {
 		super();
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
@@ -251,8 +264,9 @@ public class VirtueTemplate {
 	@Override
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
-				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
-				+ ", awsTemplateName=" + awsTemplateName + ", networkWhitelist=" + networkWhitelist + "]";
+				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification
+				+ ", lastEditor=" + lastEditor + ", awsTemplateName=" + awsTemplateName + ", networkWhitelist="
+				+ networkWhitelist + "]";
 	}
 
 	public String getAwsTemplateName() {
@@ -369,7 +383,7 @@ public class VirtueTemplate {
 
 	@JsonSetter
 	public void setAllowedPasteTargetIds(Collection<String> allowedPasteTargetIds) {
-		 this.allowedPasteTargetIds = allowedPasteTargetIds;
+		this.allowedPasteTargetIds = allowedPasteTargetIds;
 	}
 
 	@JsonSetter
@@ -442,6 +456,7 @@ public class VirtueTemplate {
 	}
 
 	public static final Comparator<? super VirtueTemplate> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+
 	private static class CaseInsensitiveNameComparator implements Comparator<VirtueTemplate> {
 		@Override
 		public int compare(VirtueTemplate o1, VirtueTemplate o2) {

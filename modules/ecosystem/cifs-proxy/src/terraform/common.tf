@@ -79,17 +79,23 @@ variable "linux_ami" {
   #
   # NOTE: If you change distributions, you probably need to change
   # linux_user, too.
-  description = "Fedora-Cloud-Base-28-20180922.0.x86_64-hvm-us-east-1-standard-0"
-  default = "ami-0064c3021927a1bd5"
+  description = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2018-08-14"
+  default = "ami-05fb04e2687120d6b"
 }
 
 variable "linux_user" {
   description = "The default user for our linux instance"
-  default = "fedora"
+  default = "ubuntu"
 }
 
 variable "linux_instance_type" {
   default = "t2.micro"
+}
+
+variable "proxy_jar" {
+  # based on baseName and version set in ../../build.gradle
+  description = "Path to the jar file for the CIFS Proxy."
+  default = "../../build/libs/cifs-proxy-server-0.0.1.jar"
 }
 
 variable "helper_program_location" {
@@ -148,4 +154,3 @@ data "aws_ami" "windows_server2016" {
 	values = ["Windows_Server-2016-English-Full-Base*"]
   }
 }
-

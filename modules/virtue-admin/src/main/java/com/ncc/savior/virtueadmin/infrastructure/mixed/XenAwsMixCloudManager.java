@@ -6,10 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
@@ -17,6 +22,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -65,6 +71,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private ISecurityGroupManager securityGroupManager;
 
+	private CifsManager cifsManager;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
 			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
@@ -92,6 +100,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
+		cifsManager.cifsBeforeVirtueDelete(virtueInstance);
 		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
 		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture, null);
 		// Database needs to be updated when we delete, but we don't have access here.
@@ -145,6 +154,30 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
+//		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+
+		Collection<FileSystem> fileSystems = template.getFileSystems();
+		try {
+			Future<Exception> cifsPriorTask = cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
+			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+			linuxFuture.thenAccept((myLinuxVms) -> {
+//			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
+				try {
+					Exception e = cifsPriorTask.get();
+					if (e == null) {
+						cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, password);
+					} else {
+						throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs Prior Task failed!", e);
+					}
+				} catch (Throwable t) {
+					// TODO need to fix how we handle this error.
+					logger.error("error creating cifs", t);
+				}
+			});
+		} catch (SaviorException e) {
+			// TODO we probably dont want to ignore
+			logger.error("Error with CIFS proxy.  Ignoring and continuing!", e);
+		}
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
 			// When xen (really NFS) and all windows VM's are up
@@ -156,7 +189,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				try {
 					windowsNfsMountingService.addWindowsStartupServices(xen, windows);
 				} catch (Throwable t) {
-					logger.error("error adding to windows services",t);
+					logger.error("error adding to windows services", t);
 				}
 			}
 			logger.debug("Finished adding vms to Windows Startup Services");
@@ -222,5 +255,10 @@ public class XenAwsMixCloudManager implements ICloudManager {
 	@Override
 	public void sync(List<String> ids) {
 		awsVmManager.syncAll(ids);
+	}
+
+	@Override
+	public void setCifsManager(CifsManager cifsManager) {
+		this.cifsManager = cifsManager;
 	}
 }

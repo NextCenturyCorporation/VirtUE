@@ -16,27 +16,41 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
+@Schema(description = "Object to describe a virtual machine template.  This is just metadata and does not include the image directly.")
 public class VirtualMachineTemplate {
 
 	@Id
+	@Schema(description = "ID of the virtual machine template.  Typically set by the system.")
 	private String id;
+	@Schema(description = "Name of the virtual machine template.")
 	private String name;
+	@Schema(description = "Operating system that the virtual machine template runs.")
 	private OS os;
+	@Schema(description = "Infrastructure specific path to the virtual machine template image. This value can be different depending on whether the virtual machine should be run directly in AWS (template path is AMI) or run on Xen (template path is path in S3 to image).")
 	private String templatePath;
+	@Schema(description = "User to be used to login as.")
 	private String loginUser;
 	@ManyToMany()
 	private Collection<ApplicationDefinition> applications;
 	@ColumnDefault("true")
+	@Schema(description = "Toggle for enabling or diabling the virtual machine.  May not be implemented.")
 	private boolean enabled;
+	@Schema(description = "Date of last modification for virtual machine template metadata.")
 	private Date lastModification;
+	@Schema(description = "Username of last editor of this virtual machine template metadata.")
 	private String lastEditor;
 
 	@Transient
+	@Schema(description = "The list of application IDs that this template provides for the users.")
 	private Collection<String> applicationIds;
+	@Schema(description = "Security tag used by Xen (linux VM's only) to determine how to setup the firewall.  Options: god, power, TBD")
 	private String securityTag;
-	
+	@Schema(description = "User who originally created this virtual machine template.")
 	private String userCreatedBy;
+	@Schema(description = "Time at which this virtual machine was originally created.")
 	private Date timeCreatedAt;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
@@ -53,7 +67,7 @@ public class VirtualMachineTemplate {
 		this.lastEditor = lastEditor;
 		this.loginUser = loginUser;
 	}
-	
+
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
 			Collection<ApplicationDefinition> applications, String loginUser, boolean enabled, Date lastModification,
 			String lastEditor, String userCreatedBy, Date timeCreatedAt) {
@@ -195,7 +209,7 @@ public class VirtualMachineTemplate {
 	public void setSecurityTag(String securityTag) {
 		this.securityTag = securityTag;
 	}
-	
+
 	public Date getTimeCreatedAt() {
 		return timeCreatedAt;
 	}
@@ -211,7 +225,9 @@ public class VirtualMachineTemplate {
 	public void setUserCreatedBy(String userCreatedBy) {
 		this.userCreatedBy = userCreatedBy;
 	}
+
 	public static final Comparator<? super VirtualMachineTemplate> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+
 	private static class CaseInsensitiveNameComparator implements Comparator<VirtualMachineTemplate> {
 		@Override
 		public int compare(VirtualMachineTemplate o1, VirtualMachineTemplate o2) {

@@ -59,6 +59,8 @@ public class CompletableFutureServiceProvider {
 	private VirtueAwsEc2Provider ec2Provider;
 	private IKeyManager keyManager;
 	private IUpdateListener<VirtualMachine> vmNotifier;
+	private RunRemoteCommandCompletableFutureService runRemoteCommand;
+	private RunRemoteScriptCompletableFutureService runRemoteScript;
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
@@ -92,6 +94,8 @@ public class CompletableFutureServiceProvider {
 		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager, upDownTimeoutMillis);
 		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager, rsaTimeoutMillis);
 		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2, awsStatusTimeoutMillis);
+		runRemoteCommand = new RunRemoteCommandCompletableFutureService(executor, keyManager);
+		runRemoteScript = new RunRemoteScriptCompletableFutureService(executor, keyManager);
 		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override
@@ -179,6 +183,14 @@ public class CompletableFutureServiceProvider {
 
 	public AwsUpdateStatusCompletableFutureService getAwsUpdateStatus() {
 		return awsUpdateStatus;
+	}
+
+	public RunRemoteCommandCompletableFutureService getRunRemoteCommand() {
+		return runRemoteCommand;
+	}
+
+	public RunRemoteScriptCompletableFutureService getRunRemoteScript() {
+		return runRemoteScript;
 	}
 
 	public ScheduledExecutorService getExecutor() {

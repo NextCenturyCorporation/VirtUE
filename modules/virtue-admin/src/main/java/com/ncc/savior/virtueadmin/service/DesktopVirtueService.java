@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
@@ -54,12 +55,13 @@ public class DesktopVirtueService {
 	private Set<PollHandler> pollHandlers;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager, IResourceManager resourceManager) {
+			IApplicationManager applicationManager, IResourceManager resourceManager, CifsManager cifsManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
 		this.resourceManager = resourceManager;
 		this.pollHandlers = new HashSet<PollHandler>();
+		addPollHandler(cifsManager.getPollHandler());
 	}
 
 	/**
@@ -279,7 +281,7 @@ public class DesktopVirtueService {
 			}
 		}
 	}
-	
+
 	public void addPollHandler(PollHandler ph) {
 		pollHandlers.add(ph);
 	}
