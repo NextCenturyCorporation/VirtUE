@@ -4,7 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatSlideToggleModule } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+import 'rxjs/add/operator/map';
 
+import { Subdomains } from '../shared/services/subdomains.enum';
 import { RouterService } from '../shared/services/router.service';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
@@ -12,6 +15,7 @@ import { DataRequestService } from '../shared/services/dataRequest.service';
 import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
+import { NetworkPermission } from '../shared/models/networkPerm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
@@ -118,11 +122,10 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/virtues', activatedRoute, routerService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
@@ -223,6 +226,28 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   /**
+   * Virtue templates have attributes that don't come with the actual Item, and must be querried separately
+   *  - NetworkPermissions
+   *  - ClipboardPermissions
+   *  - filesystems?
+   *
+   * @override [[ItemFormComponent.afterPullComplete]]()
+   */
+  afterPullComplete(): Promise<void> {
+    // return this.dataRequestService.getRecords('/admin/securityGroup')
+    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
+      .pipe(map((response: any) => {
+        if (response !== undefined) {
+          for (let secGrp of response) {
+            this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
+          }
+        }
+      })).toPromise();
+  }
+
+
+
+  /**
    * This page needs all 6 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
    * It also has a table showing the users that have been given access to this Virtue template.
    * The settings tab now also allows connection to printers and filesystems.
@@ -256,6 +281,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     if ( !this.settingsTab.collectData() ) {
       return false;
     }
+
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
 
@@ -271,6 +297,32 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     // the 's list size if vmTemplates is undefined
     this.item.vmTemplates = undefined;
     return true;
+  }
+
+  afterSave(): void {
+    // revoke this virtue's security permissions, and add the ones locally here. Since it appears updating is impossible.
+    this.updateVirtueSecurityGroupPermissions();
+  }
+
+  updateVirtueSecurityGroupPermissions(): void {
+    console.log("here")
+    console.log(this.item.newSecurityPermissions)
+    console.log(this.item.revokedSecurityPermissions)
+    for (let secPerm of this.item.newSecurityPermissions) {
+      console.log(secPerm)
+      this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'authorize'], JSON.stringify(secPerm))
+      .pipe(map((response: any) => {
+        console.log(response);
+      })).toPromise().then(() => {});
+    }
+
+    for (let secPerm of this.item.revokedSecurityPermissions) {
+      console.log(secPerm)
+      this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'revoke'], JSON.stringify(secPerm))
+      .pipe(map((response: any) => {
+        console.log(response);
+      })).toPromise().then(() => {});
+    }
   }
 
   /**

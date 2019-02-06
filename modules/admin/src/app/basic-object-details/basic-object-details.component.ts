@@ -48,12 +48,11 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog,
     private activatedRoute: ActivatedRoute
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
 
     this.prettyTitle = "";
@@ -72,7 +71,6 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    */
   ngOnInit(): void {
     this.cmnDataComponentSetup();
-    console.log(this['table']);
   }
 
 

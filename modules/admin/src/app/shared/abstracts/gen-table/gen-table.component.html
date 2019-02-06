@@ -113,9 +113,14 @@
             <a class="edit" *ngIf="column.link !== undefined && !disableLinks()" (click)="column.link(elem.obj)">
               {{ column.formatElement(elem.obj) }}
             </a>
-            <p class="edit" style="white-space: pre;" *ngIf="column.link === undefined || disableLinks()">
-              {{ column.formatElement(elem.obj) }}
-            </p>
+            <ng-container *ngIf="column.link === undefined || disableLinks()">
+              <p class="edit" style="white-space: pre;" *ngIf="!firstAttrIsString(elem.obj)">
+                {{ column.formatElement(elem.obj) }}
+              </p>
+              <div class="edit"  *ngIf="firstAttrIsString(elem.obj)">
+                {{ column.formatElement(elem.obj) }}
+              </div>
+            </ng-container>
           </ng-container>
 
 
@@ -150,14 +155,23 @@
 
           <!-- if it's an input-field column -->
           <ng-container *ngIf="isInputField(column)">
-            <mat-form-field floatLabel="never" >
-              <input matInput type="text" placeholder="{{column.inputFieldName}}" [disabled]="!editingEnabled()"
-                      [(ngModel)]="elem.obj[column.inputFieldName]" required/>
-            </mat-form-field>
+            <ng-container *ngIf="column.required">
+              <mat-form-field floatLabel="never" >
+                <input matInput type="text" placeholder="{{column.label}}" [disabled]="!editingEnabled()"
+                        [(ngModel)]="elem.obj[column.inputFieldName]" required/>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="!column.required">
+              <mat-form-field floatLabel="never" >
+                <input matInput type="text" placeholder="{{column.label}}" [disabled]="!editingEnabled()"
+                        [(ngModel)]="elem.obj[column.inputFieldName]"/>
+              </mat-form-field>
+            </ng-container>
           </ng-container>
 
           <!-- if it's a checkbox column -->
           <ng-container *ngIf="isCheckbox(column)">
+
             <!-- if angular should just automatically update the local elem.obj object -->
             <ng-container *ngIf="column.onChange === undefined">
               <mat-checkbox
@@ -173,6 +187,7 @@
               [checked]="elem.obj[column.toggleableFieldName]" (change)="column.onChange(elem.obj, $event.checked)">
               </mat-checkbox>
             </ng-container>
+
           </ng-container>
 
           <ng-container *ngIf="isIcon(column)">

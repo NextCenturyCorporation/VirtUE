@@ -41,10 +41,9 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
     this.tabLabel = "Settings History";
   }
 

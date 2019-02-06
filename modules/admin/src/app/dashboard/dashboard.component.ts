@@ -38,12 +38,11 @@ export class DashboardComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog,
     private sensingService: SensingService,
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
   }
 
@@ -56,7 +55,7 @@ export class DashboardComponent extends ItemListComponent {
       new TextColumn('Virtue ID',   2, (sensor) => this.getVirtName(sensor), SORT_DIR.ASC),
       new TextColumn('Username',    1, (sensor) => sensor.username, SORT_DIR.ASC),
       new TextColumn('Port',        1, (sensor) => sensor.port, SORT_DIR.ASC),
-      new TextColumn('Kafka Topic', 2, (sensor) => sensor.kafka_topic, SORT_DIR.ASC),
+      new TextColumn('Kafka Topic', 3, (sensor) => sensor.kafka_topic, SORT_DIR.ASC),
       new TextColumn('Certificate', 1, (sensor) => this.hasCertificates(sensor),  SORT_DIR.ASC),
       new TextColumn('Last Update', 2, (sensor) => sensor.updated_at, SORT_DIR.ASC),
       // new TextColumn('Tim',   2, (sensor) => sensor.timestamp, SORT_DIR.ASC)

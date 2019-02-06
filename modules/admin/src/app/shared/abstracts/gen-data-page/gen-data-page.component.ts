@@ -101,7 +101,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   constructor(
     routerService: RouterService,
-    protected baseUrlService: BaseUrlService,
     protected dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
@@ -367,19 +366,22 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     obj.buildAttribute(datasetName, this.datasets[datasetName] );
   }
 
-
-
   /**
    * saves the item's current state to the backend.
    *
-   * @param redirect a function to call (only) after the saving process has successfully completed.
+   * @param onSuccess a function to call (only) after the saving process has successfully completed.
    */
-  updateItem(obj: IndexedObj, redirect?: () => void): void {
+  updateItem(obj: IndexedObj, onSuccess?: (obj?: IndexedObj, updatedObject?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.updateRecord(this.getRemoteSubdomain(obj), obj.getID(), obj.getFormatForSave()).subscribe(
       updatedObject => {
-        if (redirect) {
-          redirect();
+        if (onSuccess) {
+          if (updatedObject !== null) {
+            onSuccess(obj, updatedObject);
+          }
+          else {
+            onSuccess(obj);
+          }
         }
         else {
           this.refreshPage();
@@ -399,16 +401,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
-  createItem(obj: IndexedObj, onSuccess?: (createdObj?: IndexedObj) => void): void {
+  createItem(obj: IndexedObj, onSuccess?: (obj?: IndexedObj, createdObj?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.createRecord(this.getRemoteSubdomain(obj), obj.getFormatForSave()).subscribe(
       createdObj => {
         if (onSuccess) {
           if (createdObj !== null) {
-            onSuccess(createdObj);
+            onSuccess(obj, createdObj);
           }
           else {
-            onSuccess();
+            onSuccess(obj);
           }
         }
         else {

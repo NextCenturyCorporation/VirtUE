@@ -12,6 +12,7 @@ export enum Subdomains {
   PRINTERS = "admin/printer/",
   FILE_SYSTEMS = "admin/fileSystem/",
   VIRTUES = "admin/virtues",
-  VMS = "admin/vm",
-  SENSORS = "admin/sensing"
+  VMS = "admin/vm/",
+  SENSORS = "admin/sensing/",
+  SEC_GRP = "admin/securityGroup/template/"
 }

@@ -66,11 +66,10 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
     let params = this.getListOptions();
 

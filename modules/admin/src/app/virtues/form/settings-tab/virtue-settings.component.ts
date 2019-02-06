@@ -33,6 +33,7 @@ import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNam
 
 import { PrinterSelectionModalComponent } from '../../../modals/printer-modal/printer-selection.modal';
 import { FileSystemSelectionModalComponent } from '../../../modals/fileSystem-modal/fileSystem-selection.modal';
+import { NetworkPermissionModalComponent } from '../../../modals/networkPerm-modal/networkPerm.modal';
 
 import { ColorModalComponent } from '../../../modals/color-picker/color-picker.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -427,14 +428,27 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getNetworkColumns(): Column[] {
     return [
-      new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
-                          (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
-      // new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
-      new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
-      new BlankColumn(2),
-      new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
+      new TextColumn('Direction',   1, (netPerm: NetworkPermission) => this.getDirection(netPerm), SORT_DIR.ASC),
+      new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp, SORT_DIR.ASC),
+      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => String(netPerm.ipProtocol), SORT_DIR.ASC),
+      new TextColumn('From Port',   2, (netPerm: NetworkPermission) => String(netPerm.fromPort), SORT_DIR.ASC),
+      new TextColumn('Remote Port', 2, (netPerm: NetworkPermission) => String(netPerm.toPort), SORT_DIR.ASC),
+      new TextColumn('Description', 3, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
+      new IconColumn('Revoke',      1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
+      // new RadioButtonColumn('Incoming',  1, 'ingress', true),
+      // new RadioButtonColumn('Outgoing',  1, 'ingress', false),
+      // new InputFieldColumn('CIDR IP',        2, 'cidrIp', (netPerm: NetworkPermission) => netPerm.cidrIp, true),
+      // new DropdownColumn(  'Protocol',    2, 'ipProtocol', () => Object.values(NetworkProtocols),
+      //                     (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.ipProtocol)),
+      // new InputFieldColumn('From Port',  1, 'fromPort', (netPerm: NetworkPermission) => String(netPerm.fromPort)),
+      // new InputFieldColumn('Remote Port', 1, 'toPort', (netPerm: NetworkPermission) => String(netPerm.toPort)),
+      // new InputFieldColumn('Description', 3, 'description', (netPerm: NetworkPermission) => String(netPerm.description), false),
+      // new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
+  }
+
+  getDirection(netPerm: NetworkPermission): string {
+    return netPerm.ingress ? "Incoming" : "Outgoing";
   }
 
   /**
@@ -463,33 +477,61 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (this.networkPermsTable === undefined) {
       return;
     }
-    this.networkPermsTable.populate(this.item.networkWhitelist);
+    this.networkPermsTable.populate(this.item.networkSecurityPermWhitelist);
   }
 
   /**
   * Add a new netork permission to the virtue.
   */
-  addNewNetworkPermission(): void {
-    this.item.networkWhitelist.push(new NetworkPermission());
+  addNewNetworkPermission(newPermission: NetworkPermission): void {
+    this.item.networkSecurityPermWhitelist.push(newPermission);
+    this.item.newSecurityPermissions.push(newPermission);
     this.updateNetworkPermsTable();
+  }
+
+  activateNetworkPermissionModal(): void {
+    let params = {
+      height: '70%',
+      width: '40%',
+      data: {
+        templateID: this.item.getID()
+      }
+    };
+
+    let dialogRef = this.dialog.open( NetworkPermissionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getNetPerm.subscribe((newPerm) => {
+      this.addNewNetworkPermission(newPerm);
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
   }
 
   /**
    * This removes a network from the virtue's whitelist.
    */
   removeNetwork(netPerm: NetworkPermission): void {
-    if (this.item.networkWhitelist === undefined || this.item.networkWhitelist.length === 0) {
+    if (this.item.networkSecurityPermWhitelist === undefined || this.item.networkSecurityPermWhitelist.length === 0) {
       return;
     }
 
     let idx = 0;
-    for (let nP of this.item.networkWhitelist) {
+    for (let nP of this.item.networkSecurityPermWhitelist) {
       if (netPerm.equals(nP)) {
         break;
       }
       idx++;
     }
-    this.item.networkWhitelist.splice(idx, 1);
+    let removedPermission = this.item.networkSecurityPermWhitelist.splice(idx, 1)[0];
+    this.item.revokedSecurityPermissions.push(removedPermission);
     this.updateNetworkPermsTable();
   }
 
@@ -499,7 +541,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   *         false otherwise
   */
   checkNetworkPerms(): boolean {
-    for (let networkPermission of this.item.networkWhitelist) {
+    for (let networkPermission of this.item.networkSecurityPermWhitelist) {
       if ( !networkPermission.checkValid() ) {
         return false;
       }
