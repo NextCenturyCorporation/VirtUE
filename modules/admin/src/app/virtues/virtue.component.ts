@@ -305,23 +305,14 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   updateVirtueSecurityGroupPermissions(): void {
-    console.log("here")
-    console.log(this.item.newSecurityPermissions)
-    console.log(this.item.revokedSecurityPermissions)
     for (let secPerm of this.item.newSecurityPermissions) {
-      console.log(secPerm)
       this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'authorize'], JSON.stringify(secPerm))
-      .pipe(map((response: any) => {
-        console.log(response);
-      })).toPromise().then(() => {});
+      .toPromise().then(() => {});
     }
 
     for (let secPerm of this.item.revokedSecurityPermissions) {
-      console.log(secPerm)
       this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'revoke'], JSON.stringify(secPerm))
-      .pipe(map((response: any) => {
-        console.log(response);
-      })).toPromise().then(() => {});
+      .toPromise().then(() => {});
     }
   }
 

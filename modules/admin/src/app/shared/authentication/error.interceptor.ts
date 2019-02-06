@@ -50,7 +50,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         3,
         4,
         24 // I feel like this shouldn't be an auth failure, but right now the backend uses it for all unauthorized requests
-      ]
+      ];
       return badAuthCodes.includes(errCode);
     }
 

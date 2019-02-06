@@ -100,7 +100,7 @@ export class VirtueInstanceListComponent extends ItemListComponent {
   }
 
   viewUser(v: VirtueInstance): void {
-    let owningUser = new User({username: v.user})
+    let owningUser = new User({username: v.user});
     this.viewItem(owningUser);
   }
 

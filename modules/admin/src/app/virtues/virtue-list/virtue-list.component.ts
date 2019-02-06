@@ -68,7 +68,7 @@ export class VirtueListComponent extends ItemListComponent {
       new ListColumn('Applications',     2, (v: Virtue) => v.getVmApps(),  this.formatName, (a: Item) => this.toDetailsPage(a)),
       new TextColumn('Last Editor',      2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
       new TextColumn('Version',          1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date',2, (v: Virtue) => v.readableModificationDate, SORT_DIR.DESC),
+      new TextColumn('Modification Date', 2, (v: Virtue) => v.readableModificationDate, SORT_DIR.DESC),
       new TextColumn('Status',           1, this.formatStatus,                 SORT_DIR.ASC)
     ];
   }

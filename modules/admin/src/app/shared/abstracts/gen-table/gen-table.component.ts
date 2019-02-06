@@ -424,9 +424,6 @@ export class GenericTableComponent<T> {
     }
 
   }
-  logItem(i) {
-    console.log(i)
-  }
 
   /**
    * @return true iff all elements in this column are checked.

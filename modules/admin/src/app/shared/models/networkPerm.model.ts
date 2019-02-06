@@ -21,14 +21,14 @@ export class NetworkPermission {
   /** True if the security group pertains to connections coming into into the virtue, false if the connection is outgoing.*/
   public ingress: boolean = false; // user-supplied
 
-	/** Port the connection came from. */
-	public fromPort: number; // user-supplied
+  /** Port the connection came from. */
+  public fromPort: number; // user-supplied
 
-	/** Port the connection came to. */
-	public toPort: number; // user-supplied
+  /** Port the connection came to. */
+  public toPort: number; // user-supplied
 
-	/** Protocol for.  Usually TCP or UDP. */
-	public ipProtocol: NetworkProtocols = NetworkProtocols.TCPIP; // user-supplied
+  /** Protocol for.  Usually TCP or UDP. */
+  public ipProtocol: NetworkProtocols = NetworkProtocols.TCPIP; // user-supplied
 
   /** CIDR block of that the permission should pertain to. */
   public cidrIp: string; // user-supplied
