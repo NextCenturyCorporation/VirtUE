@@ -11,6 +11,7 @@ import { DictList } from '../../../shared/models/dictionary.model';
 
 import {
   Column,
+  BlankColumn,
   TextColumn,
   ListColumn,
   CheckboxColumn,
@@ -75,16 +76,16 @@ import { NetworkProtocols } from '../../protocols.enum';
 })
 export class VirtueSettingsTabComponent extends ItemFormTabComponent implements OnInit {
 
-  /** a table to display the Virtues that this Virtue is allowd to paste data into */
+  /** the Virtues that this Virtue is allowd to paste data into */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
 
-  /** a table to display the network permissions granted to this Virtue */
+  /** the network permissions granted to this Virtue */
   @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
 
-  /** a table to display the file system permissions of this Virtue */
+  /** the file system permissions of this Virtue */
   @ViewChild('fileSystemsPermsTable') private fileSystemsPermsTable: GenericTableComponent<FileSystem>;
 
-  /** a table to display the printers this Virtue can access */
+  /** the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
   /** re-classing item, to make it easier and less error-prone to work with.
@@ -152,8 +153,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    *                Either attribute is optional.
    */
   update(changes: any): void {
-    if (changes.allVirtues) {
-      this.updatePasteableVirtuesTable(changes.allVirtues);
+    if (changes[DatasetNames.VIRTUE_TS]) {
+      this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
     }
 
     if (changes.mode) {
@@ -398,8 +399,9 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
       new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
-      new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
+      // new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
+      new BlankColumn(2),
       new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }

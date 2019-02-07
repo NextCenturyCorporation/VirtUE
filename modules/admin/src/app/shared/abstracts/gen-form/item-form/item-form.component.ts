@@ -85,7 +85,7 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
   mode: Mode;
 
   /** holds the name of the relevant dataset for Item being viewed;
-   *   e.g., in virtue.component, it should be set to `DatasetNames.VMS`
+   *   e.g., in virtue.component, it should be set to `DatasetNames.VM_TS`
    * Must be set in constructor of derived class.
    * Can't hold direct reference because that reference won't be updated when
    * the dataset is pulled or re-pulled
@@ -93,7 +93,7 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
   datasetName: DatasetNames;
 
   /** holds the name of the relevant dataset for the children of the Item being viewed;
-   *   e.g., in virtue.component, it should be set to `DatasetNames.VMS`
+   *   e.g., in virtue.component, it should be set to `DatasetNames.VM_TS`
    * Must be set in constructor of derived class.
    * Can't hold direct reference because that reference won't be updated when
    * the dataset is pulled or re-pulled
@@ -211,9 +211,20 @@ but got: \n       " + this.routerService.getRouterUrl());
       }
       this.setUpTabs();
     }
-
+    this.routerService.submitPageTitle(this.getCrumbTitle());
     this.updatePage();
     this.initialPullComplete = true;
+  }
+
+  getCrumbTitle(): string {
+    let title = this.getTitle();
+    let pieces = title.split(" ");
+    if (pieces[0] === "View" || pieces[0] === "Edit" || pieces[0] === "Duplicate" ) {
+      return pieces.slice(1).join(" "); // remove the first word
+    }
+    else {
+      return title;
+    }
   }
 
   /**
@@ -389,4 +400,5 @@ but got: \n       " + this.routerService.getRouterUrl());
    */
   abstract finalizeItem(): boolean;
 
+  abstract getTitle(): string;
 }

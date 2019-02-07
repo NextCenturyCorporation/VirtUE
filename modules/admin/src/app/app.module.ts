@@ -36,7 +36,7 @@ import {
 } from '@angular/material';
 
 import { FlexLayoutModule } from "@angular/flex-layout";
-
+import { Ng2DropdownModule } from 'ng2-material-dropdown';
 
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
 
@@ -61,6 +61,7 @@ import { UserMainTabComponent} from './users/form/main-tab/main-user-tab.compone
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
+import { VirtueInstanceListComponent } from './virtues/virtue-instance-list/virtue-instance-list.component';
 import { VirtueComponent } from './virtues/virtue.component';
 import { VirtueMainTabComponent } from './virtues/form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './virtues/form/settings-tab/virtue-settings.component';
@@ -75,6 +76,7 @@ import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-s
 import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmInstanceListComponent } from './vms/vm-instance-list/vm-instance-list.component';
 import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './vms/form/vm-usage-tab/vm-usage-tab.component';
 import { VmComponent} from './vms/vm.component';
@@ -129,6 +131,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     UserMainTabComponent,
 
     VirtueListComponent,
+    VirtueInstanceListComponent,
     VirtueMainTabComponent,
     VirtueSettingsTabComponent,
     VirtueUsageTabComponent,
@@ -148,6 +151,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     PageNotFoundComponent,
 
     VmListComponent,
+    VmInstanceListComponent,
     VmComponent,
     VmMainTabComponent,
     VmUsageTabComponent,
@@ -187,6 +191,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     MatSelectModule,
     MatTabsModule,
     MatToolbarModule,
+    Ng2DropdownModule,
     ReactiveFormsModule,
     SplitPaneModule
   ],

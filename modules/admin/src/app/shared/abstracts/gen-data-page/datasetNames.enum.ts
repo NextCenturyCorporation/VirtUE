@@ -6,9 +6,12 @@
  */
 export enum DatasetNames {
   APPS = "allApps",
-  VMS = "allVms",
-  VIRTUES = "allVirtues",
+  VM_TS = "allVmTemplates",
+  VIRTUE_TS = "allVirtueTemplates",
   USERS = "allUsers",
   PRINTERS = "allPrinters",
-  FILE_SYSTEMS = "allFileSystems"
+  FILE_SYSTEMS = "allFileSystems",
+  VIRTUES = "allVirtues",
+  VMS = "allVms",
+  SENSORS = "allSensors"
 }

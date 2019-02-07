@@ -53,7 +53,7 @@ export class User extends Item {
    * #uncommented
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
-    if (datasetName === DatasetNames.VIRTUES) {
+    if (datasetName === DatasetNames.VIRTUE_TS) {
       this.virtueTemplates = dataset.getSubset(this.virtueTemplateIds) as DictList<Virtue>;
     }
   }
@@ -78,10 +78,10 @@ export class User extends Item {
 
   /** @override [[Item.getRelatedDict]] */
   getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
-    if (datasetName === DatasetNames.VIRTUES) {
+    if (datasetName === DatasetNames.VIRTUE_TS) {
       return this.virtueTemplates;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS, was", datasetName);
     return undefined;
   }
 
@@ -92,19 +92,19 @@ export class User extends Item {
    */
   getRelatedIDList(datasetName: DatasetNames): string[] {
 
-    if (datasetName === DatasetNames.VIRTUES) {
+    if (datasetName === DatasetNames.VIRTUE_TS) {
       return this.virtueTemplateIds;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS, was", datasetName);
     return [];
   }
 
   getVirtues(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VIRTUES);
+    return this.getChildren(DatasetNames.VIRTUE_TS);
   }
 
   getVirtueVms(): IndexedObj[] {
-    return this.getGrandChildren(DatasetNames.VIRTUES, DatasetNames.VMS);
+    return this.getGrandChildren(DatasetNames.VIRTUE_TS, DatasetNames.VM_TS);
   }
 
   removeUnspecifiedChild(childObj: IndexedObj): void {
@@ -117,7 +117,7 @@ export class User extends Item {
   }
 
   removeVirtue(virtue: Virtue) {
-    this.removeChild(virtue.getID(), DatasetNames.VIRTUES);
+    this.removeChild(virtue.getID(), DatasetNames.VIRTUE_TS);
   }
 
   protected getInBackendFormat() {

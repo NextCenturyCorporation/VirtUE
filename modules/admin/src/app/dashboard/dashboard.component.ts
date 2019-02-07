@@ -89,7 +89,11 @@ export class DashboardComponent extends ItemListComponent {
    * @return
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES, DatasetNames.SENSORS];
+  }
+
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.SENSORS;
   }
 
   /**
@@ -145,7 +149,7 @@ export class DashboardComponent extends ItemListComponent {
    * @return
    */
   getVirtName(d: any): string {
-    return this.datasets[DatasetNames.VIRTUES].get(d.virtue_id).getName();
+    return this.datasets[DatasetNames.VIRTUE_TS].get(d.virtue_id).getName();
   }
 
   /**

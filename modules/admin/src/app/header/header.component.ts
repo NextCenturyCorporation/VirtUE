@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule } from '@angular/core';
+import { Component, OnInit, NgModule, ViewEncapsulation } from '@angular/core';
 
 import { AuthenticationService } from '../shared/services/authentication.service';
 
@@ -26,6 +26,20 @@ export class HeaderComponent implements OnInit {
     {value: 'Dashboard', link: '/dashboard'},
     {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
+    {value: 'Running Virtues', link: '/virtue-instances'},
+    {value: 'Running Vms', link: '/vm-instances'},
+    // {value: 'Running Instances',
+    //   dropdownOptions: [
+    //     {value: 'Running Virtues', link: '/virtue-instances'},
+    //     {value: 'Running Vms', link: '/vm-instances'},
+    //   ]
+    // },
+    // {value: 'Templates',
+    //   dropdownOptions: [
+    //     {value: 'Virtue Templates', link: '/virtues'},
+    //     {value: 'Virtual Machine Templates', link: '/vm-templates'}
+    //   ]
+    // },
     {value: 'Virtue Templates', link: '/virtues'},
     {value: 'Virtual Machine Templates', link: '/vm-templates'},
     {value: 'Applications', link: '/applications'}

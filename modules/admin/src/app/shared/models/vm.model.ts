@@ -51,7 +51,7 @@ export class VirtualMachine extends Item {
       this.enabled = vmObj.enabled;
       this.os = vmObj.os;
       this.applicationIds = vmObj.applicationIds;
-      this.version = vmObj.version;
+      this.version = vmObj.version; // currently doesn't exist, figure out later
       this.lastEditor = vmObj.lastEditor;
       this.modificationDate = vmObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
@@ -61,10 +61,10 @@ export class VirtualMachine extends Item {
 
 
   /**
-   * @return the VMS subdomain
+   * @return the VM_TS subdomain
    */
   getSubdomain(): string {
-    return Subdomains.VMS;
+    return Subdomains.VM_TS;
   }
 
   /**

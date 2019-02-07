@@ -10,6 +10,7 @@ import { VirtualMachine } from '../../../shared/models/vm.model';
 
 import {
   Column,
+  BlankColumn,
   TextColumn,
   ListColumn,
   SORT_DIR
@@ -60,7 +61,7 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
       routerService: RouterService,
       dialog: MatDialog) {
     super(routerService, dialog);
-    this.childDatasetName = DatasetNames.VMS;
+    this.childDatasetName = DatasetNames.VM_TS;
   }
 
   /**
@@ -115,7 +116,8 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
                                                                                                 () => this.getSubMenu()),
       new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => v.getApps(),  this.formatName),
       new TextColumn('OS',      2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
-      new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      // new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      new BlankColumn(1),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
   }

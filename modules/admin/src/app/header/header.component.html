@@ -3,8 +3,24 @@
     <span class="navbar-brand">Savior VirtUE</span>
     <ng-container *ngIf=authService.isAuthenticated()>
       <ul class="nav navbar-nav">
-          <li *ngFor="let n of getNavOptions()" class="nav-item" routerLinkActive="active">
-            <a class="nav-link" routerLink="{{ n.link }}" title="{{ n.value }}">{{ n.value }}</a>
+          <li *ngFor="let option of getNavOptions()" class="nav-item" routerLinkActive="active">
+
+            <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.value }}">{{ option.value }}</a>
+            <!-- <div *ngIf="option.dropdownOptions !== undefined">
+              <ng2-dropdown>
+                  <ng2-dropdown-button _ngcontent-c0="" class="ng2-dropdown-button customButton">
+                    <div NgClass="{}">
+                      <span _ngcontent-c2="" class="ng2-dropdown-button__label"> {{ option.value }} </span>
+                    </div>
+                  </ng2-dropdown-button>
+                  <ng2-dropdown-menu  class="nav-item" >
+                      <ng2-menu-item class="nav-item"  *ngFor="let page of option.dropdownOptions">
+                          <a class="nav-link" routerLink="{{ page.link }}" title="{{ page.value }}">{{ page.value }}</a>
+                      </ng2-menu-item>
+                  </ng2-dropdown-menu>
+              </ng2-dropdown>
+            </div> -->
+
           </li>
       </ul>
       <ul class="nav navbar-nav" ng-style="{margin-left: auto; margin-right: 0;float: right;}">

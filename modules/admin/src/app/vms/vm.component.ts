@@ -44,7 +44,7 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} Virtual Machine: &nbsp;&nbsp;{{item.name}}</h1>
+      <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
     <div id="content-main">
       <div id="content" class="content">
@@ -102,7 +102,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
 
     this.item = new VirtualMachine();
 
-    this.datasetName = DatasetNames.VMS;
+    this.datasetName = DatasetNames.VM_TS;
     this.childDatasetName = DatasetNames.APPS;
 
   }
@@ -159,17 +159,24 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
+    this.usageTab.update({
+      mode: this.mode,
+      [DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS],
+      [DatasetNames.VMS]: this.datasets[DatasetNames.VMS],
+    });
   }
 
   /**
-   * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
-   * been given.
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS];
   }
+
+  getTitle(): string {
+    return this.mode + " Virtual Machine Template:  " + this.item.name;
+  }
+
 
   /**
    * create and fill the fields the backend expects to see, pull in/record any

@@ -8,10 +8,13 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
+import { VirtualMachineInstance } from '../../../shared/models/vm-instance.model';
 import { Virtue } from '../../../shared/models/virtue.model';
+import { VirtueInstance } from '../../../shared/models/virtue-instance.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
 import {
@@ -57,7 +60,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
    * Tables may need filters.
    * Change any to the correct type (probably "VirtueInstance" or something)
    */
-  @ViewChild('usageTable') private usageTable: GenericTableComponent<any>;
+  @ViewChild('instanceTable') private instanceTable: GenericTableComponent<any>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: VirtualMachine;
@@ -81,7 +84,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
   init(mode: Mode): void {
     this.setMode(mode);
     this.setUpParentTable();
-    this.setUpUsageTable();
+    this.setUpInstanceTable();
   }
 
   /**
@@ -108,8 +111,8 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
    *                Either attribute is optional.
    */
   update(changes: any): void {
-    if (changes.allVirtues) {
-      let allVirtues: DictList<Item> = changes.allVirtues;
+    if (changes[DatasetNames.VIRTUE_TS]) {
+      let allVirtues: DictList<Item> = changes[DatasetNames.VIRTUE_TS];
       let parents: Item[] = [];
 
       for (let v of allVirtues.asList()) {
@@ -119,6 +122,19 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
       }
       this.parentTable.populate(parents);
     }
+
+    // Can't be implemented yet because VM instances don't come with a record of the template that was used to make them
+    // if (changes[DatasetNames.VMS]) {
+    //   let items: IndexedObj[] = [];
+    //   let vms: DictList<VirtualMachineInstance> = changes[DatasetNames.VMS];
+    //
+    //   for (let vm of vms.asList()) {
+    //     if (vm.templateId === this.item.getID()) {
+    //       items.push(vm);
+    //     }
+    //   }
+    //   this.instanceTable.populate(items);
+    // }
 
     if (changes.mode) {
       this.setMode(changes.mode);
@@ -177,15 +193,44 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
       editingEnabled: () => !this.inViewMode()
     });
   }
+  /**
+   * @return what columns should show up in [[parentTable]]
+   *         Links to the parent and the parent's children should only be clickable if not in view mode.
+   */
+  getInstanceColumns(): Column[] {
+    return [
+      new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
+                                                                                            () => this.getParentSubMenu()),
+      new ListColumn('Virtual Machines',  3, (v: Virtue) => v.getVms(),  this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
+      new TextColumn('Version',           2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',            3, this.formatStatus, SORT_DIR.ASC)
+    ];
+  }
+
+  /**
+   * @return a list of links to show up as a submenu on each parent. Links are to edit the parent, or
+   *         view the parent. Only show this list if page is in view mode.
+   */
+  getInstanceSubMenu(): SubMenuOptions[] {
+    if (this.mode === Mode.VIEW) {
+      return [
+        new SubMenuOptions("View", () => this.inViewMode(), (v: Virtue) => this.viewItem(v)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (v: Virtue) => this.editItem(v))
+      ];
+    }
+    else {
+      return [];
+    }
+  }
 
   /**
    * Sets up the table of parents
    *
    * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
-  setUpUsageTable(): void {
-    this.usageTable.setUp({
-      cols: [],
+  setUpInstanceTable(): void {
+    this.instanceTable.setUp({
+      cols: this.getInstanceColumns(),
       filters: [],
       tableWidth: 0.66,
       noDataMsg: "Not yet implemented",

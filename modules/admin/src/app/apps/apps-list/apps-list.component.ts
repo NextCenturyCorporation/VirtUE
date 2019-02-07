@@ -58,11 +58,8 @@ export class AppsListComponent extends ItemListComponent {
     // "version" as in "this is the 4th change I've made to this Chrome application item".
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the app list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.APPS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.APPS;
   }
 
   /**

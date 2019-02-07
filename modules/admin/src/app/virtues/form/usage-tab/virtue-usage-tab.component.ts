@@ -10,8 +10,10 @@ import { DialogsComponent } from '../../../dialogs/dialogs.component';
 import { RouterService } from '../../../shared/services/router.service';
 
 import { Item } from '../../../shared/models/item.model';
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
+import { VirtueInstance } from '../../../shared/models/virtue-instance.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
 import {
@@ -50,8 +52,7 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
   /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
 
-  /** #uncommented unimplemented */
-  @ViewChild('usageTable') private usageTable: GenericTableComponent<Number>;
+  @ViewChild('instanceTable') private instanceTable: GenericTableComponent<Number>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
@@ -75,7 +76,7 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
   init(mode: Mode): void {
     this.setMode(mode);
     this.setUpParentTable();
-    this.setUpUsageTable();
+    this.setUpInstanceTable();
   }
 
   /**
@@ -107,9 +108,9 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
       this.setUpParentTable();
     }
 
-    if (changes.allUsers) {
+    if (changes[DatasetNames.USERS]) {
       let items: Item[] = [];
-      let allUsers: DictList<User> = changes.allUsers;
+      let allUsers: DictList<User> = changes[DatasetNames.USERS];
 
       for (let u of allUsers.asList()) {
         if (u.virtueTemplates.has(this.item.getID())) {
@@ -117,6 +118,18 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
         }
       }
       this.parentTable.populate(items);
+    }
+
+    if (changes[DatasetNames.VIRTUES]) {
+      let items: IndexedObj[] = [];
+      let virtues: DictList<VirtueInstance> = changes[DatasetNames.VIRTUES];
+
+      for (let v of virtues.asList()) {
+        if (v.templateId === this.item.getID()) {
+          items.push(v);
+        }
+      }
+      this.instanceTable.populate(items);
     }
 
   }
@@ -168,17 +181,40 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
     });
   }
 
+
+  /**
+   * @return what columns should show up in [[parentTable]]
+   *         Links to the parent and the parent's children should only be clickable if not in view mode.
+   */
+  getInstanceColumns(): Column[] {
+    return [
+      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC, undefined,
+                                                                                            () => this.getInstanceSubMenu()),
+      new TextColumn('User',         2, (v: VirtueInstance) => v.user,       SORT_DIR.ASC),
+      new ListColumn('Active VMs',  2, (v: VirtueInstance) => v.getVms(),  this.formatName, (i: Item) => this.viewItem(i)),
+      // new ListColumn('Applications',      2, (v: VirtueInstance) => []),
+      // put this in once you actually pull the template in
+      // new TextColumn('Template Version',  1, (v: VirtueInstance) => v.getTemplateVersion(),  SORT_DIR.ASC),
+      new TextColumn('State',            1,  (v: VirtueInstance) => String(v.state), SORT_DIR.ASC)
+    ];
+  }
+  getInstanceSubMenu(): SubMenuOptions[] {
+    return [
+      new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => v.stop()),
+    ];
+  }
+
   /**
    * Sets up the table of parents
    *
    * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
-  setUpUsageTable(): void {
-    this.usageTable.setUp({
-      cols: [],
+  setUpInstanceTable(): void {
+    this.instanceTable.setUp({
+      cols: this.getInstanceColumns(),
       filters: [],
       tableWidth: 0.66,
-      noDataMsg: "Not yet implemented",
+      noDataMsg: "There are no running instances of this template.",
       editingEnabled: () => !this.inViewMode()
     });
   }

@@ -48,11 +48,8 @@ export class VmListComponent extends ItemListComponent {
     super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the vm list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VMS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.VM_TS;
   }
 
   /**
@@ -76,7 +73,7 @@ export class VmListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS];
   }
 
 

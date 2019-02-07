@@ -55,7 +55,7 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} Virtue: &nbsp;&nbsp;{{item.name}}</h1>
+      <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
     <div id="content-main">
       <div id="content" class="content">
@@ -125,8 +125,8 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     // mode is not 'CREATE'
     this.item = new Virtue();
 
-    this.datasetName = DatasetNames.VIRTUES;
-    this.childDatasetName = DatasetNames.VMS;
+    this.datasetName = DatasetNames.VIRTUE_TS;
+    this.childDatasetName = DatasetNames.VM_TS;
 
   }
 
@@ -209,11 +209,14 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
+    this.settingsTab.update({[DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS], mode: this.mode});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allUsers: this.datasets[DatasetNames.USERS], mode: this.mode});
+    this.usageTab.update({
+                          [DatasetNames.USERS]: this.datasets[DatasetNames.USERS],
+                          [DatasetNames.VIRTUES]: this.datasets[DatasetNames.VIRTUES],
+                          mode: this.mode});
   }
 
   /**
@@ -225,12 +228,18 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   getNeededDatasets(): DatasetNames[] {
     return [
             DatasetNames.APPS,
-            DatasetNames.VMS,
+            DatasetNames.VM_TS,
             DatasetNames.PRINTERS,
             DatasetNames.FILE_SYSTEMS,
+            DatasetNames.VIRTUE_TS,
             DatasetNames.VIRTUES,
             DatasetNames.USERS];
   }
+
+  getTitle(): string {
+    return this.mode + " Virtue Template:  " + this.item.name;
+  }
+
 
   /**
    * Pull in/record any uncollected inputs, and check that the item is valid to be saved

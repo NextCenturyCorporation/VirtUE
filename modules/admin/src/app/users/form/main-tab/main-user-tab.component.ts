@@ -65,7 +65,7 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
       routerService: RouterService,
       dialog: MatDialog) {
     super(routerService, dialog);
-    this.childDatasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
   /**
