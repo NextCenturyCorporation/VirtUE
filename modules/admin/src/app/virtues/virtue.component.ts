@@ -6,6 +6,7 @@ import { MatDialog, MatSlideToggleModule } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 import 'rxjs/add/operator/map';
+import { catchError, tap } from 'rxjs/operators';
 
 import { Subdomains } from '../shared/services/subdomains.enum';
 import { RouterService } from '../shared/services/router.service';
@@ -233,19 +234,60 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    *
    * @override [[ItemFormComponent.afterPullComplete]]()
    */
-  afterPullComplete(): Promise<void> {
-    // return this.dataRequestService.getRecords('/admin/securityGroup')
+  afterPullComplete(): Promise<any> {
+    // So, aws adds a default permission. But only when it learns about the security group. Which happens either when you
+    // try to add a new permission, or when you start up the virtue for the first time.
+    // So if you make this request and get nothing back, try requesting to authorize something invalid, to trigger
+    // the creation of the default, and then make the GET request again.
     return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
-      .pipe(map((response: any) => {
-        if (response !== undefined) {
-          for (let secGrp of response) {
-            this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.initializeNetworkPerms(response);
           }
-        }
-      })).toPromise();
+        }),
+        catchError(this.pingAndRetryOnce(this.item.getID()))
+      )
+      .toPromise();
   }
 
+  pingAndRetryOnce(templateID: string) {
+    return (err: any) => {
+      let badPermission = new NetworkPermission({'templateId': templateID, 'securityGroupId': "2", 'ipProtocol': 'tcp'});
+      return this.addRemoveSecGrpPermission(templateID, 'revoke', badPermission)
+        .catch(response => {
+            setTimeout(() => {
+              this.retryGetSecurityPerms(templateID);
+            }, 300);
+        });
+    };
+  }
 
+  retryGetSecurityPerms(templateID: string): Promise<any> {
+    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.initializeNetworkPerms(response);
+          }
+        }),
+        catchError(this.ignoreError())
+      )
+      .toPromise();
+  }
+
+  ignoreError() {
+    return (err: any) => {
+      return new Observable<HttpEvent<any>>( () => err);
+    };
+  }
+
+  initializeNetworkPerms(netPerms) {
+    for (let secGrp of netPerms) {
+      this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
+    }
+    this.settingsTab.update();
+  }
 
   /**
    * This page needs all 6 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
@@ -257,6 +299,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     return [
             DatasetNames.APPS,
             DatasetNames.VM_TS,
+            DatasetNames.VMS,
             DatasetNames.PRINTERS,
             DatasetNames.FILE_SYSTEMS,
             DatasetNames.VIRTUE_TS,
@@ -265,7 +308,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   getTitle(): string {
-    return this.mode + " Virtue Template:  " + this.item.name;
+    return this.mode + " Virtue Template:  " + (this.item.getName() ? this.item.getName() : "");
   }
 
 
@@ -299,21 +342,34 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     return true;
   }
 
-  afterSave(): void {
-    // revoke this virtue's security permissions, and add the ones locally here. Since it appears updating is impossible.
-    this.updateVirtueSecurityGroupPermissions();
+  afterSave(returnedObj?: any): void {
+    // needs to be done this way so permissions added during the creation/duplication of a virtue actually get
+    // saved; remember the item doesn't have an ID until after it gets saved.
+    let virtueTemplateID = this.item.getID();
+    if (this.mode === Mode.CREATE) {
+      virtueTemplateID = new Virtue(returnedObj).getID();
+    }
+    this.updateVirtueSecurityGroupPermissions(virtueTemplateID);
   }
 
-  updateVirtueSecurityGroupPermissions(): void {
+  updateVirtueSecurityGroupPermissions(virtueTemplateID: string): void {
     for (let secPerm of this.item.newSecurityPermissions) {
-      this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'authorize'], JSON.stringify(secPerm))
-      .toPromise().then(() => {});
+      secPerm.templateId = virtueTemplateID;
+      this.authorizeSecGrpPermission(virtueTemplateID, secPerm);
     }
 
     for (let secPerm of this.item.revokedSecurityPermissions) {
-      this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [this.item.getID(), 'revoke'], JSON.stringify(secPerm))
-      .toPromise().then(() => {});
+      secPerm.templateId = virtueTemplateID;
+      this.revokeSecGrpPermission(virtueTemplateID, secPerm);
     }
+  }
+
+  authorizeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm).then(() => {});
+  }
+
+  revokeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm).then(() => {});
   }
 
   /**

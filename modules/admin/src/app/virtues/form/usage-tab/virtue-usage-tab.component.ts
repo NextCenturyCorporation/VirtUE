@@ -14,6 +14,7 @@ import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { VirtueInstance } from '../../../shared/models/virtue-instance.model';
+import { VirtualMachineInstance } from '../../../shared/models/vm-instance.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
 import {
@@ -131,7 +132,6 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
       }
       this.instanceTable.populate(items);
     }
-
   }
 
   /**
@@ -188,20 +188,26 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
    */
   getInstanceColumns(): Column[] {
     return [
-      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC, undefined,
-                                                                                            () => this.getInstanceSubMenu()),
+      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC,
+                                              (v: VirtueInstance) => this.toDetailsPage(v), () => this.getInstanceSubMenu()),
       new TextColumn('User',         2, (v: VirtueInstance) => v.user,       SORT_DIR.ASC),
-      new ListColumn('Active VMs',  2, (v: VirtueInstance) => v.getVms(),  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Active VMs',  2, (v: VirtueInstance) => v.getVms(),  this.formatName,
+                                            (vm: VirtualMachineInstance) => this.viewVmInstance(vm)),
       // new ListColumn('Applications',      2, (v: VirtueInstance) => []),
       // put this in once you actually pull the template in
       // new TextColumn('Template Version',  1, (v: VirtueInstance) => v.getTemplateVersion(),  SORT_DIR.ASC),
       new TextColumn('State',            1,  (v: VirtueInstance) => String(v.state), SORT_DIR.ASC)
     ];
   }
+
   getInstanceSubMenu(): SubMenuOptions[] {
     return [
       new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => v.stop()),
     ];
+  }
+
+  viewVmInstance(vm): void {
+    this.toDetailsPage(new VirtualMachineInstance(vm));
   }
 
   /**

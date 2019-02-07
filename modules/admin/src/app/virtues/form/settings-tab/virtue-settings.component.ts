@@ -178,19 +178,18 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    *                if the paste-permission table is to be updated.
    *                Either attribute is optional.
    */
-  update(changes: any): void {
-    if (changes[DatasetNames.VIRTUE_TS]) {
-      this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
+  update(changes?: any): void {
+    if (changes) {
+      if (changes[DatasetNames.VIRTUE_TS]) {
+        this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
+      }
+
+      if (changes.mode) {
+        this.setMode(changes.mode);
+        this.setUpPasteableVirtuesTable();
+      }
     }
 
-    if (changes.mode) {
-      this.setMode(changes.mode);
-      this.setUpPasteableVirtuesTable();
-    }
-
-    // if (changes.networks) {
-    //   // TODO update something
-    // }
     // if (changes.printers) {
     //   // TODO update something
     // }
@@ -430,21 +429,27 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     return [
       new TextColumn('Direction',   1, (netPerm: NetworkPermission) => this.getDirection(netPerm), SORT_DIR.ASC),
       new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp, SORT_DIR.ASC),
-      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => String(netPerm.ipProtocol), SORT_DIR.ASC),
-      new TextColumn('From Port',   2, (netPerm: NetworkPermission) => String(netPerm.fromPort), SORT_DIR.ASC),
-      new TextColumn('Remote Port', 2, (netPerm: NetworkPermission) => String(netPerm.toPort), SORT_DIR.ASC),
+      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => this.formatIfBlank(netPerm.ipProtocol), SORT_DIR.ASC),
+      new TextColumn('Port Range',   2, (netPerm: NetworkPermission) => this.formatPortRange(netPerm), SORT_DIR.ASC),
       new TextColumn('Description', 3, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
       new IconColumn('Revoke',      1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
-      // new RadioButtonColumn('Incoming',  1, 'ingress', true),
-      // new RadioButtonColumn('Outgoing',  1, 'ingress', false),
-      // new InputFieldColumn('CIDR IP',        2, 'cidrIp', (netPerm: NetworkPermission) => netPerm.cidrIp, true),
-      // new DropdownColumn(  'Protocol',    2, 'ipProtocol', () => Object.values(NetworkProtocols),
-      //                     (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.ipProtocol)),
-      // new InputFieldColumn('From Port',  1, 'fromPort', (netPerm: NetworkPermission) => String(netPerm.fromPort)),
-      // new InputFieldColumn('Remote Port', 1, 'toPort', (netPerm: NetworkPermission) => String(netPerm.toPort)),
-      // new InputFieldColumn('Description', 3, 'description', (netPerm: NetworkPermission) => String(netPerm.description), false),
-      // new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
+  }
+
+  formatPortRange( netPerm: NetworkPermission ) {
+    if (netPerm.fromPort === undefined && netPerm.toPort === undefined) {
+      return "";
+    }
+    return netPerm.fromPort + " - " + netPerm.toPort;
+  }
+
+  formatIfBlank( value ) {
+    if (value === undefined) {
+      return "";
+    }
+    else {
+      return String(value);
+    }
   }
 
   getDirection(netPerm: NetworkPermission): string {
@@ -490,12 +495,22 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   }
 
   activateNetworkPermissionModal(): void {
+    /** Note: networkPermissions need to hold the id of their virtue template.
+     * When creating or duplicating, that ID isn't given until after the object is saved.
+     * Luckily (sort-of), networkPermissions can't be saved with the virtue, and must be saved separately.
+     * Therefore, we have to:
+     *    - load old permissions using this.item.getID(), if it's there
+     *          (in case it's in duplicate mode - we want that template's permissions)
+     *    - create the permissions without a templateID.
+     *    - save the virtue
+     *    - use the returned virtue object to get the correct templateID
+     *    - save the items using the new templateID.
+     *
+     * Be mindful of changes.
+     */
     let params = {
       height: '70%',
-      width: '40%',
-      data: {
-        templateID: this.item.getID()
-      }
+      width: '40%'
     };
 
     let dialogRef = this.dialog.open( NetworkPermissionModalComponent, params);

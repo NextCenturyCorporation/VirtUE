@@ -20,7 +20,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class NetworkPermissionModalComponent extends GenericPageComponent implements OnInit {
 
-  /** What the containing component watches, to get the user's selections back out of this modal. */
   getNetPerm = new EventEmitter();
 
   netPerm: NetworkPermission = new NetworkPermission();
@@ -29,28 +28,16 @@ export class NetworkPermissionModalComponent extends GenericPageComponent implem
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    *
    * @param dialogRef injected, is a reference to the modal dialog box itself.
-   * @param data is defined in calling component, holds the initial selections
    */
   constructor(
       routerService: RouterService,
       dialog: MatDialog,
 
       /** injected, is a reference to the modal dialog box itself. */
-      public dialogRef: MatDialogRef<NetworkPermissionModalComponent>,
-
-      /** holds the initial selections, and possibly a SelectionMode */
-      @Inject(MAT_DIALOG_DATA) public data: any
+      public dialogRef: MatDialogRef<NetworkPermissionModalComponent>
     ) {
       super(routerService, dialog);
-
-      if (data && data['templateID']) {
-        this.netPerm = new NetworkPermission(data);
-      }
-      else {
-        console.log("No field 'templateID' in data input to modal");
-        this.dialogRef.close();
-      }
-
+      this.netPerm = new NetworkPermission();
   }
 
   ngOnInit(): void {

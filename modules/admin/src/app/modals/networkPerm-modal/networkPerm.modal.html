@@ -34,7 +34,7 @@
 
     <div class="mui-row">
       <div class="mui-col-md-12 padding-left-0">
-        CIDR block for this permission
+        CIDR-style IP block for this permission
       </div>
     </div>
     <div class="mui-row">
@@ -47,19 +47,19 @@
 
 
     <div class="mui-row">
-      <div class="mui-col-md-6 padding-left-0">
-        Local port
-      </div>
-      <div class="mui-col-md-6 padding-left-0">
-        Remote port
+      <div class="mui-col-md-7 padding-left-0">
+        Port range:
       </div>
     </div>
     <div class="mui-row">
-      <div class="mui-col-md-6 padding-left-0">
-        <input matInput type="text" placeholder="Local port" [(ngModel)]="netPerm.fromPort" name="fromPort"/>
+      <div class="mui-col-md-3 padding-left-0">
+        <input matInput type="text" placeholder="Lower bound" [(ngModel)]="netPerm.fromPort" name="fromPort"/>
       </div>
-      <div class="mui-col-md-6 padding-left-0">
-        <input matInput type="text" placeholder="Remote port"[(ngModel)]="netPerm.toPort" name="toPort"/>
+      <div class="mui-col-md-1" style="vertical-align: middle">
+        to
+      </div>
+      <div class="mui-col-md-3 padding-left-0">
+        <input matInput type="text" placeholder="Upper bound"[(ngModel)]="netPerm.toPort" name="toPort"/>
       </div>
     </div>
     <br>

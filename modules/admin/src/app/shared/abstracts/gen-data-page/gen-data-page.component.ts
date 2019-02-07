@@ -19,6 +19,7 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
+import { NetworkPermission } from '../../models/networkPerm.model';
 import { Toggleable } from '../../models/toggleable.interface';
 
 import { Subdomains } from '../../services/subdomains.enum';
@@ -371,16 +372,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    * @param onSuccess a function to call (only) after the saving process has successfully completed.
    */
-  updateItem(obj: IndexedObj, onSuccess?: (obj?: IndexedObj, updatedObject?: IndexedObj) => void): void {
+  updateItem(obj: IndexedObj, onSuccess?: (updatedObject?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.updateRecord(this.getRemoteSubdomain(obj), obj.getID(), obj.getFormatForSave()).subscribe(
       updatedObject => {
         if (onSuccess) {
           if (updatedObject !== null) {
-            onSuccess(obj, updatedObject);
+            onSuccess(updatedObject);
           }
           else {
-            onSuccess(obj);
+            onSuccess();
           }
         }
         else {
@@ -401,16 +402,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
-  createItem(obj: IndexedObj, onSuccess?: (obj?: IndexedObj, createdObj?: IndexedObj) => void): void {
+  createItem(obj: IndexedObj, onSuccess?: (createdObj?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.createRecord(this.getRemoteSubdomain(obj), obj.getFormatForSave()).subscribe(
       createdObj => {
         if (onSuccess) {
           if (createdObj !== null) {
-            onSuccess(obj, createdObj);
+            onSuccess(createdObj);
           }
           else {
-            onSuccess(obj);
+            onSuccess();
           }
         }
         else {
@@ -458,5 +459,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       sub.unsubscribe();
       this.refreshPage();
     });
+  }
+
+
+  addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): Promise<any> {
+    if (! (action === 'authorize' || action === 'revoke') ) {
+      console.log("invalid request");
+      return new Promise<any>(() => {});
+    }
+
+    return this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [virtueTemplateID, action], JSON.stringify(secPerm))
+      .toPromise();
   }
 }

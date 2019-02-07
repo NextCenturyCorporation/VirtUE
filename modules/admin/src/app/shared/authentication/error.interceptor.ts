@@ -31,15 +31,20 @@ export class ErrorInterceptor implements HttpInterceptor {
               }
 
               if (errCode === 255) {
-                console.log("You may have tried to delete something that other items reference. The backend isn't " +
-                "(as of late Jan 2019) set up to handle that - there should be a check on the frontend though, or at " +
-                "least an informative error message.");
+                let msg = "You may have tried to delete something that other items reference. The backend isn't " +
+                "currently set up to handle that. ";
+                alert(msg);
+                console.log(msg);
               }
-              return new Observable<HttpEvent<any>>( () => err);
-            }
 
-            const error = err.message || err.statusText;
-            return throwError(error);
+              if (errCode === 300) {
+                alert(err.error);
+                return new Observable<HttpEvent<any>>( () => err);
+
+              }
+              return throwError(err);
+            }
+            return throwError(err);
         }))
         ;
     }
