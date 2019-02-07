@@ -71,12 +71,15 @@ set -e
 
 [ $verbose -eq 1 ] && set -x
 
+# Detect the network device. Assumes there is just one.
+netDevice=$(systemd-resolve --status | sed -n 's/^Link .*(\(.*\))/\1/p')
+
 # set hostname and make DHCP resolve against the DC
 cat > /etc/netplan/99-virtue.yaml <<EOF
 network:
     version: 2
     ethernets:
-        eth0:
+        ${netDevice}:
           nameservers:
             addresses: [${dcip}]
             search: [${domain}]
@@ -88,7 +91,7 @@ netplan apply
 # https://bugs.launchpad.net/netplan/+bug/1759014/comments/5
 # https://askubuntu.com/questions/1001241/can-netplan-configured-nameservers-supersede-not-merge-with-the-dhcp-nameserve
 
-echo UseDNS=false | sudo tee -a /run/systemd/network/10-netplan-eth0.network
+echo UseDNS=false | sudo tee -a /run/systemd/network/10-netplan-${netDevice}.network
 sudo systemctl restart systemd-networkd
 
 sudo sed -i '/preserve_hostname: false/c\preserve_hostname: true' /etc/cloud/cloud.cfg
