@@ -243,7 +243,7 @@ public class LoginPage {
 			try {
 				doLogin(domain, username, password);
 			} catch (ProcessingException e) {
-				errorMessage.setText("Server is not connected");
+				errorMessage.setText("Unable to connect to server");
 				errorMessage.setForeground(Color.RED);
 				container.validate();
 				container.repaint();
