@@ -103,8 +103,8 @@ export class VmInstanceListComponent extends ItemListComponent {
   getSubMenu(): SubMenuOptions[] {
     return [
       // new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => {}),
-      new SubMenuOptions("Stop",   (vm: VirtualMachineInstance) => !vm.isStopped(),
-                                                    (vm: VirtualMachineInstance) => this.stopVm(vm)),
+      // new SubMenuOptions("Stop",   (vm: VirtualMachineInstance) => !vm.isStopped(),
+      //                                               (vm: VirtualMachineInstance) => this.stopVm(vm)),
     ];
   }
 

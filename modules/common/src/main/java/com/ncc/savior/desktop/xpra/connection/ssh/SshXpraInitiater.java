@@ -93,6 +93,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 			session = getConnectedSessionWithRetries();
 			session.setTimeout(10000);
 			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
+			command+=" --systemd-run=no";
 			// command = "sudo systemctl enable xpra.socket;" + command;
 			channel = getConnectedChannel(command, session, null);
 			channel.setErrStream(System.err);

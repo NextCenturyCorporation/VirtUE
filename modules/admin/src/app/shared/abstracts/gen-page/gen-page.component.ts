@@ -91,14 +91,6 @@ export abstract class GenericPageComponent {
     this.routerService.toPreviousPage();
   }
 
-  stopVirtue(virtueID): void {
-
-  }
-
-  stopVm(vmID): void {
-
-  }
-
   /**
    * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
    * It could be merged with the modal creation below.

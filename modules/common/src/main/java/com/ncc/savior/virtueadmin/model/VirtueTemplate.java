@@ -68,8 +68,8 @@ public class VirtueTemplate {
 	private Collection<Printer> printers;
 
 	@ElementCollection()
-	@Schema(description = "List of the file systems that will be attached to the VMs when this virute is provisioned.")
-	private Collection<FileSystemPermission> fileSystems;
+	@Schema(description = "List of permissions for the file systems that will be attached to the VMs when this virute is provisioned.")
+	private Collection<FileSystemPermission> fileSystemPerms;
 
 	@ElementCollection()
 	@Schema(description = "Unused")
@@ -104,12 +104,12 @@ public class VirtueTemplate {
 		this.awsTemplateName = template.getAwsTemplateName();
 		this.printers = template.getPrinters();
 		this.printerIds = template.getPrinterIds();
-		this.fileSystems = template.getFileSystemPermissions();
+		this.fileSystemPerms = template.getFileSystemPermissions();
 
 		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
 
-		if (this.fileSystems == null) {
-			this.fileSystems = new ArrayList<FileSystemPermission>();
+		if (this.fileSystemIds == null) {
+			this.fileSystemIds = new ArrayList<String>();
 		}
 		if (this.allowedPasteTargetIds == null) {
 			this.allowedPasteTargetIds = new ArrayList<String>();
@@ -128,7 +128,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -145,7 +144,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -164,7 +162,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -183,7 +180,6 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
-		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -317,7 +313,19 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	public Collection<FileSystemPermission> getFileSystemPermissions() {
+	public Collection<String> getFileSystemIds() {
+		if (fileSystems != null) {
+			fileSystemIds = new ArrayList<String>();
+			for (FileSystem fs : fileSystems) {
+				fileSystemIds.add(fs.getId());
+			}
+		}
+		// return new ArrayList<String>();
+		return fileSystemIds;
+	}
+
+	@JsonIgnore
+	public Collection<FileSystem> getFileSystems() {
 		return fileSystems;
 	}
 
@@ -330,19 +338,6 @@ public class VirtueTemplate {
 	public void setVmTemplateIds(Collection<String> vmTemplateIds) {
 		this.vmTemplates = null;
 		this.vmTemplateIds = vmTemplateIds;
-	}
-
-	@JsonSetter
-	public void setFileSystemPermissions(Collection<FileSystemPermission> fileSystems) {
-		this.fileSystems = fileSystems;
-	}
-
-	@JsonSetter
-	public void setFileSystems(Collection<FileSystem> fileSystems) {
-		this.fileSystems = new ArrayList<FileSystemPermission>();
-		for (FileSystem fs : fileSystems) {
-			this.fileSystems.add(new FileSystemPermission(fs));
-		}
 	}
 
 	@JsonSetter
@@ -381,29 +376,11 @@ public class VirtueTemplate {
 		printerIds.add(newPrinter.getId());
 	}
 
-	public void addFileSystemPermission(FileSystemPermission newFileSystemPermission) {
-		if (fileSystems == null) {
-			fileSystems = new ArrayList<FileSystemPermission>();
-		}
-		fileSystems.add(newFileSystemPermission);
-	}
-
 	public void removePrinter(Printer printer) {
 		Iterator<Printer> itr = getPrinters().iterator();
 		while (itr.hasNext()) {
 			Printer p = itr.next();
 			if (p.getId().equals(printer.getId())) {
-				itr.remove();
-				break;
-			}
-		}
-	}
-
-	public void removeFileSystemPermission(FileSystemPermission fileSystem) {
-		Iterator<FileSystemPermission> itr = getFileSystemPermissions().iterator();
-		while (itr.hasNext()) {
-			FileSystemPermission fs = itr.next();
-			if (fs.getFileSystemId().equals(fileSystem.getFileSystemId())) {
 				itr.remove();
 				break;
 			}

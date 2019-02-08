@@ -22,6 +22,7 @@ import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
+import com.ncc.savior.virtueadmin.infrastructure.windows.WindowsDisplayServerManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -53,13 +54,16 @@ public class DesktopVirtueService {
 	@Value("${virtue.aws.windows.password}")
 	private String windowsPassword;
 	private Set<PollHandler> pollHandlers;
+	private WindowsDisplayServerManager wdsManager;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager, IResourceManager resourceManager, CifsManager cifsManager) {
+			IApplicationManager applicationManager, IResourceManager resourceManager, CifsManager cifsManager,
+			WindowsDisplayServerManager wdsManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
 		this.resourceManager = resourceManager;
+		this.wdsManager = wdsManager;
 		this.pollHandlers = new HashSet<PollHandler>();
 		addPollHandler(cifsManager.getPollHandler());
 	}
@@ -126,13 +130,21 @@ public class DesktopVirtueService {
 		if (OS.LINUX.equals(vm.getOs())) {
 			applicationManager.startApplicationOnVm(vm, application, params, 15);
 		} else {
-
+			wdsManager.startApplication(vm, application, params,15);
 		}
 		String hostname = vm.getHostname();
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
-		if (OS.WINDOWS.equals(dva.getOs()) && windowsPassword != null) {
-			dva.setPrivateKey(windowsPassword);
+		if (OS.WINDOWS.equals(dva.getOs())) {
+			VirtualMachine wdsVm = wdsManager.getWindowsDisplayVm(vm.getId());
+			if (wdsVm != null) {
+				dva.setHostname(wdsVm.getHostname());
+				dva.setPort(wdsVm.getSshPort());
+				dva.setUserName(wdsVm.getUserName());
+				dva.setPrivateKey(wdsVm.getPrivateKey());
+			} else if (windowsPassword != null) {
+				dva.setPrivateKey(windowsPassword);
+			}
 		}
 		logger.debug("started app: " + dva);
 		return dva;

@@ -121,8 +121,8 @@ export class VirtueInstanceListComponent extends ItemListComponent {
 
   getSubMenu(): SubMenuOptions[] {
     return [
-      new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => this.viewItem(v.template)),
-      new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => this.stopVirtue(v)),
+      new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => this.viewItem(v.template))
+      // new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => this.stopVirtue(v)),
     ];
   }
 
