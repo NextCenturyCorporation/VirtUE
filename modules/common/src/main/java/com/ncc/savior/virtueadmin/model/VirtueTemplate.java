@@ -117,10 +117,7 @@ public class VirtueTemplate {
 
 		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
 		this.networkWhitelist = template.getNetworkWhitelist();
-
-		if (this.fileSystems == null) {
-			this.fileSystems = new ArrayList<FileSystem>();
-		}
+		
 		if (this.fileSystemIds == null) {
 			this.fileSystemIds = new ArrayList<String>();
 		}
@@ -144,7 +141,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
@@ -162,7 +158,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
@@ -182,7 +177,6 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
@@ -202,7 +196,6 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
-		this.fileSystems = new ArrayList<FileSystem>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
@@ -350,7 +343,7 @@ public class VirtueTemplate {
 		return fileSystemIds;
 	}
 
-	@JsonGetter
+	@JsonIgnore
 	public Collection<FileSystem> getFileSystems() {
 		return fileSystems;
 	}
@@ -376,7 +369,6 @@ public class VirtueTemplate {
 		this.fileSystemIds = fileSystemIds;
 	}
 
-	@JsonSetter
 	public void setFileSystems(Collection<FileSystem> fileSystems) {
 		this.fileSystems = fileSystems;
 	}
