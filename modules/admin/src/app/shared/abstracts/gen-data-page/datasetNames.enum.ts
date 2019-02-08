@@ -5,13 +5,13 @@
  * pages requesting the population of datasets.
  */
 export enum DatasetNames {
-  APPS = "allApps",
-  VM_TS = "allVmTemplates",
-  VIRTUE_TS = "allVirtueTemplates",
-  USERS = "allUsers",
-  PRINTERS = "allPrinters",
-  FILE_SYSTEMS = "allFileSystems",
-  VIRTUES = "allVirtues",
-  VMS = "allVms",
-  SENSORS = "allSensors"
+  APPS = "apps",
+  VM_TS = "vmTemplates",
+  VIRTUE_TS = "virtueTemplates",
+  USERS = "users",
+  PRINTERS = "printers",
+  FILE_SYSTEMS = "fileSystems",
+  VIRTUES = "virtues",
+  VMS = "vms",
+  SENSORS = "sensors"
 }

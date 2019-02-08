@@ -26,15 +26,10 @@ export interface DatasetType {
   /** the class members of this dataset should be created as. Apparently needs to be 'any'. */
   readonly class: any;
 
-  /**
-   * The name of the dataset attribute within this class. E.g. 'allApps', 'allUsers', etc.
-   *
-   * Specified as a Dataset enum to encapsulate that.
-   */
   readonly datasetName: DatasetNames;
 
   /**
-   * The dataset which members of this dataset have links to, and so which must be already loaded in order to fully-flesh
+   * The datasets which members of this dataset have links to, and so which must be already loaded in order to fully-flesh
    * out the items in this dataset.
    */
   readonly depends: DatasetNames[];

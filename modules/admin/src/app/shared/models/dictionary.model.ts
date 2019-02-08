@@ -41,8 +41,11 @@
    */
   add(key: string, e: T): void {
     if (key in this.dict) {
-      console.log("Key ", key + ": ", e, " already in dict.");
-      throw new Error("Key " + key + ": " + JSON.stringify(e) + " already in dict.");
+      console.log("Key ", key + " already in dict.");
+      if (JSON.stringify(e) === JSON.stringify(this.dict[key])) {
+        return;
+      }
+      throw new Error("Key " + key + ": " + JSON.stringify(e) + " already in dict:" + JSON.stringify(this.dict[key]));
       // return;
     }
     this.dict[key] = e;

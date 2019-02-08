@@ -33,7 +33,7 @@ mat-toolbar.mat-primary {
   color: rgb(255,255,255);
   display: block;
   margin: 0;
-  padding: 0 2.4rem;
+  padding: 0 1.4rem;
 }
 
 .mat-toolbar span.navbar-brand {
@@ -46,77 +46,16 @@ mat-toolbar.mat-primary {
   width: auto;
 }
 
-/* ng2-dropdown-button { */
-  /* background-color: rgb(46,41,78); */
-  /* color: rgb(0,0,255); */
-  /* display: block; */
-  /* margin: 0; */
-  /* padding: 0 2.4rem; */
-/* } */
-.ng2-dropdown-button__caret[_ngcontent-c2] .ng-star-inserted[_ngcontent-c2]{
-  color: 'white';
-}
+/* [_ngcontent-c2] {
+  color:white !important;
+  border: 0px solid rgb(0,0,0,0) !important;
+} */
 
-button.ng2-dropdown-button[_ngcontent-c2] {
-  background: rgb(0,0,0, 0) !important;
-  background-color: rgb(0,0,0, 0) !important;
-  color: rgb(0,0,0, 0) !important;
-  border-bottom: 1px solid rgb(0,0,0,0) !important;
-  /* border: rgb(46,41,78); */
-}
-
-.customButton {
-  background: rgb(0,0,0, 0) !important;
-  background-color: rgb(0,0,0, 0) !important;
-  color: rgb(0,0,0, 0) !important;
-  border-bottom: 1px solid rgb(0,0,0,0) !important;
-  /* border: rgb(46,41,78); */
-}
-
-.ng2-dropdown-button[_ngcontent-c2] {
-  background: rgb(0,0,0, 0) !important;
-  background-color: rgb(0,0,0, 0) !important;
-  color: rgb(0,0,0, 0) !important;
-  border-bottom: 1px solid rgb(0,0,0,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.nav-item .ng-star-inserted[_ngcontent-c0] {
-  background-color: rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.ng-star-inserted[_ngcontent-c0] {
-  background-color: rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.ng-dropdown[_ngcontent-c0] {
-  background-color: rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.ng-dropdown-container {
-  background-color: rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.ng2-dropdown-button[_ngcontent-c0][_nghost-c2] {
-  background-color: rgb(46,41,78,0) !important;
-  border-bottom: 1px solid rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-.ng2-dropdown-button[_ngcontent-c1] {
-  background-color: rgb(46,41,78,0) !important;
-  /* border: rgb(46,41,78); */
-}
-
-.ng2-dropdown-button__label[_ngcontent-c0] {
-  color: green;
-  background: rgb(0,0,0, 0) !important;
-  background-color: rgb(0,0,0, 0) !important;
-  border-bottom: 1px solid rgb(0,0,0,0) !important;
-}
-button {
-  background-color: rgb(46,41,78) !important;
-  /* border: rgb(46,41,78) */
-}
-.button {
-  background-color: rgb(46,41,78) !important;
-  /* border: rgb(46,41,78) */
+.mat-select {
+    background: rgb(0,0,0, 0) !important;
+    background-color: rgb(0,0,0, 0) !important;
+    border: 0px solid rgb(0,0,0,0) !important;
+    color: #fff !important;
+    font-size: 1.1rem;
+    margin-top: -5px;
 }

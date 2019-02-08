@@ -128,7 +128,6 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
         this.setItemAvailability(this.item, newStatus);
       }
     });
-
   }
 
   /**

@@ -44,6 +44,28 @@ import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode
 import { NetworkProtocols } from '../../protocols.enum';
 
 /**
+ * Temporary, just for showcasing the radio button column
+ */
+class Sensor {
+  public status: string;
+  constructor (
+    public name: string,
+    public level: VigilenceLevel
+  ) { }
+}
+
+/**
+ * This is also temporary, but will probably eventually just get moved to its own file.
+ */
+enum VigilenceLevel {
+  OFF = "off",
+  DEFAULT = "default",
+  LOW = "low",
+  HIGH = "high",
+  ADVERSARIAL = "adversarial"
+}
+
+/**
  * @class
  *
  * This class represents  a tab in [[VirtueComponent]], describing all the settings a virtue can be set to have.
@@ -88,6 +110,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   /** the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
+  @ViewChild('sensorTable') private sensorTable: GenericTableComponent<Printer>;
+
   /** re-classing item, to make it easier and less error-prone to work with.
   * Must be public to be used in template html file in production mode.
   */
@@ -120,6 +144,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.setUpNetworkPermsTable();
     this.setUpFileSysPermsTable();
     this.setUpPrinterTable();
+    this.setUpSensorTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
     // GenericTable would need to allow arbitrary objects/html in any column - so one could just as
@@ -172,6 +197,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.updateFileSysPermsTable();
     this.updatePrinterTable();
 
+    // temporary hard-coding
+    this.sensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
+                              new Sensor("In-Virtue Controller", VigilenceLevel.OFF),
+                              new Sensor("Logging - Aggregate", VigilenceLevel.OFF),
+                              new Sensor("Logging - Archive", VigilenceLevel.OFF),
+                              new Sensor("Certificates Infrastructure", VigilenceLevel.OFF)]);
   }
 
   /**
@@ -576,6 +607,33 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
 /************************************************************************************/
 
+  setUpSensorTable(): void {
+    if (this.sensorTable === undefined) {
+      return;
+    }
+    this.sensorTable.setUp({
+      cols: this.getSensorColumns(),
+      filters: [],
+      tableWidth: 1,
+      noDataMsg: "No sensors have been connected."
+    });
+  }
+
+  getSensorColumns(): Column[] {
+    return [
+      new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
+      new RadioButtonColumn("Off",          1, "level", VigilenceLevel.OFF),
+      new RadioButtonColumn("Default",      1, "level", VigilenceLevel.DEFAULT),
+      new RadioButtonColumn("Low",          1, "level", VigilenceLevel.LOW),
+      new RadioButtonColumn("High",         1, "level", VigilenceLevel.HIGH),
+      new RadioButtonColumn("Adversarial",  2, "level", VigilenceLevel.ADVERSARIAL),
+      new RadioButtonColumn("On",           1, "status", "ON"),
+      new RadioButtonColumn("Off",          1, "status", "OFF")
+    ];
+  }
+
+
+/************************************************************************************/
 
 
   /**

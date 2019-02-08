@@ -23,28 +23,23 @@ export class HeaderComponent implements OnInit {
 
   /** The list of items to appear in the header, with their urls. */
   private navigation = [
-    {value: 'Dashboard', link: '/dashboard'},
-    {value: 'Settings', link: '/settings'},
-    {value: 'Users', link: '/users'},
-    {value: 'Running Virtues', link: '/virtue-instances'},
-    {value: 'Running Vms', link: '/vm-instances'},
-    // {value: 'Running Instances',
-    //   dropdownOptions: [
-    //     {value: 'Running Virtues', link: '/virtue-instances'},
-    //     {value: 'Running Vms', link: '/vm-instances'},
-    //   ]
-    // },
-    // {value: 'Templates',
-    //   dropdownOptions: [
-    //     {value: 'Virtue Templates', link: '/virtues'},
-    //     {value: 'Virtual Machine Templates', link: '/vm-templates'}
-    //   ]
-    // },
-    {value: 'Virtue Templates', link: '/virtues'},
-    {value: 'Virtual Machine Templates', link: '/vm-templates'},
-    {value: 'Applications', link: '/applications'}
+    {label: 'Dashboard', link: '/dashboard'},
+    {label: 'Settings', link: '/settings'},
+    {label: 'Users', link: '/users'},
+    {label: 'Applications    ', link: '/applications'},
+    {label: 'Running Instances',
+      dropdownOptions: [
+        {label: 'Existing Instances', link: '/virtue-instances'},
+        {label: 'VM Instances', link: '/vm-instances'},
+      ]
+    },
+    {label: 'Templates',
+      dropdownOptions: [
+        {label: 'Virtue Templates', link: '/virtues'},
+        {label: 'VM Templates', link: '/vm-templates'}
+      ]
+    }
   ];
-
   constructor(
       public authService: AuthenticationService
     ) {
