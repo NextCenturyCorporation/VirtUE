@@ -2,6 +2,7 @@
 /**
  * @enum
  * The paths on the backend which must be queried for each of those datasets
+ *
  */
 export enum Subdomains {
   APPS = "admin/application/",
@@ -10,7 +11,7 @@ export enum Subdomains {
   USERS = "admin/user/",
   PRINTERS = "admin/printer/",
   FILE_SYSTEMS = "admin/fileSystem/",
-  SENSORS = "admin/sensing",
   VIRTUES = "admin/virtues",
-  VMS = "admin/vm"
+  VMS = "admin/vm",
+  SENSORS = "admin/sensing"
 }

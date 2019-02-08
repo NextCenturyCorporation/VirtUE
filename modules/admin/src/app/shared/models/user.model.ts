@@ -6,7 +6,6 @@ import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 /**
 * @class
@@ -42,11 +41,8 @@ export class User extends Item {
     }
   }
 
-  /**
-   * @return the USERS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.USERS;
+  getDatasetName(): string {
+    return DatasetNames.USERS;
   }
 
   /**

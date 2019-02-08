@@ -1,6 +1,6 @@
 
 <div class="scaleToFit" [ngStyle]="{'width': tableWidth*100 + '%'}">
-  <div *ngIf="filterOptions.length > 0" >
+  <div *ngIf="filterOptions !== undefined && filterOptions.length > 0" >
     <!-- only show this list if the table isn't empty -->
     <div *ngIf="elements.length > 0" class="mui-container-fluid">
       <div class="mui-row">
@@ -65,7 +65,7 @@
       <div class="mui-row margin-top-10">
         <div class="mui-col-md-12 padding-left-0">
           <p class="no-data-message">
-            {{noDataMessage}}
+            {{getNoDataMessage()}}
           </p>
         </div>
       </div>

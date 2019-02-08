@@ -27,9 +27,9 @@ export class HeaderComponent implements OnInit {
     {label: 'Settings', link: '/settings'},
     {label: 'Users', link: '/users'},
     {label: 'Applications    ', link: '/applications'},
-    {label: 'Running Instances',
+    {label: 'Instances',
       dropdownOptions: [
-        {label: 'Existing Instances', link: '/virtue-instances'},
+        {label: 'Virtue Instances', link: '/virtue-instances'},
         {label: 'VM Instances', link: '/vm-instances'},
       ]
     },

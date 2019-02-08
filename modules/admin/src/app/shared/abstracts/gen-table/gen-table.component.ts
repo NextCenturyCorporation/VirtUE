@@ -102,6 +102,8 @@ export class GenericTableComponent<T> {
   /** The message that should show up intead of any table data, when [[elements]] is undefined or empty. */
   private noDataMessage: string;
 
+  private dataHasLoaded: boolean = false;
+
   /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive.
   * Must be public to be used in template html file in production mode.*/
   public tableWidth: number;
@@ -294,6 +296,15 @@ export class GenericTableComponent<T> {
     }
   }
 
+  getNoDataMessage(): string {
+    if ( ! this.dataHasLoaded) {
+      return "Loading data, please wait.";
+    }
+    else {
+      return this.noDataMessage;
+    }
+  }
+
   /**
    * remove everything from [[elements]]
    */
@@ -306,6 +317,7 @@ export class GenericTableComponent<T> {
    * @param dataset the objects to be put into the table.
    */
   populate(dataset: any[]): void {
+    this.dataHasLoaded = true;
     this.clear();
     for (let d of dataset) {
       this.elements.push(new TableElement(d));

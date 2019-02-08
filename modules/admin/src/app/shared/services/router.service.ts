@@ -126,11 +126,18 @@ export class RouterService {
     this.goToPage(this.getRouterUrlPieces()[0]);
   }
 
+
   /**
    * @param targetPath the subdomain path to navigate to.
    */
-  goToPage(targetPath: string): void {
-    this.router.navigate([targetPath]);
+  goToPage(targetPath: string, params?: string[]): void {
+    if (params) {
+      params.unshift(targetPath);
+      this.router.navigate(params);
+    }
+    else {
+      this.router.navigate([targetPath]);
+    }
   }
 
   changeUrlWithoutNavigation( newURL: string ): void {

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { SensingModel } from '../models/sensing.model';
+import { SensorRecord } from '../models/sensor.model';
 import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
 
 const httpOptions = {
