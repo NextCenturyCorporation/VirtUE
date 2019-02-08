@@ -7,6 +7,7 @@ import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
+import { User } from '../../shared/models/user.model';
 import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
 import { VirtualMachineInstance, VmState } from '../../shared/models/vm-instance.model';
@@ -57,11 +58,10 @@ export class VirtueInstanceListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
   }
 
   getDatasetToDisplay(): DatasetNames {
@@ -71,7 +71,7 @@ export class VirtueInstanceListComponent extends ItemListComponent {
   defaultTableParams() {
     return {
       cols: this.getColumns(),
-      filters: this.getTableFilters(),
+      filters: [],
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
       noDataMsg: this.getNoDataMsg()
     };
@@ -82,9 +82,11 @@ export class VirtueInstanceListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC, undefined, () => this.getSubMenu()),
-      new TextColumn('User',          2, (v: VirtueInstance) => v.user,       SORT_DIR.ASC),
-      new ListColumn('Active VMs',        2, (v: VirtueInstance) => v.getVms(),  this.formatName, undefined),
+      new TextColumn('Template Name', 2, (v: VirtueInstance) => v.getName(), SORT_DIR.ASC,
+                                                        (v: VirtueInstance) => this.toDetailsPage(v), () => this.getSubMenu()),
+      new TextColumn('User',          2, (v: VirtueInstance) => v.user, SORT_DIR.ASC, (v: VirtueInstance) => this.viewUser(v)),
+      new ListColumn('Active VMs',        2, (v: VirtueInstance) => v.getVms(),  this.formatName,
+                                                        (vm) => this.viewVmInstance(vm)),
       // new ListColumn('Applications',      2, (v: VirtueInstance) => []),
 
       // put this in once you actually pull the template in
@@ -93,9 +95,13 @@ export class VirtueInstanceListComponent extends ItemListComponent {
     ];
   }
 
+  viewVmInstance(vm): void {
+    this.toDetailsPage(new VirtualMachineInstance(vm));
+  }
 
-  getTableFilters(): {value: string, text: string}[] {
-    return [];
+  viewUser(v: VirtueInstance): void {
+    let owningUser = new User({username: v.user});
+    this.viewItem(owningUser);
   }
 
   /**
@@ -115,8 +121,8 @@ export class VirtueInstanceListComponent extends ItemListComponent {
 
   getSubMenu(): SubMenuOptions[] {
     return [
-      new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => this.viewItem(v.template)),
-      new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => v.stop()),
+      new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => this.viewItem(v.template))
+      // new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => this.stopVirtue(v)),
     ];
   }
 

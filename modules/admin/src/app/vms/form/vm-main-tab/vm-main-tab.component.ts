@@ -103,7 +103,6 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
   updateVersion(): void {
     this.newVersion = this.item.version;
 
-    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
     if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }

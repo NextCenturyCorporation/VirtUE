@@ -87,7 +87,7 @@ export abstract class GenericPageComponent {
     this.routerService.goToPage(item.getDupURL());
   }
 
-  toPreviousPage() {
+  toPreviousPage(): void {
     this.routerService.toPreviousPage();
   }
 

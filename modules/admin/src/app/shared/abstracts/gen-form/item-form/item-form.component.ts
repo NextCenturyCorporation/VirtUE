@@ -108,11 +108,10 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
     protected parentDomain: string,
     protected activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super( routerService, baseUrlService, dataRequestService, dialog);
+    super( routerService, dataRequestService, dialog);
 
     // the mode needs to be set before any other work can be done
     this.setMode();
@@ -206,14 +205,26 @@ but got: \n       " + this.routerService.getRouterUrl());
     // any changes/edits made to the data on the page.
     // So update item only the first time datasets are pulled, or if the page is only being viewed.
     if ( !this.initialPullComplete || this.mode === Mode.VIEW ) {
-      if (this.mode !== Mode.CREATE) {// no data to retrieve if creating a new one.
+      if (this.mode !== Mode.CREATE) { // no data to retrieve if creating a new one.
         this.initItem();
       }
       this.setUpTabs();
     }
     this.routerService.submitPageTitle(this.getCrumbTitle());
+
     this.updatePage();
     this.initialPullComplete = true;
+
+    if (this.mode !== Mode.CREATE) {
+      this.afterPullComplete().then(() => {
+        this.updatePage();
+      });
+    }
+  }
+
+  /** @override-able */
+  afterPullComplete(): Promise<void> {
+    return new Promise( () => {} );
   }
 
   getCrumbTitle(): string {
@@ -305,15 +316,24 @@ but got: \n       " + this.routerService.getRouterUrl());
    * Save changes to backend and return to the previous domain.
    */
   saveAndReturn(): void {
-    this.createOrUpdate(() => this.toPreviousPage());
+    this.createOrUpdate((updatedObj) => {
+      this.afterSave(updatedObj);
+      this.toPreviousPage();
+    });
   }
 
   /**
    * save changes to backend, staying on current page (but switching to view mode)
    */
   save(): void {
-    this.createOrUpdate(() => this.toViewMode());
+    this.createOrUpdate((updatedObj) => {
+      this.afterSave(updatedObj);
+      this.toViewMode();
+    });
   }
+
+  /** @override */
+  afterSave(updatedObj?: any): void {}
 
   cancel(): void {
     // Go back to whatever the previous page was, unless you navigated to this page in view mode, and clicked edit.

@@ -38,13 +38,12 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<FileSystemSelectionModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
+    super(routerService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "FileSystems";
   }
 

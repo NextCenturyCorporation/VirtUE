@@ -46,11 +46,10 @@ export class AppsListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
     // TODO fix app versioning - maybe make automatic?
     // Apps need versions, but they can't default to anything, and it must be made clear

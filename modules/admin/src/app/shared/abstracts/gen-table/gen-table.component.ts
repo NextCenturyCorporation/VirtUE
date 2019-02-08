@@ -305,6 +305,14 @@ export class GenericTableComponent<T> {
     }
   }
 
+  firstAttrIsString(obj) {
+      return (typeof this.getFirstAttribute(obj)) === 'string';
+  }
+
+  getFirstAttribute(obj) {
+    return obj[Object.keys(obj)[0]];
+  }
+
   /**
    * remove everything from [[elements]]
    */

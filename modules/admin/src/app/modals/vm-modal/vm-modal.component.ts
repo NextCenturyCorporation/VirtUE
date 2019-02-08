@@ -38,13 +38,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
-      super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
+      super(routerService, dataRequestService, dialog, dialogRef, data);
       this.pluralItem = "Virtual Machine Templates";
     }
 

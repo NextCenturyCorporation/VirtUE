@@ -97,11 +97,10 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/vm-templates', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/vm-templates', activatedRoute, routerService, dataRequestService, dialog);
 
     this.item = new VirtualMachine();
 

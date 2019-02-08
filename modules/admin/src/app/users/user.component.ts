@@ -91,11 +91,10 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/users', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/users', activatedRoute, routerService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User();

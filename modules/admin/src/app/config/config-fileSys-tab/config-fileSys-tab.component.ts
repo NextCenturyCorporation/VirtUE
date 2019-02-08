@@ -40,10 +40,9 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
     this.tabLabel = "File Systems";
   }
 

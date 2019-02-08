@@ -37,13 +37,12 @@ export class VirtueModalComponent extends GenericModalComponent {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<VirtueModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
+    super(routerService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "Virtue Templates";
   }
 

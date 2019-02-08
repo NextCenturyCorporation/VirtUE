@@ -19,6 +19,7 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
+import { NetworkPermission } from '../../models/networkPerm.model';
 import { Toggleable } from '../../models/toggleable.interface';
 
 import { Subdomains } from '../../services/subdomains.enum';
@@ -101,7 +102,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   constructor(
     routerService: RouterService,
-    protected baseUrlService: BaseUrlService,
     protected dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
@@ -367,19 +367,22 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     obj.buildAttribute(datasetName, this.datasets[datasetName] );
   }
 
-
-
   /**
    * saves the item's current state to the backend.
    *
-   * @param redirect a function to call (only) after the saving process has successfully completed.
+   * @param onSuccess a function to call (only) after the saving process has successfully completed.
    */
-  updateItem(obj: IndexedObj, redirect?: () => void): void {
+  updateItem(obj: IndexedObj, onSuccess?: (updatedObject?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.updateRecord(this.getRemoteSubdomain(obj), obj.getID(), obj.getFormatForSave()).subscribe(
       updatedObject => {
-        if (redirect) {
-          redirect();
+        if (onSuccess) {
+          if (updatedObject !== null) {
+            onSuccess(updatedObject);
+          }
+          else {
+            onSuccess();
+          }
         }
         else {
           this.refreshPage();
@@ -448,13 +451,24 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       }
     }
 
-    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(() => {
-      sub.unsubscribe();
-      this.refreshPage();
-    },
-    error => {
-      sub.unsubscribe();
-      this.refreshPage();
+    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(
+      () => {
+        sub.unsubscribe();
+        this.refreshPage();
+      },
+      error => {
+        sub.unsubscribe();
+        this.refreshPage();
     });
+  }
+
+  addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): Promise<any> {
+    if (! (action === 'authorize' || action === 'revoke') ) {
+      console.log("invalid request");
+      return new Promise<any>(() => {});
+    }
+
+    return this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [virtueTemplateID, action], JSON.stringify(secPerm))
+      .toPromise();
   }
 }

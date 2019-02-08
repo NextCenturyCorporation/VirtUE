@@ -93,9 +93,11 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
   formatValue(obj): string {
     let attr = Object.keys(obj)[0];
     let value = obj[attr];
-
+    // if (Array.isArray(value)) {
+    //   return value.toString();
+    // }
     if (typeof value === 'object') {
-      return JSON.stringify(obj[Object.keys(obj)[0]], undefined, 4);
+      return JSON.stringify(value, undefined, 4);
     }
     return value;
   }

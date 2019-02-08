@@ -143,7 +143,7 @@ export class VirtueInstance extends IndexedObj {
     // DELETING = 100,
     // DELETED = 110,
     // UNPROVISIONED = 120
-    return ! (this.state >= 20 && this.state <= 70);
+    return this.state < 20 || this.state > 70;
   }
 
   stop(): void {
