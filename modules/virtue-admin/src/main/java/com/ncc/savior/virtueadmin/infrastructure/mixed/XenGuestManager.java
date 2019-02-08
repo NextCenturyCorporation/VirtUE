@@ -9,8 +9,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +40,8 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 
 /**
  * Handles creation, starting, stopping, deleting and some other management of
@@ -56,12 +60,15 @@ public class XenGuestManager {
 	private CompletableFutureServiceProvider serviceProvider;
 	private int numSensingPorts = 10;
 
+	private ITemplateService templateService;
+
 	public XenGuestManager(VirtualMachine xenVm, File keyFile, CompletableFutureServiceProvider serviceProvider,
-			Route53Manager route53) {
+			Route53Manager route53, ITemplateService templateService) {
 		this.keyFile = keyFile;
 		this.xenVm = xenVm;
 		this.serviceProvider = serviceProvider;
 		this.route53 = route53;
+		this.templateService = templateService;
 	}
 
 	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
@@ -131,13 +138,18 @@ public class XenGuestManager {
 
 	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
 			int startingInternalPort, int numSensingPorts, String templatePath, String role, VirtualMachine vm,
-			boolean create) throws JSchException, IOException, SftpException {
+			boolean create) throws JSchException, IOException, SftpException, TemplateException {
 
 		String ipAddress = "0.0.0.0";
 		String name = vm.getName();
 		String loginUsername = vm.getUserName();
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("vm", vm);
+		model.put("templatePath", templatePath);
+		model.put("securityRole", (role == null ? "" : role));
 		if (create) {
-			createGuestVm(session, templatePath, name, role);
+			List<String> lines = SshUtil.runCommandsFromFile(templateService, session, "xen-guest-create.tpl", model);
+			logger.debug("provision guest output: " + lines);
 		} else {
 			// error:
 			// xencall: error: Could not obtain handle on privileged command interface: No
@@ -148,8 +160,9 @@ public class XenGuestManager {
 			boolean success = false;
 			while (true) {
 				success = true;
-				List<String> response = SshUtil.sendCommandFromSession(session,
-						"sudo xl create app-domains/" + name + "/" + name + ".cfg");
+				// List<String> response = SshUtil.sendCommandFromSession(session,
+				// "sudo xl create app-domains/" + name + "/" + name + ".cfg");
+				List<String> response = SshUtil.runCommandsFromFile(templateService, session, "xen-guest-start.tpl", model);
 				for (String line : response) {
 					if (line.contains("xencall: error:") || line.contains("invalid domain identifier")) {
 						success = false;
@@ -250,17 +263,6 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private void createGuestVm(Session session, String templatePath, String name, String role)
-			throws JSchException, IOException {
-		String command = "cd ./app-domains; sudo ./create.sh " + templatePath + " " + name;
-		if (JavaUtil.isNotEmpty(role)) {
-			command += " " + role;
-		}
-		logger.debug("provisioning guest with command: " + command);
-		List<String> out = SshUtil.sendCommandFromSession(session, command);
-		logger.debug("provisoin guest output: " + out);
-	}
-
 	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
 		Channel myChannel = session.openChannel("shell");
 		OutputStream ops = myChannel.getOutputStream();
@@ -282,9 +284,9 @@ public class XenGuestManager {
 		String cmd2 = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"echo dns=" + dns + " >> "
 				+ PORTS_FILE + "\"";
 		List<String> lines = SshUtil.sendCommandFromSession(session, cmd);
-		logger.debug("output: "+lines);
-		lines=SshUtil.sendCommandFromSession(session, cmd2);
-		logger.debug("output: "+lines);
+		logger.debug("output: " + lines);
+		lines = SshUtil.sendCommandFromSession(session, cmd2);
+		logger.debug("output: " + lines);
 	}
 
 	private void setupPortForwarding(Session session, int externalSensingPort, int startingInternalPort,
@@ -334,7 +336,7 @@ public class XenGuestManager {
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"cat " + file + "\"";
 		List<String> lines = SshUtil.sendCommandFromSession(session, cmd);
-		logger.info("Output of file "+file);
+		logger.info("Output of file " + file);
 		for (String line : lines) {
 			logger.info("  " + line);
 		}
@@ -445,10 +447,13 @@ public class XenGuestManager {
 		try {
 			session = SshUtil.getConnectedSession(xenVm, keyFile);
 			for (VirtualMachine vm : linuxVms) {
-				SshUtil.sendCommandFromSession(session, "sudo xl shutdown " + vm.getName());
+				// SshUtil.sendCommandFromSession(session, "sudo xl shutdown " + vm.getName());
+				Map<String, Object> dataModel = new HashMap<String, Object>();
+				dataModel.put("vm", vm);
+				SshUtil.runCommandsFromFile(templateService, session, "xen-guest-stop.tpl", dataModel);
 			}
 			addToStopPipeline(linuxVms, linuxFuture);
-		} catch (JSchException | IOException e) {
+		} catch (JSchException | IOException | TemplateException e) {
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);

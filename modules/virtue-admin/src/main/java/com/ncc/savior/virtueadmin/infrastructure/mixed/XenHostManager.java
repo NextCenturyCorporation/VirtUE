@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
@@ -70,7 +69,6 @@ public class XenHostManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
 
-	@Autowired
 	private ITemplateService templateService;
 
 	@Value("${virtue.aws.persistentStorage.deviceName}")
@@ -94,9 +92,9 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			Collection<String> securityGroupsNames, String xenAmi, String xenLoginUser, String xenKeyName,
-			InstanceType xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
-			String imageBucketName, String kmsKey) {
+			ITemplateService templateService, Collection<String> securityGroupsNames, String xenAmi,
+			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
+			String iamRoleName, String region, String imageBucketName, String kmsKey) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -104,6 +102,7 @@ public class XenHostManager {
 		this.region = region;
 		this.bucket = imageBucketName;
 		String vpcId = vpcSubnetProvider.getVpcId();
+		this.templateService = templateService;
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
@@ -111,7 +110,7 @@ public class XenHostManager {
 		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
 		this.kmsKey = kmsKey;
-		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53);
+		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53, templateService);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
@@ -119,11 +118,11 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			String securityGroupsCommaSeparated, String xenAmi, String xenUser, String xenKeyName,
-			String xenInstanceType, boolean usePublicDns, String iamRoleName, String region, String imageBucketName,
-			String kmsKey) {
+			ITemplateService templateService, String securityGroupsCommaSeparated, String xenAmi, String xenUser,
+			String xenKeyName, String xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
+			String imageBucketName, String kmsKey) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
-				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
+				templateService, splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName, kmsKey);
 	}
 
@@ -271,8 +270,8 @@ public class XenHostManager {
 						model.put("region", region);
 						model.put("kmsKey", kmsKey);
 						model.put("bucket", bucket);
-						SshUtil.runCommandsFromFile(templateService, finalSession,
-								"Dom0-pre-copy-DomU-image.tpl", model);
+						SshUtil.runCommandsFromFile(templateService, finalSession, "Dom0-pre-copy-DomU-image.tpl",
+								model);
 						for (VirtualMachineTemplate vmt : linuxVmts) {
 							model.put("guestVmTemplate", vmt);
 							List<String> lines = SshUtil.runCommandsFromFile(templateService, finalSession,
