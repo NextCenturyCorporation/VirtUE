@@ -116,6 +116,7 @@ public class CifsManager {
 	private IKeyManager keyManager;
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser> cifsVmUpdater;
 	private ITemplateService templateService;
+	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> cifsNetworkUpdater;
 
 	public CifsManager(ServerIdProvider serverIdProvider, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
 			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
@@ -144,6 +145,15 @@ public class CifsManager {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, VirtueUser user) {
 				cifsProxyDao.updateCifsVm(user, param);
+				return param;
+			}
+		};
+		this.cifsNetworkUpdater = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
+				"CifsNetworkConverter") {
+			@Override
+			protected VirtualMachine onExecute(VirtualMachine param, Void v) {
+				param.setHostname(param.getInternalHostname());
+				param.setIpAddress(param.getInternalIpAddress());
 				return param;
 			}
 		};
@@ -387,6 +397,7 @@ public class CifsManager {
 		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(vm, v);
 		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
 		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
+		cf = cifsNetworkUpdater.chainFutures(cf, v);
 		cf = cifsVmUpdater.chainFutures(cf, user);
 		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
