@@ -2,7 +2,7 @@
     "name": "Chrome (Win)",
     "version": "1.0",
     "os": "WINDOWS",
-    "launchCommand": "c:\\windows\\notepad.exe",
+    "launchCommand": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
     "iconKey": "chrome",
     "tags": [
     	"BROWSER"

@@ -2,7 +2,7 @@
     "name": "Microsoft Edge",
     "version": "1.0",
     "os": "WINDOWS",
-    "launchCommand": "c:\\windows\\notepad.exe",
+    "launchCommand": "C:\\Program Files\\internet explorer\\iexplore.exe",
     "iconKey": "ms-edge",
     "tags": [
     	"BROWSER"

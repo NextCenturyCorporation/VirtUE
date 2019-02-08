@@ -31,4 +31,6 @@ public interface IApplicationManager {
 	 * 
 	 */
 	int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException;
+
+	int startOrGetXpraServerWithRetries(VirtualMachine vm, File privateKeyFile, int maxTries);
 }

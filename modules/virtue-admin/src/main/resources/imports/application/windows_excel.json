@@ -2,6 +2,6 @@
     "name": "Microsoft Excel 2013",
     "version": "1.0",
     "os": "WINDOWS",
-    "launchCommand": "c:\\windows\\notepad.exe",
+    "launchCommand": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
     "iconKey": "ms-excel"
   }
