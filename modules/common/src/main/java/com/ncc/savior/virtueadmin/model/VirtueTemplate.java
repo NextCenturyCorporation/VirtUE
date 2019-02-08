@@ -67,17 +67,25 @@ public class VirtueTemplate {
 	@Schema(description = "Unused")
 	private Collection<Printer> printers;
 
-	@ElementCollection()
-	@Schema(description = "List of permissions for the file systems that will be attached to the VMs when this virute is provisioned.")
-	private Collection<FileSystemPermission> fileSystemPerms;
+	@ManyToMany()
+	// @ElementCollection()
+	private Collection<FileSystem> fileSystems;
 
 	@ElementCollection()
 	@Schema(description = "Unused")
 	private Collection<String> allowedPasteTargetIds;
 
+	@Embedded
+	@ElementCollection(targetClass = WhitelistedNetwork.class)
+	@Schema(description = "Unused")
+	private Collection<WhitelistedNetwork> networkWhitelist;
+
 	@Transient
 	@Schema(description = "Unused")
 	private Collection<String> printerIds;
+
+	@Schema(description = "List of IDs of the file systems that will be attached to the VMs when this virute is provisioned.")
+	private Collection<String> fileSystemIds;
 	@Transient
 	@Schema(description = "List of IDs of the virtual machine templates that will be provisioned when this virtue is provisioned.")
 	private Collection<String> vmTemplateIds;
@@ -104,15 +112,20 @@ public class VirtueTemplate {
 		this.awsTemplateName = template.getAwsTemplateName();
 		this.printers = template.getPrinters();
 		this.printerIds = template.getPrinterIds();
-		this.fileSystemPerms = template.getFileSystemPermissions();
+		this.fileSystems = template.getFileSystems();
+		this.fileSystemIds = template.getFileSystemIds();
 
 		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
+		this.networkWhitelist = template.getNetworkWhitelist();
 
 		if (this.fileSystemIds == null) {
 			this.fileSystemIds = new ArrayList<String>();
 		}
 		if (this.allowedPasteTargetIds == null) {
 			this.allowedPasteTargetIds = new ArrayList<String>();
+		}
+		if (this.networkWhitelist == null) {
+			this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 		}
 	}
 
@@ -129,6 +142,7 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
@@ -145,6 +159,7 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
@@ -163,6 +178,7 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -181,6 +197,7 @@ public class VirtueTemplate {
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
 		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	/**
@@ -189,6 +206,7 @@ public class VirtueTemplate {
 	protected VirtueTemplate() {
 		super();
 		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public String getId() {
@@ -240,7 +258,8 @@ public class VirtueTemplate {
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
 				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification
-				+ ", lastEditor=" + lastEditor + ", awsTemplateName=" + awsTemplateName + "]";
+				+ ", lastEditor=" + lastEditor + ", awsTemplateName=" + awsTemplateName + ", networkWhitelist="
+				+ networkWhitelist + "]";
 	}
 
 	public String getAwsTemplateName() {
@@ -334,6 +353,11 @@ public class VirtueTemplate {
 		return allowedPasteTargetIds;
 	}
 
+	@JsonGetter
+	public Collection<WhitelistedNetwork> getNetworkWhitelist() {
+		return networkWhitelist;
+	}
+
 	@JsonSetter
 	public void setVmTemplateIds(Collection<String> vmTemplateIds) {
 		this.vmTemplates = null;
@@ -341,8 +365,22 @@ public class VirtueTemplate {
 	}
 
 	@JsonSetter
+	public void setFileSystemIds(Collection<String> fileSystemIds) {
+		this.fileSystemIds = fileSystemIds;
+	}
+
+	public void setFileSystems(Collection<FileSystem> fileSystems) {
+		this.fileSystems = fileSystems;
+	}
+
+	@JsonSetter
 	public void setAllowedPasteTargetIds(Collection<String> allowedPasteTargetIds) {
 		this.allowedPasteTargetIds = allowedPasteTargetIds;
+	}
+
+	@JsonSetter
+	public void setNetworkWhitelist(Collection<WhitelistedNetwork> networkWhitelist) {
+		this.networkWhitelist = networkWhitelist;
 	}
 
 	public Date getTimeCreatedAt() {
@@ -376,11 +414,33 @@ public class VirtueTemplate {
 		printerIds.add(newPrinter.getId());
 	}
 
+	public void addFileSystem(FileSystem newFileSystem) {
+		if (fileSystems == null) {
+			fileSystems = new ArrayList<FileSystem>();
+		}
+		if (fileSystemIds == null) {
+			fileSystemIds = new ArrayList<String>();
+		}
+		fileSystems.add(newFileSystem);
+		fileSystemIds.add(newFileSystem.getId());
+	}
+
 	public void removePrinter(Printer printer) {
 		Iterator<Printer> itr = getPrinters().iterator();
 		while (itr.hasNext()) {
 			Printer p = itr.next();
 			if (p.getId().equals(printer.getId())) {
+				itr.remove();
+				break;
+			}
+		}
+	}
+
+	public void removeFileSystem(FileSystem fileSystem) {
+		Iterator<FileSystem> itr = getFileSystems().iterator();
+		while (itr.hasNext()) {
+			FileSystem fs = itr.next();
+			if (fs.getId().equals(fileSystem.getId())) {
 				itr.remove();
 				break;
 			}
