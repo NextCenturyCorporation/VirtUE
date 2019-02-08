@@ -67,9 +67,9 @@ public class VirtueTemplate {
 	@Schema(description = "Unused")
 	private Collection<Printer> printers;
 
-	@ManyToMany()
-	// @ElementCollection()
-	private Collection<FileSystem> fileSystems;
+	@ElementCollection()
+	@Schema(description = "List of the file systems that will be attached to the VMs when this virute is provisioned.")
+	private Collection<FileSystemPermission> fileSystems;
 
 	@ElementCollection()
 	@Schema(description = "Unused")
@@ -78,9 +78,6 @@ public class VirtueTemplate {
 	@Transient
 	@Schema(description = "Unused")
 	private Collection<String> printerIds;
-	@Transient
-	@Schema(description = "List of IDs of the file systems that will be attached to the VMs when this virute is provisioned.")
-	private Collection<String> fileSystemIds;
 	@Transient
 	@Schema(description = "List of IDs of the virtual machine templates that will be provisioned when this virtue is provisioned.")
 	private Collection<String> vmTemplateIds;
@@ -107,16 +104,12 @@ public class VirtueTemplate {
 		this.awsTemplateName = template.getAwsTemplateName();
 		this.printers = template.getPrinters();
 		this.printerIds = template.getPrinterIds();
-		this.fileSystems = template.getFileSystems();
-		this.fileSystemIds = template.getFileSystemIds();
+		this.fileSystems = template.getFileSystemPermissions();
 
 		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
 
 		if (this.fileSystems == null) {
-			this.fileSystems = new ArrayList<FileSystem>();
-		}
-		if (this.fileSystemIds == null) {
-			this.fileSystemIds = new ArrayList<String>();
+			this.fileSystems = new ArrayList<FileSystemPermission>();
 		}
 		if (this.allowedPasteTargetIds == null) {
 			this.allowedPasteTargetIds = new ArrayList<String>();
@@ -135,7 +128,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -152,7 +145,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -171,7 +164,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -190,7 +183,7 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<FileSystemPermission>();
 		this.allowedPasteTargetIds = new ArrayList<String>();
 	}
 
@@ -324,19 +317,7 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	public Collection<String> getFileSystemIds() {
-		if (fileSystems != null) {
-			fileSystemIds = new ArrayList<String>();
-			for (FileSystem fs : fileSystems) {
-				fileSystemIds.add(fs.getId());
-			}
-		}
-		// return new ArrayList<String>();
-		return fileSystemIds;
-	}
-
-	@JsonGetter
-	public Collection<FileSystem> getFileSystems() {
+	public Collection<FileSystemPermission> getFileSystemPermissions() {
 		return fileSystems;
 	}
 
@@ -352,13 +333,16 @@ public class VirtueTemplate {
 	}
 
 	@JsonSetter
-	public void setFileSystemIds(Collection<String> fileSystemIds) {
-		this.fileSystemIds = fileSystemIds;
+	public void setFileSystemPermissions(Collection<FileSystemPermission> fileSystems) {
+		this.fileSystems = fileSystems;
 	}
 
 	@JsonSetter
 	public void setFileSystems(Collection<FileSystem> fileSystems) {
-		this.fileSystems = fileSystems;
+		this.fileSystems = new ArrayList<FileSystemPermission>();
+		for (FileSystem fs : fileSystems) {
+			this.fileSystems.add(new FileSystemPermission(fs));
+		}
 	}
 
 	@JsonSetter
@@ -397,15 +381,11 @@ public class VirtueTemplate {
 		printerIds.add(newPrinter.getId());
 	}
 
-	public void addFileSystem(FileSystem newFileSystem) {
+	public void addFileSystemPermission(FileSystemPermission newFileSystemPermission) {
 		if (fileSystems == null) {
-			fileSystems = new ArrayList<FileSystem>();
+			fileSystems = new ArrayList<FileSystemPermission>();
 		}
-		if (fileSystemIds == null) {
-			fileSystemIds = new ArrayList<String>();
-		}
-		fileSystems.add(newFileSystem);
-		fileSystemIds.add(newFileSystem.getId());
+		fileSystems.add(newFileSystemPermission);
 	}
 
 	public void removePrinter(Printer printer) {
@@ -419,11 +399,11 @@ public class VirtueTemplate {
 		}
 	}
 
-	public void removeFileSystem(FileSystem fileSystem) {
-		Iterator<FileSystem> itr = getFileSystems().iterator();
+	public void removeFileSystemPermission(FileSystemPermission fileSystem) {
+		Iterator<FileSystemPermission> itr = getFileSystemPermissions().iterator();
 		while (itr.hasNext()) {
-			FileSystem fs = itr.next();
-			if (fs.getId().equals(fileSystem.getId())) {
+			FileSystemPermission fs = itr.next();
+			if (fs.getFileSystemId().equals(fileSystem.getFileSystemId())) {
 				itr.remove();
 				break;
 			}
