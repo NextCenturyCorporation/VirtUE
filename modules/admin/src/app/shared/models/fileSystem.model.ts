@@ -74,6 +74,6 @@ export class FileSystem extends IndexedObj implements Toggleable {
   }
 
   formatPerms() {
-    return (this.readPerm ? " R " : "") + (this.writePerm ? " W " : "") + (this.executePerm ? " X " : "");
+    return (this.readPerm ? " R " : " _ ") + (this.writePerm ? " W " : " _ ") + (this.executePerm ? " X " : " _ ");
   }
 }

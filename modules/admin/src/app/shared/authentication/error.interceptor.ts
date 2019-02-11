@@ -32,8 +32,10 @@ export class ErrorInterceptor implements HttpInterceptor {
 
               if (errCode === 255) {
                 alert(err.error);
-                console.log("You may have tried to delete something that other items reference. The backend isn't " +
-                "currently set up to handle that. ");
+                if (request.method === "DELETE") {
+                  console.log("You may have tried to delete something that other items reference. The backend isn't " +
+                  "currently set up to handle that. ");
+                }
                 return new Observable<HttpEvent<any>>( () => err);
               }
 

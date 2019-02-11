@@ -107,11 +107,6 @@ export class Virtue extends Item {
       this.printerIds = virtueObj.printerIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
 
-      if (virtueObj.fileSystems) {
-        for (let fs of virtueObj.fileSystems) {
-          this.fileSystems.add(fs.id, fs);
-        }
-      }
 
       this.lastEditor = virtueObj.lastEditor;
 
@@ -130,9 +125,6 @@ export class Virtue extends Item {
     return DatasetNames.VIRTUE_TS;
   }
 
-  /**
-   * #uncommented
-   */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
     if (datasetName === DatasetNames.VIRTUE_TS) {
       this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;

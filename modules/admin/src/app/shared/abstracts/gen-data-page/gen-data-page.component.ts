@@ -249,7 +249,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       if (updateQueue[0].datasetName === DatasetNames.SENSORS && rawDataList) {
         rawDataList = this.cleanSensorData(rawDataList);
       }
-
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
@@ -451,16 +450,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       }
     }
 
-    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(
-      () => {
-        sub.unsubscribe();
-        this.refreshPage();
-      },
-      error => {
-        sub.unsubscribe();
-        this.refreshPage();
+    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(() => {
+      sub.unsubscribe();
+      this.refreshPage();
+    },
+    error => {
+      sub.unsubscribe();
+      this.refreshPage();
     });
   }
+
 
   addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): Promise<any> {
     if (! (action === 'authorize' || action === 'revoke') ) {

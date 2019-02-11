@@ -52,6 +52,7 @@ export class RouterService {
       }
     });
   }
+
   setBreadcrumbHref( href: string ): void {
     this.fullCrumb.href = href;
   }
@@ -62,13 +63,30 @@ export class RouterService {
     // Therefore we can be pretty confident this function will always be called second.
 
     // It can, apparently, get called more than once though. So guard against that - otherwise you'll have extra breadcrumbs
-    if (this.fullCrumb.href !== undefined && this.fullCrumb.label === undefined) {
+    if (this.hrefSetButLabelUnset()) {
       this.fullCrumb.label = label;
       this.fullCrumb = this.cleanCrumb(this.fullCrumb);
       this.onNewPage.emit(this.fullCrumb);
       this.updateHistory(this.fullCrumb);
       this.fullCrumb = new Breadcrumb(undefined, undefined);
     }
+
+    if (this.breadcrumbAlreadySent()) {
+      // update just the title
+      this.onNewPage.emit(new Breadcrumb(label, ""));
+      this.history[this.history.length - 1].label = label;
+    }
+  }
+
+  hrefSetButLabelUnset(): boolean {
+    return this.fullCrumb.href !== undefined && this.fullCrumb.label === undefined;
+  }
+
+  /**
+   * Only accurate when called within setBreadcrumbLabel
+   */
+  breadcrumbAlreadySent(): boolean {
+    return this.fullCrumb.href === undefined;
   }
 
   // just have pages notify the router manually of their title.
@@ -96,8 +114,8 @@ export class RouterService {
     // go back to the view page. To prevent accidentally making extra duplicates, and to prevent weird circles
     // with the breadcrumbs, like: View U1 > View V1 > View U2 > Edit V1 > Edit U1 > Duplicate V2 > Edit U2
     // With, of course, much longer names.
-    crumb.href = crumb.href.replace("edit", "view")
-                           .replace("duplicate", "view");
+    crumb.href = crumb.href.replace("/edit/", "/view/")
+                           .replace("/duplicate/", "/view/");
     return crumb;
   }
 
@@ -119,7 +137,7 @@ export class RouterService {
   }
 
   isTopDomainPage(url: string): boolean {
-    return this.getUrlPieces( url ).length === 1;
+    return url !== "" && this.getUrlPieces( url ).length === 1;
   }
 
   toTopDomainPage(): void {
@@ -160,7 +178,6 @@ export class RouterService {
   }
 
   loginRedirect() {
-    console.log(this.getRouterUrl().split('?'));
     if (this.getRouterUrl().split('?')[0] !== '/login') {
       this.router.navigate(['/login'], { queryParams: { returnUrl: this.getRouterUrl().split("?")[0] }});
     }
