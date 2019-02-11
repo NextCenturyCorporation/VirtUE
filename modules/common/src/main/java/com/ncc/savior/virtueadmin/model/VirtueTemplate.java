@@ -79,7 +79,7 @@ public class VirtueTemplate {
 	@Schema(description = "Unused")
 	private Collection<String> printerIds;
 	@Transient
-	@Schema(description = "List of IDs of the file systems that will be attached to the VMs when this virute is provisioned.")
+	@Schema(description = "List of IDs of the file systems that will be attached to the VMs when this virtue is provisioned.")
 	private Collection<String> fileSystemIds;
 	@Transient
 	@Schema(description = "List of IDs of the virtual machine templates that will be provisioned when this virtue is provisioned.")

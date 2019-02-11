@@ -39,22 +39,22 @@ export class NetworkPermission {
 
       if ('securityGroupId' in netPerm) { // if we're loading an existing networkPerm
         this.securityGroupId = netPerm.securityGroupId;
-        this.description = netPerm.description;
-        this.ingress = netPerm.ingress;
-        this.fromPort = netPerm.fromPort;
-        this.toPort = netPerm.toPort;
-        this.ipProtocol = netPerm.ipProtocol;
-        this.cidrIp = netPerm.cidrIp;
-
-        if (
-            this.ingress === false &&
-            this.cidrIp === "0.0.0.0/0" &&
-            String(this.ipProtocol) === "-1" &&
-            this.fromPort === undefined &&
-            this.toPort === undefined
-          ) {
-          this.description = "AWS-provided default - open all outgoing traffic.";
-        }
+      }
+      this.description = netPerm.description;
+      this.ingress = netPerm.ingress;
+      this.fromPort = netPerm.fromPort;
+      this.toPort = netPerm.toPort;
+      this.ipProtocol = netPerm.ipProtocol;
+      this.cidrIp = netPerm.cidrIp;
+      if (
+          this.ingress === false &&
+          this.cidrIp === "0.0.0.0/0" &&
+          String(this.ipProtocol) === "-1" &&
+          this.fromPort === undefined &&
+          this.toPort === undefined &&
+          this.description === "default"
+        ) {
+        this.description = "AWS-provided default - open all outgoing traffic.";
       }
     }
   }

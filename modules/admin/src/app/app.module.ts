@@ -78,6 +78,7 @@ import { PrinterModalComponent } from './modals/printer-modal/printer.modal';
 import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-selection.modal';
 // import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
 import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
+import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
 import { NetworkPermissionModalComponent } from './modals/networkPerm-modal/networkPerm.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
@@ -152,7 +153,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     ColorModalComponent,
     PrinterModalComponent,
     PrinterSelectionModalComponent,
-    // FileSystemModalComponent,
+    FileSystemModalComponent,
     FileSystemSelectionModalComponent,
     NetworkPermissionModalComponent,
 
@@ -238,6 +239,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     PrinterSelectionModalComponent,
     // FileSystemModalComponent,
     FileSystemSelectionModalComponent,
+    FileSystemModalComponent,
     NetworkPermissionModalComponent
   ]
 })

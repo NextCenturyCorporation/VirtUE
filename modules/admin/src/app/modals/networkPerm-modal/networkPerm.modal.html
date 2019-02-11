@@ -25,6 +25,9 @@
           <mat-option *ngFor="let p of getProtocols(); let dropdownIdx = index" value="{{p}}" >
             {{p}}
           </mat-option>
+          <mat-option value="-1" >
+            (All)
+          </mat-option>
         </mat-select>
       </div>
     </div>

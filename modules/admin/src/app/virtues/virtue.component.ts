@@ -235,35 +235,6 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    * @override [[ItemFormComponent.afterPullComplete]]()
    */
   afterPullComplete(): Promise<any> {
-    // So, aws adds a default permission. But only when it learns about the security group. Which happens either when you
-    // try to add a new permission, or when you start up the virtue for the first time.
-    // So if you make this request and get nothing back, try requesting to authorize something invalid, to trigger
-    // the creation of the default, and then make the GET request again.
-    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
-      .pipe(
-        tap(response => {
-          if (response !== undefined && Array.isArray(response)) {
-            this.initializeNetworkPerms(response);
-          }
-        }),
-        catchError(this.pingAndRetryOnce(this.item.getID()))
-      )
-      .toPromise();
-  }
-
-  pingAndRetryOnce(templateID: string) {
-    return (err: any) => {
-      let badPermission = new NetworkPermission({'templateId': templateID, 'securityGroupId': "2", 'ipProtocol': 'tcp'});
-      return this.addRemoveSecGrpPermission(templateID, 'revoke', badPermission)
-        .catch(response => {
-            setTimeout(() => {
-              this.retryGetSecurityPerms(templateID);
-            }, 300);
-        });
-    };
-  }
-
-  retryGetSecurityPerms(templateID: string): Promise<any> {
     return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
       .pipe(
         tap(response => {
