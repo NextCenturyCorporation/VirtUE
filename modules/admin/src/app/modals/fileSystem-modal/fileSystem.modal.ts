@@ -40,7 +40,7 @@ export class FileSystemModalComponent extends GenericPageComponent implements On
     ) {
       super(routerService, dialog);
       console.log(data);
-      if (data && data['fileSystem']){
+      if (data && data['fileSystem']) {
         this.fileSystem = data.fileSystem;
         this.title = "Edit File System: " + data.fileSystem.name;
       }
