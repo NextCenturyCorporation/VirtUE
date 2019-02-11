@@ -274,7 +274,6 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	@Operation(summary = "Update virtue template.", description = "Updates a virtue template associated with the ID in the path based on the request body.")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
-		logger.debug("here! " + template);
 		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 		return virtueTemplate;
 	}
