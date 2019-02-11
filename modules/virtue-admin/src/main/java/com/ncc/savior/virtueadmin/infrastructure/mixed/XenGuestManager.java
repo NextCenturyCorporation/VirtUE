@@ -217,7 +217,8 @@ public class XenGuestManager {
 		}
 		if (!hostIsKnown) {
 			String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
-			SshUtil.sendCommandFromSession(session, hostCmd);
+			List<String> logOutput = SshUtil.sendCommandFromSession(session, hostCmd);
+			logger.debug(logOutput.toString());
 		}
 	}
 
@@ -334,9 +335,9 @@ public class XenGuestManager {
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"cat " + file + "\"";
 		List<String> lines = SshUtil.sendCommandFromSession(session, cmd);
-		logger.info("Output of file "+file);
+		logger.debug("Output of file "+file);
 		for (String line : lines) {
-			logger.info("  " + line);
+			logger.debug("  " + line);
 		}
 	}
 
