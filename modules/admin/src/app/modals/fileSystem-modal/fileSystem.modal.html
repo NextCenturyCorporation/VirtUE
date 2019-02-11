@@ -1,0 +1,89 @@
+<div class="">
+  <h2 mat-dialog-title>Add New File System Permission</h2>
+  <br>
+
+  <div class="mui-container-fluid container">
+
+
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        Name
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        <input matInput type="text" placeholder="Name" [(ngModel)]="fileSystem.name" name="name"/>
+      </div>
+    </div>
+    <br>&nbsp;
+
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        Address
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        <input matInput type="text" placeholder="Address" [(ngModel)]="fileSystem.address" name="address"/>
+      </div>
+    </div>
+    <br>&nbsp;
+
+    <div class="mui-row">
+      <div class="mui-col-md-10 padding-left-0">
+        Enable this file system:
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-3 padding-left-0">
+        <mat-checkbox [(ngModel)]="fileSystem.enabled"> </mat-checkbox>
+      </div>
+    </div>
+    <br>&nbsp;
+
+    <div class="mui-row">
+      Permissions:
+    </div>
+    <div class="mui-col-md-10 padding-left-40">
+      <div class="mui-row">
+        <div class="mui-col-md-2 padding-left-0">
+          Read
+        </div>
+        <div class="mui-col-md-1 padding-left-0">
+          <mat-checkbox [(ngModel)]="fileSystem.readPerm"> </mat-checkbox>
+        </div>
+      </div>
+      <div class="mui-row">
+        <div class="mui-col-md-2 padding-left-0">
+          Write
+        </div>
+        <div class="mui-col-md-1 padding-left-0">
+          <mat-checkbox [(ngModel)]="fileSystem.writePerm"> </mat-checkbox>
+        </div>
+      </div>
+      <div class="mui-row">
+        <div class="mui-col-md-2 padding-left-0">
+          Execute
+        </div>
+        <div class="mui-col-md-1 padding-left-0">
+          <mat-checkbox [(ngModel)]="fileSystem.executePerm"> </mat-checkbox>
+        </div>
+      </div>
+    </div>
+    <br>&nbsp;
+
+
+  </div>
+
+  <!-- <div style="align-self: flex-end;">
+    <div mat-dialog-actions style="display: flex; flex: row; align-self: center;"> -->
+  <div mat-dialog-actions style="vertical-align: middle">
+      <button class="button" type="submit" (click)="submit()">
+        Submit
+      </button>
+      <button type="button" (click)="cancel()" mat-dialog-close>
+        Cancel
+      </button>
+  </div>
+  <!-- </div> -->
+</div>

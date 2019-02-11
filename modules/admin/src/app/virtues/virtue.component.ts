@@ -246,31 +246,6 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
             this.initializeNetworkPerms(response);
           }
         }),
-        catchError(this.pingAndRetryOnce(this.item.getID()))
-      )
-      .toPromise();
-  }
-
-  pingAndRetryOnce(templateID: string) {
-    return (err: any) => {
-      let badPermission = new NetworkPermission({'templateId': templateID, 'securityGroupId': "2", 'ipProtocol': 'tcp'});
-      return this.addRemoveSecGrpPermission(templateID, 'revoke', badPermission)
-        .catch(response => {
-            setTimeout(() => {
-              this.retryGetSecurityPerms(templateID);
-            }, 300);
-        });
-    };
-  }
-
-  retryGetSecurityPerms(templateID: string): Promise<any> {
-    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
-      .pipe(
-        tap(response => {
-          if (response !== undefined && Array.isArray(response)) {
-            this.initializeNetworkPerms(response);
-          }
-        }),
         catchError(this.ignoreError())
       )
       .toPromise();

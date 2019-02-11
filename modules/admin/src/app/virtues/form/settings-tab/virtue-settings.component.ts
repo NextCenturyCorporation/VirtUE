@@ -431,7 +431,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp, SORT_DIR.ASC),
       new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => this.formatIfBlank(netPerm.ipProtocol), SORT_DIR.ASC),
       new TextColumn('Port Range',   2, (netPerm: NetworkPermission) => this.formatPortRange(netPerm), SORT_DIR.ASC),
-      new TextColumn('Description', 3, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
+      new TextColumn('Description', 5, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
       new IconColumn('Revoke',      1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }

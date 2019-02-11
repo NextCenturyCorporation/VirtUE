@@ -26,15 +26,15 @@ import { ConfigSettingsHistoryTabComponent } from './config-settingsHistory-tab/
 })
 export class ConfigComponent extends GenericPageComponent {
 
-  @ViewChild('activeDirTab') activeDirTab: ConfigActiveDirTabComponent;
+  // @ViewChild('activeDirTab') activeDirTab: ConfigActiveDirTabComponent;
 
-  @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
+  // @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
 
   @ViewChild('fileSysTab') fileSysTab: ConfigFileSysTabComponent;
 
-  @ViewChild('sensorTab') sensorTab: ConfigSensorsTabComponent;
+  // @ViewChild('sensorTab') sensorTab: ConfigSensorsTabComponent;
 
-  @ViewChild('settingsHistoryTab') settingsHistoryTab: ConfigSettingsHistoryTabComponent;
+  // @ViewChild('settingsHistoryTab') settingsHistoryTab: ConfigSettingsHistoryTabComponent;
 
   constructor(
     routerService: RouterService,
