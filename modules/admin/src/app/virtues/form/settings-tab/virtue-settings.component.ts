@@ -33,6 +33,7 @@ import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNam
 
 import { PrinterSelectionModalComponent } from '../../../modals/printer-modal/printer-selection.modal';
 import { FileSystemSelectionModalComponent } from '../../../modals/fileSystem-modal/fileSystem-selection.modal';
+import { NetworkPermissionModalComponent } from '../../../modals/networkPerm-modal/networkPerm.modal';
 
 import { ColorModalComponent } from '../../../modals/color-picker/color-picker.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -42,6 +43,28 @@ import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-t
 import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
 import { NetworkProtocols } from '../../protocols.enum';
+
+/**
+ * Temporary, just for showcasing the radio button column
+ */
+class Sensor {
+  public status: string;
+  constructor (
+    public name: string,
+    public level: VigilenceLevel
+  ) { }
+}
+
+/**
+ * This is also temporary, but will probably eventually just get moved to its own file.
+ */
+enum VigilenceLevel {
+  OFF = "off",
+  DEFAULT = "default",
+  LOW = "low",
+  HIGH = "high",
+  ADVERSARIAL = "adversarial"
+}
 
 /**
  * @class
@@ -88,6 +111,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   /** the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
+  @ViewChild('sensorTable') private sensorTable: GenericTableComponent<Printer>;
+
   /** re-classing item, to make it easier and less error-prone to work with.
   * Must be public to be used in template html file in production mode.
   */
@@ -120,6 +145,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.setUpNetworkPermsTable();
     this.setUpFileSysPermsTable();
     this.setUpPrinterTable();
+    this.setUpSensorTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
     // GenericTable would need to allow arbitrary objects/html in any column - so one could just as
@@ -152,19 +178,18 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    *                if the paste-permission table is to be updated.
    *                Either attribute is optional.
    */
-  update(changes: any): void {
-    if (changes[DatasetNames.VIRTUE_TS]) {
-      this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
+  update(changes?: any): void {
+    if (changes) {
+      if (changes[DatasetNames.VIRTUE_TS]) {
+        this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
+      }
+
+      if (changes.mode) {
+        this.setMode(changes.mode);
+        this.setUpPasteableVirtuesTable();
+      }
     }
 
-    if (changes.mode) {
-      this.setMode(changes.mode);
-      this.setUpPasteableVirtuesTable();
-    }
-
-    // if (changes.networks) {
-    //   // TODO update something
-    // }
     // if (changes.printers) {
     //   // TODO update something
     // }
@@ -172,6 +197,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.updateFileSysPermsTable();
     this.updatePrinterTable();
 
+    // temporary hard-coding
+    this.sensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
+                              new Sensor("In-Virtue Controller", VigilenceLevel.OFF),
+                              new Sensor("Logging - Aggregate", VigilenceLevel.OFF),
+                              new Sensor("Logging - Archive", VigilenceLevel.OFF),
+                              new Sensor("Certificates Infrastructure", VigilenceLevel.OFF)]);
   }
 
   /**
@@ -396,14 +427,33 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getNetworkColumns(): Column[] {
     return [
-      new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
-                          (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
-      // new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
-      new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
-      new BlankColumn(2),
-      new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
+      new TextColumn('Direction',   1, (netPerm: NetworkPermission) => this.getDirection(netPerm), SORT_DIR.ASC),
+      new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp, SORT_DIR.ASC),
+      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => this.formatIfBlank(netPerm.ipProtocol), SORT_DIR.ASC),
+      new TextColumn('Port Range',   2, (netPerm: NetworkPermission) => this.formatPortRange(netPerm), SORT_DIR.ASC),
+      new TextColumn('Description', 5, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
+      new IconColumn('Revoke',      1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
+  }
+
+  formatPortRange( netPerm: NetworkPermission ) {
+    if (netPerm.fromPort === undefined && netPerm.toPort === undefined) {
+      return "";
+    }
+    return netPerm.fromPort + " - " + netPerm.toPort;
+  }
+
+  formatIfBlank( value ) {
+    if (value === undefined) {
+      return "";
+    }
+    else {
+      return String(value);
+    }
+  }
+
+  getDirection(netPerm: NetworkPermission): string {
+    return netPerm.ingress ? "Incoming" : "Outgoing";
   }
 
   /**
@@ -432,33 +482,71 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (this.networkPermsTable === undefined) {
       return;
     }
-    this.networkPermsTable.populate(this.item.networkWhitelist);
+    this.networkPermsTable.populate(this.item.networkSecurityPermWhitelist);
   }
 
   /**
   * Add a new netork permission to the virtue.
   */
-  addNewNetworkPermission(): void {
-    this.item.networkWhitelist.push(new NetworkPermission());
+  addNewNetworkPermission(newPermission: NetworkPermission): void {
+    this.item.networkSecurityPermWhitelist.push(newPermission);
+    this.item.newSecurityPermissions.push(newPermission);
     this.updateNetworkPermsTable();
+  }
+
+  activateNetworkPermissionModal(): void {
+    /** Note: networkPermissions need to hold the id of their virtue template.
+     * When creating or duplicating, that ID isn't given until after the object is saved.
+     * Luckily (sort-of), networkPermissions can't be saved with the virtue, and must be saved separately.
+     * Therefore, we have to:
+     *    - load old permissions using this.item.getID(), if it's there
+     *          (in case it's in duplicate mode - we want that template's permissions)
+     *    - create the permissions without a templateID.
+     *    - save the virtue
+     *    - use the returned virtue object to get the correct templateID
+     *    - save the items using the new templateID.
+     *
+     * Be mindful of changes.
+     */
+    let params = {
+      height: '70%',
+      width: '40%'
+    };
+
+    let dialogRef = this.dialog.open( NetworkPermissionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getNetPerm.subscribe((newPerm) => {
+      this.addNewNetworkPermission(newPerm);
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
   }
 
   /**
    * This removes a network from the virtue's whitelist.
    */
   removeNetwork(netPerm: NetworkPermission): void {
-    if (this.item.networkWhitelist === undefined || this.item.networkWhitelist.length === 0) {
+    if (this.item.networkSecurityPermWhitelist === undefined || this.item.networkSecurityPermWhitelist.length === 0) {
       return;
     }
 
     let idx = 0;
-    for (let nP of this.item.networkWhitelist) {
+    for (let nP of this.item.networkSecurityPermWhitelist) {
       if (netPerm.equals(nP)) {
         break;
       }
       idx++;
     }
-    this.item.networkWhitelist.splice(idx, 1);
+    let removedPermission = this.item.networkSecurityPermWhitelist.splice(idx, 1)[0];
+    this.item.revokedSecurityPermissions.push(removedPermission);
     this.updateNetworkPermsTable();
   }
 
@@ -468,7 +556,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   *         false otherwise
   */
   checkNetworkPerms(): boolean {
-    for (let networkPermission of this.item.networkWhitelist) {
+    for (let networkPermission of this.item.networkSecurityPermWhitelist) {
       if ( !networkPermission.checkValid() ) {
         return false;
       }
@@ -576,6 +664,33 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
 /************************************************************************************/
 
+  setUpSensorTable(): void {
+    if (this.sensorTable === undefined) {
+      return;
+    }
+    this.sensorTable.setUp({
+      cols: this.getSensorColumns(),
+      filters: [],
+      tableWidth: 1,
+      noDataMsg: "No sensors have been connected."
+    });
+  }
+
+  getSensorColumns(): Column[] {
+    return [
+      new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
+      new RadioButtonColumn("Off",          1, "level", VigilenceLevel.OFF),
+      new RadioButtonColumn("Default",      1, "level", VigilenceLevel.DEFAULT),
+      new RadioButtonColumn("Low",          1, "level", VigilenceLevel.LOW),
+      new RadioButtonColumn("High",         1, "level", VigilenceLevel.HIGH),
+      new RadioButtonColumn("Adversarial",  2, "level", VigilenceLevel.ADVERSARIAL),
+      new RadioButtonColumn("On",           1, "status", "ON"),
+      new RadioButtonColumn("Off",          1, "status", "OFF")
+    ];
+  }
+
+
+/************************************************************************************/
 
 
   /**

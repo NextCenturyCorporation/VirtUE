@@ -223,7 +223,8 @@ public class XenGuestManager {
 		}
 		if (!hostIsKnown) {
 			String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
-			SshUtil.sendCommandFromSession(session, hostCmd);
+			List<String> logOutput = SshUtil.sendCommandFromSession(session, hostCmd);
+			logger.debug(logOutput.toString());
 		}
 	}
 

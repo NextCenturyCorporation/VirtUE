@@ -7,7 +7,6 @@ import { VirtualMachine } from './vm.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 import { DictList } from './dictionary.model';
 
@@ -63,7 +62,9 @@ export class Virtue extends Item {
   defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
-  networkWhitelist: NetworkPermission[] = [];
+  networkSecurityPermWhitelist: NetworkPermission[] = [];
+  newSecurityPermissions: NetworkPermission[] = [];
+  revokedSecurityPermissions: NetworkPermission[] = [];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
   allowedPasteTargetIds: string[] = [];
@@ -117,12 +118,6 @@ export class Virtue extends Item {
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
 
-      if (virtueObj.networkWhitelist) {
-        for (let netPerm of virtueObj.networkWhitelist) {
-          this.networkWhitelist.push(new NetworkPermission(netPerm));
-        }
-      }
-
       this.unprovisioned = virtueObj.unprovisioned;
       this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
       this.version = virtueObj.version;
@@ -131,11 +126,8 @@ export class Virtue extends Item {
 
   }
 
-  /**
-   * @return the VIRTUES subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.VIRTUE_TS;
+  getDatasetName(): string {
+    return DatasetNames.VIRTUE_TS;
   }
 
   /**
@@ -268,7 +260,7 @@ export class Virtue extends Item {
         allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
         lastModification: this.modificationDate,
-        networkWhitelist: this.networkWhitelist,
+        networkSecurityPermWhitelist: this.networkSecurityPermWhitelist,
         unprovisioned: this.unprovisioned,
         version: this.version,
         defaultBrowserVirtueId: this.defaultBrowserVirtueId,

@@ -1,0 +1,97 @@
+<div class="container">
+  <h2 mat-dialog-title>Create new Network Security Permission</h2>
+
+  <div class="mui-container-fluid container">
+
+    <div class="mui-row">
+      <div class="mui-col-md-6 padding-left-0">
+        Allowed direction
+      </div>
+      <div class="mui-col-md-6 padding-left-0">
+        Protocol
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-6 padding-left-0">
+        <mat-radio-group [(ngModel)]="netPerm.ingress" name="ingress">
+          <mat-radio-button [value]="true" ><label>Incoming</label>
+          </mat-radio-button>
+          <mat-radio-button [value]="false"><label>Outgoing</label>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="mui-col-md-6 padding-left-0">
+        <mat-select placeholder="Protocol" [(ngModel)]="netPerm.ipProtocol" required name="ipProtocol">
+          <mat-option *ngFor="let p of getProtocols(); let dropdownIdx = index" value="{{p}}" >
+            {{p}}
+          </mat-option>
+          <mat-option value="-1" >
+            (All)
+          </mat-option>
+        </mat-select>
+      </div>
+    </div>
+    <br>
+    <br>
+
+
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        CIDR-style IP block for this permission
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        <input matInput type="text" placeholder="CIDR IP" [(ngModel)]="netPerm.cidrIp" name="cidrIp"/>
+      </div>
+    </div>
+    <br>
+    <br>
+
+
+    <div class="mui-row">
+      <div class="mui-col-md-7 padding-left-0">
+        Port range:
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-3 padding-left-0">
+        <input matInput type="text" placeholder="Lower bound" [(ngModel)]="netPerm.fromPort" name="fromPort"/>
+      </div>
+      <div class="mui-col-md-1" style="vertical-align: middle">
+        to
+      </div>
+      <div class="mui-col-md-3 padding-left-0">
+        <input matInput type="text" placeholder="Upper bound"[(ngModel)]="netPerm.toPort" name="toPort"/>
+      </div>
+    </div>
+    <br>
+    <br>
+
+
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        Connection description
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+          <textarea matInput [(ngModel)]="netPerm.description" name="description"
+            placeholder="Enter a description for this connection..." rows="3"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- <div style="align-self: flex-end;">
+    <div mat-dialog-actions style="display: flex; flex: row; align-self: center;"> -->
+  <div mat-dialog-actions style="vertical-align: middle">
+      <button class="button" type="submit" (click)="submit()">
+        Submit
+      </button>
+      <button type="button" (click)="cancel()" mat-dialog-close>
+        Cancel
+      </button>
+  </div>
+  <!-- </div> -->
+</div>

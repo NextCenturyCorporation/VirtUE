@@ -9,7 +9,6 @@ import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
 import { VirtualMachine } from './vm.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 
 export enum VmState {
@@ -72,8 +71,8 @@ export class VirtualMachineInstance extends IndexedObj {
     return this.name.split("-").slice(1).join("-");
   }
 
-  getSubdomain(): string {
-    return Subdomains.VMS;
+  getDatasetName(): string {
+    return DatasetNames.VMS;
   }
 
   isStopped(): boolean {

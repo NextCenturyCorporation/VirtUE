@@ -8,29 +8,54 @@ import { NetworkProtocols } from '../../virtues/protocols.enum';
  */
 export class NetworkPermission {
 
-  /** The address of the network this permission is for */
-  host: string = "";
+  /** ID of the security group.
+   * Currently!!, the back end looks this up using the templateID, and then overwrites whatever was in this field.*/
+  private securityGroupId: string = "";
 
-  /** What connection protocol must be used */
-  protocol: NetworkProtocols;
+  /** Virtue template ID that this permission pertains to. */
+  templateId: string = ""; // determined automatically - if create or duplicate, must be set after the virtue is saved.
 
-  /** What specific local port can make this connection.
-   * I thought these were chosen randomly on the connecting machine -
-   * TODO see virtue notes
-   * Oh or maybe it allows two-way comms. This is the port which that resource can connect to?
-   * #uncommented
-   */
-  localPort: number;
+  /** Human readable description of the purpose of this security group. */
+  public description: string = ""; // optional, user-supplied
 
-  /** The port to connect to on the desination */
-  remotePort: number;
+  /** True if the security group pertains to connections coming into into the virtue, false if the connection is outgoing.*/
+  public ingress: boolean = false; // user-supplied
+
+  /** Port the connection came from. */
+  public fromPort: number; // user-supplied
+
+  /** Port the connection came to. */
+  public toPort: number; // user-supplied
+
+  /** Protocol for.  Usually TCP or UDP. */
+  public ipProtocol: NetworkProtocols = NetworkProtocols.TCPIP; // user-supplied
+
+  /** CIDR block of that the permission should pertain to. */
+  public cidrIp: string; // user-supplied
 
   constructor(netPerm?) {
     if (netPerm) {
-      this.host = netPerm.host;
-      this.protocol = NetworkProtocols.TCPIP; // netPerm.protocol; // TODO FIXME
-      this.localPort = netPerm.localPort;
-      this.remotePort = netPerm.remotePort;
+      this.templateId = netPerm.templateId;
+
+      if ('securityGroupId' in netPerm) { // if we're loading an existing networkPerm
+        this.securityGroupId = netPerm.securityGroupId;
+      }
+      this.description = netPerm.description;
+      this.ingress = netPerm.ingress;
+      this.fromPort = netPerm.fromPort;
+      this.toPort = netPerm.toPort;
+      this.ipProtocol = netPerm.ipProtocol;
+      this.cidrIp = netPerm.cidrIp;
+      if (
+          this.ingress === false &&
+          this.cidrIp === "0.0.0.0/0" &&
+          String(this.ipProtocol) === "-1" &&
+          this.fromPort === undefined &&
+          this.toPort === undefined &&
+          this.description === "default"
+        ) {
+        this.description = "AWS-provided default - open all outgoing traffic.";
+      }
     }
   }
 
@@ -40,10 +65,12 @@ export class NetworkPermission {
     }
     // remember instanceof just checks the prototype.
     // If any of these don't exist, that's ok.
-    return (obj.host === this.host)
-        && (obj.protocol === this.protocol)
-        && (obj.localPort === this.localPort)
-        && (obj.remotePort === this.remotePort);
+    return (obj.templateId === this.templateId)
+        && (obj.ingress === this.ingress)
+        && (obj.fromPort === this.fromPort)
+        && (obj.toPort === this.toPort)
+        && (obj.ipProtocol === this.ipProtocol)
+        && (obj.cidrIp === this.cidrIp);
   }
 
   /**
@@ -52,34 +79,56 @@ export class NetworkPermission {
    */
   checkValid(): boolean {
 
-    // instead of checking  '<=='
+
+    // These are the values AWS gives by default when the virtue is created.
+    if (
+        this.ingress === false &&
+        this.cidrIp === "0.0.0.0/0" &&
+        String(this.ipProtocol) === "-1" &&
+        this.fromPort === undefined &&
+        this.toPort === undefined
+      ) {
+      return true;
+    }
+
     // first make sure that the ports aren't 0, because checking !port will be true
     // if port === 0. Which would make the wrong error message appear.
     if (
-        // this.localPort === 0
-        this.remotePort === 0
+        this.fromPort === 0
+        || this.toPort === 0
         ) {
       console.log("Ports on network permissions must be greater than zero.");
       return false;
     }
 
-    if (
-      !this.host
-      || !this.protocol
-      // || !this.localPort
-      || !this.remotePort
-        ) {
-      console.log("Network permission fields cannot be blank");
-      return false;
+    if ( String(this.ipProtocol) !== "-1") {
+      if (!(this.toPort || this.fromPort) ) {
+        console.log("Both local and remote ports must be given.");
+        return false;
+      }
+      if (
+        this.fromPort < 0
+         || this.toPort < 0) {
+        console.log("Ports must be greater than zero.");
+        return false;
+      }
+      if (
+        this.toPort < this.fromPort) {
+        console.log("The top of the port range must not be lower than the bottom of the range.");
+        return false;
+      }
+
     }
 
-    if (
-      // this.localPort < 0
-      this.remotePort < 0) {
-      console.log("Ports on network permissions must be greater than zero.");
+    // if ( !this.ipProtocol ) {
+    //   console.log("Please select a protocol.");
+    //   return false;
+    // }
+
+    if ( !this.cidrIp ) {
+      console.log("Destination CIDR IP must not be blank.");
       return false;
     }
-
     return true;
   }
 }

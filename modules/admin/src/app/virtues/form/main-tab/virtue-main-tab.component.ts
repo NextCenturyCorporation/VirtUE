@@ -7,6 +7,7 @@ import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
+import { Application } from '../../../shared/models/application.model';
 
 import {
   Column,
@@ -114,7 +115,8 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => v.getApps(),  this.formatName),
+      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => v.getApps(),  this.formatName,
+                                                                                  (a: Application) => this.toDetailsPage(a)),
       new TextColumn('OS',      2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
       // new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new BlankColumn(1),

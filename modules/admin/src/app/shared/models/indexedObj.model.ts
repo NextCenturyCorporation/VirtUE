@@ -2,7 +2,6 @@
 
 import { DictList } from './dictionary.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -31,11 +30,9 @@ export abstract class IndexedObj {
   abstract getID(): string;
 
   /**
-   * tells [[DataRequestService]] where this type of object lives on the backend.
-   * @return The subdomain at which this sort of object is made accessible, on the virtue-admin backend server.
+   * @return The DatasetNames enum that this object belongs to
    */
-  abstract getSubdomain(): string;
-
+  abstract getDatasetName(): string;
 
   /**
    * Empty by default. Items with children can override it.

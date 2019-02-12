@@ -66,11 +66,10 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
     let params = this.getListOptions();
 
@@ -80,10 +79,10 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
 
     // pull the top subdomain, e.g. '/users', '/virtues', etc., out of the url.
     // Used only when to navigate to the create page for this type of item, via the 'Add new {{itemName}}' button.
-    this.subdomain = this.getSubdomain();
+    this.subdomain = this.getLocalSubdomain();
   }
 
-  protected getSubdomain(): string {
+  protected getLocalSubdomain(): string {
     return '/' + this.routerService.getRouterUrlPieces()[0];
   }
 
@@ -117,7 +116,7 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   /**
    * returns the default parameters for the table on a list page, using subclass-defined features.
    */
-  defaultTableParams() {
+  defaultTableParams(): any {
     return {
       cols: this.getColumns(),
       filters: this.getTableFilters(),

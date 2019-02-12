@@ -971,9 +971,6 @@ public class AdminResource {
 	@Path("fileSystem")
 	@Operation(summary = "Get all shared file systems.", description = "Returns a list of all the metadata for a shared file systems(I.E. Samba share) on the system.")
 	public Iterable<FileSystem> getAllFileSystems() {
-		// ArrayList<FileSystem> ps = new ArrayList<FileSystem>();
-		// ps.add(new FileSystem("id", "name", "address", "status", true));
-		// return ps;
 		return adminService.getAllFileSystems();
 	}
 

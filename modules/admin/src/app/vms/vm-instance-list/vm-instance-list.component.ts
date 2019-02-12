@@ -57,11 +57,10 @@ export class VmInstanceListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
   }
 
   getDatasetToDisplay(): DatasetNames {
@@ -73,8 +72,7 @@ export class VmInstanceListComponent extends ItemListComponent {
       cols: this.getColumns(),
       filters: this.getTableFilters(),
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
-      noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: i => false
+      noDataMsg: this.getNoDataMsg()
     };
   }
 
@@ -83,8 +81,8 @@ export class VmInstanceListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name',   5, (v: VirtualMachineInstance) => v.getName(), SORT_DIR.ASC,  undefined,
-                                                                                                    () => this.getSubMenu()),
+      new TextColumn('Template Name',   5, (v: VirtualMachineInstance) => v.getName(), SORT_DIR.ASC,
+                                                (v: VirtualMachineInstance) => this.toDetailsPage(v), () => this.getSubMenu()),
       new TextColumn('State',           1,  (v: VirtualMachineInstance) => String(v.state), SORT_DIR.ASC),
       new TextColumn('os',              1,  (v: VirtualMachineInstance) => v.os,       SORT_DIR.ASC),
       new TextColumn('Hostname',           3,  (v: VirtualMachineInstance) => String(v.hostname), SORT_DIR.ASC)
@@ -105,7 +103,8 @@ export class VmInstanceListComponent extends ItemListComponent {
   getSubMenu(): SubMenuOptions[] {
     return [
       // new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => {}),
-      new SubMenuOptions("Stop",   (v: VirtualMachineInstance) => !v.isStopped(), (v: VirtualMachineInstance) => v.stop()),
+      // new SubMenuOptions("Stop",   (vm: VirtualMachineInstance) => !vm.isStopped(),
+      //                                               (vm: VirtualMachineInstance) => this.stopVm(vm)),
     ];
   }
 

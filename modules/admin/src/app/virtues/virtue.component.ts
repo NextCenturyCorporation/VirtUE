@@ -4,7 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatSlideToggleModule } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+import 'rxjs/add/operator/map';
+import { catchError, tap } from 'rxjs/operators';
 
+import { Subdomains } from '../shared/services/subdomains.enum';
 import { RouterService } from '../shared/services/router.service';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
@@ -12,6 +16,7 @@ import { DataRequestService } from '../shared/services/dataRequest.service';
 import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
+import { NetworkPermission } from '../shared/models/networkPerm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
@@ -57,6 +62,9 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
     <div id="content-header">
       <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
+    <button mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+      <label>View all Virtue details</label>
+    </button>
     <div id="content-main">
       <div id="content" class="content">
         <mat-tab-group dynamicHeight=true>
@@ -115,11 +123,10 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/virtues', activatedRoute, routerService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
@@ -220,6 +227,40 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   /**
+   * Virtue templates have attributes that don't come with the actual Item, and must be querried separately
+   *  - NetworkPermissions
+   *  - ClipboardPermissions
+   *  - filesystems?
+   *
+   * @override [[ItemFormComponent.afterPullComplete]]()
+   */
+  afterPullComplete(): Promise<any> {
+    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.initializeNetworkPerms(response);
+          }
+        }),
+        catchError(this.ignoreError())
+      )
+      .toPromise();
+  }
+
+  ignoreError() {
+    return (err: any) => {
+      return new Observable<HttpEvent<any>>( () => err);
+    };
+  }
+
+  initializeNetworkPerms(netPerms) {
+    for (let secGrp of netPerms) {
+      this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
+    }
+    this.settingsTab.update();
+  }
+
+  /**
    * This page needs all 6 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
    * It also has a table showing the users that have been given access to this Virtue template.
    * The settings tab now also allows connection to printers and filesystems.
@@ -229,6 +270,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     return [
             DatasetNames.APPS,
             DatasetNames.VM_TS,
+            DatasetNames.VMS,
             DatasetNames.PRINTERS,
             DatasetNames.FILE_SYSTEMS,
             DatasetNames.VIRTUE_TS,
@@ -237,7 +279,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   getTitle(): string {
-    return this.mode + " Virtue Template:  " + this.item.name;
+    return this.mode + " Virtue Template:  " + (this.item.getName() ? this.item.getName() : "");
   }
 
 
@@ -253,6 +295,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     if ( !this.settingsTab.collectData() ) {
       return false;
     }
+
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
 
@@ -268,6 +311,36 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     // the 's list size if vmTemplates is undefined
     this.item.vmTemplates = undefined;
     return true;
+  }
+
+  afterSave(returnedObj?: any): void {
+    // needs to be done this way so permissions added during the creation/duplication of a virtue actually get
+    // saved; remember the item doesn't have an ID until after it gets saved.
+    let virtueTemplateID = this.item.getID();
+    if (this.mode === Mode.CREATE) {
+      virtueTemplateID = new Virtue(returnedObj).getID();
+    }
+    this.updateVirtueSecurityGroupPermissions(virtueTemplateID);
+  }
+
+  updateVirtueSecurityGroupPermissions(virtueTemplateID: string): void {
+    for (let secPerm of this.item.newSecurityPermissions) {
+      secPerm.templateId = virtueTemplateID;
+      this.authorizeSecGrpPermission(virtueTemplateID, secPerm);
+    }
+
+    for (let secPerm of this.item.revokedSecurityPermissions) {
+      secPerm.templateId = virtueTemplateID;
+      this.revokeSecGrpPermission(virtueTemplateID, secPerm);
+    }
+  }
+
+  authorizeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm).then(() => {});
+  }
+
+  revokeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm).then(() => {});
   }
 
   /**

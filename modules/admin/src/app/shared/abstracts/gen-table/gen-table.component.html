@@ -1,6 +1,6 @@
 
 <div class="scaleToFit" [ngStyle]="{'width': tableWidth*100 + '%'}">
-  <div *ngIf="filterOptions.length > 0" >
+  <div *ngIf="filterOptions !== undefined && filterOptions.length > 0" >
     <!-- only show this list if the table isn't empty -->
     <div *ngIf="elements.length > 0" class="mui-container-fluid">
       <div class="mui-row">
@@ -65,7 +65,7 @@
       <div class="mui-row margin-top-10">
         <div class="mui-col-md-12 padding-left-0">
           <p class="no-data-message">
-            {{noDataMessage}}
+            {{getNoDataMessage()}}
           </p>
         </div>
       </div>
@@ -113,9 +113,14 @@
             <a class="edit" *ngIf="column.link !== undefined && !disableLinks()" (click)="column.link(elem.obj)">
               {{ column.formatElement(elem.obj) }}
             </a>
-            <div class="edit" *ngIf="column.link === undefined || disableLinks()">
-              {{ column.formatElement(elem.obj) }}
-            </div>
+            <ng-container *ngIf="column.link === undefined || disableLinks()">
+              <p class="edit" style="white-space: pre;" *ngIf="!firstAttrIsString(elem.obj)">
+                {{ column.formatElement(elem.obj) }}
+              </p>
+              <div class="edit"  *ngIf="firstAttrIsString(elem.obj)">
+                {{ column.formatElement(elem.obj) }}
+              </div>
+            </ng-container>
           </ng-container>
 
 
@@ -150,14 +155,23 @@
 
           <!-- if it's an input-field column -->
           <ng-container *ngIf="isInputField(column)">
-            <mat-form-field floatLabel="never" >
-              <input matInput type="text" placeholder="{{column.inputFieldName}}" [disabled]="!editingEnabled()"
-                      [(ngModel)]="elem.obj[column.inputFieldName]" required/>
-            </mat-form-field>
+            <ng-container *ngIf="column.required">
+              <mat-form-field floatLabel="never" >
+                <input matInput type="text" placeholder="{{column.label}}" [disabled]="!editingEnabled()"
+                        [(ngModel)]="elem.obj[column.inputFieldName]" required/>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="!column.required">
+              <mat-form-field floatLabel="never" >
+                <input matInput type="text" placeholder="{{column.label}}" [disabled]="!editingEnabled()"
+                        [(ngModel)]="elem.obj[column.inputFieldName]"/>
+              </mat-form-field>
+            </ng-container>
           </ng-container>
 
           <!-- if it's a checkbox column -->
           <ng-container *ngIf="isCheckbox(column)">
+
             <!-- if angular should just automatically update the local elem.obj object -->
             <ng-container *ngIf="column.onChange === undefined">
               <mat-checkbox
@@ -173,6 +187,7 @@
               [checked]="elem.obj[column.toggleableFieldName]" (change)="column.onChange(elem.obj, $event.checked)">
               </mat-checkbox>
             </ng-container>
+
           </ng-container>
 
           <ng-container *ngIf="isIcon(column)">

@@ -62,6 +62,10 @@ export abstract class GenericPageComponent {
     return obj.enabled ? 'Enabled' : 'Disabled';
   }
 
+  toDetailsPage( obj: IndexedObj ) {
+    this.routerService.goToPage("view", [obj.getDatasetName(), obj.getID()]);
+  }
+
   /**
    * Navigates to the form page for this item.
    */
@@ -83,7 +87,7 @@ export abstract class GenericPageComponent {
     this.routerService.goToPage(item.getDupURL());
   }
 
-  toPreviousPage() {
+  toPreviousPage(): void {
     this.routerService.toPreviousPage();
   }
 

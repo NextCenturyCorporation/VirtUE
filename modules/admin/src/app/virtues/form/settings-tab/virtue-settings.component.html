@@ -95,7 +95,7 @@
           <div class="mui-col-md-2">
             <br>
             <label>Add new &nbsp;&nbsp;</label>
-            <button mat-mini-fab mat-button class="fab-button" [disabled]="inViewMode()" (click)="addNewNetworkPermission()" style="">
+            <button mat-mini-fab mat-button class="fab-button" [disabled]="inViewMode()" (click)="activateNetworkPermissionModal()" style="">
               <mat-icon class="plus" svgIcon="plus" aria-label="Add new network permission."></mat-icon>
             </button>
           </div>
@@ -158,6 +158,7 @@
 <div class="mui-tabs__pane" id="sensors">
   <div class="tab-pane-content no-overflow">
     <h4>Sensor Settings</h4>
+    <app-table #sensorTable></app-table>
   </div>
 </div>
 

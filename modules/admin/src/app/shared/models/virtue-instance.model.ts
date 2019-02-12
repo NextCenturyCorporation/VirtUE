@@ -9,7 +9,6 @@ import { Virtue } from './virtue.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 import { DictList } from './dictionary.model';
 
@@ -111,8 +110,8 @@ export class VirtueInstance extends IndexedObj {
     return this.templateId;
   }
 
-  getSubdomain(): string {
-    return Subdomains.VIRTUES;
+  getDatasetName(): string {
+    return DatasetNames.VIRTUES;
   }
 
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
@@ -144,7 +143,7 @@ export class VirtueInstance extends IndexedObj {
     // DELETING = 100,
     // DELETED = 110,
     // UNPROVISIONED = 120
-    return ! (this.state >= 20 && this.state <= 70);
+    return this.state < 20 || this.state > 70;
   }
 
   stop(): void {

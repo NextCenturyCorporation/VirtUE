@@ -19,6 +19,7 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
+import { NetworkPermission } from '../../models/networkPerm.model';
 import { Toggleable } from '../../models/toggleable.interface';
 
 import { Subdomains } from '../../services/subdomains.enum';
@@ -101,7 +102,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   constructor(
     routerService: RouterService,
-    protected baseUrlService: BaseUrlService,
     protected dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
@@ -151,11 +151,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   pullData(): void {
     let updateQueue: DatasetType[] = [];
-
     for (let datasetName of this.neededDatasets) {
       if ( !(datasetName in this.datasetsMeta)) {
         // throw error TODO
-        console.log("Unrecognized dataset name");
+        console.log("Unrecognized dataset name: ", datasetName);
       }
       else {
         updateQueue.push(this.datasetsMeta[datasetName]);
@@ -240,20 +239,19 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   recursivePullData(
     updateQueue: DatasetType[]
   ): void {
-    // Make a throw-away object of the currently to-be-requested type, just to get its subdomain.
-    // Feels hacky, but I need to be able to get an object's subdomain, without knowing its class, as well as be able to get that same
-    // subdomain *only* knowing the class.
-    // The alternative would be to have every IndexObj subclass have a static function to return the subdomain, as well as a regular
-    // function that calls that static function. Just to eliminate the below line.
-    let subdomain = new (updateQueue[0].class)().getSubdomain();
+    // let subdomain = new (updateQueue[0].class)().getSubdomain();
 
-    let sub = this.dataRequestService.getRecords(subdomain).subscribe( rawDataList => {
+    let sub = this.dataRequestService.getRecords(updateQueue[0].subdomain).subscribe( rawDataList => {
 
       this.datasets[updateQueue[0].datasetName] = new DictList<IndexedObj>();
 
+      // because the sensor endpoint is set up differently than the others.
+      if (updateQueue[0].datasetName === DatasetNames.SENSORS && rawDataList) {
+        rawDataList = this.cleanSensorData(rawDataList);
+      }
+
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
-
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
         // Like a User needs to have a list of Virtues, populated based on the virtueTemplateIDs list it comes in with.
         // Virtue has one list each for vms, printers, and filesystems.
@@ -310,6 +308,19 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     });
   }
 
+  getRemoteSubdomain(obj: IndexedObj): string {
+    return this.datasetsMeta[obj.getDatasetName()].subdomain;
+  }
+
+  cleanSensorData(rawSensorsResponse: any) {
+    let timestamp = rawSensorsResponse.timestamp;
+    let sensors = rawSensorsResponse.sensors;
+    for (let e of sensors) {
+      e['timestamp'] = timestamp;
+    }
+    return sensors;
+  }
+
   /**
    * Necessary.
    *
@@ -356,20 +367,22 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     obj.buildAttribute(datasetName, this.datasets[datasetName] );
   }
 
-
-
   /**
    * saves the item's current state to the backend.
    *
-   * @param redirect a function to call (only) after the saving process has successfully completed.
+   * @param onSuccess a function to call (only) after the saving process has successfully completed.
    */
-  updateItem(obj: IndexedObj, redirect?: () => void): void {
+  updateItem(obj: IndexedObj, onSuccess?: (updatedObject?: IndexedObj) => void): void {
 
-    let sub = this.dataRequestService.updateRecord(obj.getSubdomain(), obj.getID(), obj.getFormatForSave()).subscribe(
+    let sub = this.dataRequestService.updateRecord(this.getRemoteSubdomain(obj), obj.getID(), obj.getFormatForSave()).subscribe(
       updatedObject => {
-        console.log(updatedObject);
-        if (redirect) {
-          redirect();
+        if (onSuccess) {
+          if (updatedObject !== null) {
+            onSuccess(updatedObject);
+          }
+          else {
+            onSuccess();
+          }
         }
         else {
           this.refreshPage();
@@ -391,7 +404,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   createItem(obj: IndexedObj, onSuccess?: (createdObj?: IndexedObj) => void): void {
 
-    let sub = this.dataRequestService.createRecord(obj.getSubdomain(), obj.getFormatForSave()).subscribe(
+    let sub = this.dataRequestService.createRecord(this.getRemoteSubdomain(obj), obj.getFormatForSave()).subscribe(
       createdObj => {
         if (onSuccess) {
           if (createdObj !== null) {
@@ -415,7 +428,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   }
 
   deleteItem(obj: IndexedObj): void {
-    this.dataRequestService.deleteRecord(obj.getSubdomain(), obj.getID()).then(() => {
+    this.dataRequestService.deleteRecord(this.getRemoteSubdomain(obj), obj.getID()).then(() => {
       this.refreshPage();
     });
 
@@ -438,13 +451,24 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       }
     }
 
-    let sub = this.dataRequestService.setRecordAvailability(obj.getSubdomain(), obj.getID(), newStatus).subscribe(() => {
-      sub.unsubscribe();
-      this.refreshPage();
-    },
-    error => {
-      sub.unsubscribe();
-      this.refreshPage();
+    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(
+      () => {
+        sub.unsubscribe();
+        this.refreshPage();
+      },
+      error => {
+        sub.unsubscribe();
+        this.refreshPage();
     });
+  }
+
+  addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): Promise<any> {
+    if (! (action === 'authorize' || action === 'revoke') ) {
+      console.log("invalid request");
+      return new Promise<any>(() => {});
+    }
+
+    return this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [virtueTemplateID, action], JSON.stringify(secPerm))
+      .toPromise();
   }
 }

@@ -221,13 +221,14 @@ export class InputFieldColumn extends Column implements Sortable {
     width: number,
     /** the name of the attribute within the object held by each TableElement that this input field should be mapped to. */
     public inputFieldName: string,
-
-    /**
-     * A function that returns a string representing the given object, which this column should use when sorting the objects.
-     */
-    public sortField: (elem: any) => string
+    /** A function that returns a string representing the given object, which this column should use when sorting the objects.*/
+    public sortField: (elem: any) => string,
+    public required?: boolean
     ) {
       super(label, width);
+      if (this.required === undefined) {
+        this.required = false;
+      }
     }
 }
 
@@ -269,7 +270,7 @@ export class RadioButtonColumn extends Column {
     /** the field to be watched/set by this column's radio button. */
     public fieldName: string,
     /** the value to be given to [[fieldName]], if this column is selected. */
-    public value: string
+    public value: any
     ) {
       super(label, width);
     }

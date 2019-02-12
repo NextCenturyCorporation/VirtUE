@@ -28,6 +28,7 @@ import {
   MatIconModule,
   MatIconRegistry,
   MatInputModule,
+  MatMenuModule,
   MatRadioModule,
   MatSelectModule,
   MatSlideToggleModule,
@@ -54,6 +55,9 @@ import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fi
 import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
+import { SimpleTableComponent } from './shared/abstracts/gen-table/simple-table/simple-table.component';
+
+import { BasicObjectDetailsComponent } from './basic-object-details/basic-object-details.component';
 
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
@@ -74,6 +78,8 @@ import { PrinterModalComponent } from './modals/printer-modal/printer.modal';
 import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-selection.modal';
 // import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
 import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
+import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
+import { NetworkPermissionModalComponent } from './modals/networkPerm-modal/networkPerm.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
 import { VmInstanceListComponent } from './vms/vm-instance-list/vm-instance-list.component';
@@ -90,7 +96,6 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { DialogsComponent } from './dialogs/dialogs.component';
-
 
 import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
@@ -125,6 +130,10 @@ import { LoginComponent } from './shared/authentication/login.component';
     DashboardComponent,
 
     GenericTableComponent,
+    SimpleTableComponent,
+
+    BasicObjectDetailsComponent,
+    // SensorDetailsComponent,
 
     UserListComponent,
     UserComponent,
@@ -144,8 +153,9 @@ import { LoginComponent } from './shared/authentication/login.component';
     ColorModalComponent,
     PrinterModalComponent,
     PrinterSelectionModalComponent,
-    // FileSystemModalComponent,
+    FileSystemModalComponent,
     FileSystemSelectionModalComponent,
+    NetworkPermissionModalComponent,
 
     ListFilterPipe,
     PageNotFoundComponent,
@@ -186,6 +196,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     MatGridListModule,
     MatIconModule,
     MatInputModule,
+    MatMenuModule,
     MatRadioModule,
     MatSlideToggleModule,
     MatSelectModule,
@@ -227,7 +238,9 @@ import { LoginComponent } from './shared/authentication/login.component';
     // PrinterModalComponent,
     PrinterSelectionModalComponent,
     // FileSystemModalComponent,
-    FileSystemSelectionModalComponent
+    FileSystemSelectionModalComponent,
+    FileSystemModalComponent,
+    NetworkPermissionModalComponent
   ]
 })
 
