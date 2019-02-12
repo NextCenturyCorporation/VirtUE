@@ -336,11 +336,11 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   authorizeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
-    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm).then(() => {});
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm);
   }
 
   revokeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
-    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm).then(() => {});
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm);
   }
 
   /**

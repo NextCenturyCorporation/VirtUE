@@ -323,6 +323,13 @@ public class AdminResource {
 	}
 
 	@GET
+	@Path("virtues/stop/{instanceId}")
+	@Operation(summary = "Stop virtue instance.", description = "Stops the virtue instance associated with the given ID.")
+	public void stopVirtue(@PathParam("instanceId") String instanceId) {
+		adminService.stopVirtue(instanceId);
+	}
+
+	@GET
 	@Path("deletevirtue/instance/{instanceId}")
 	@Operation(summary = "Delete virtue instance.", description = "Deletes the virtue instance associated with the given ID.")
 	public void deleteVirtue(@PathParam("instanceId") String instanceId) {
