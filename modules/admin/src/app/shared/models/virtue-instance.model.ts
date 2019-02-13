@@ -66,6 +66,7 @@ export class VirtueInstance extends IndexedObj {
   template: Virtue;
 
   state: VirtueState;
+  readableState: string;
 
   name: string = "";
   user: string = "";
@@ -96,7 +97,8 @@ export class VirtueInstance extends IndexedObj {
       // maybe temporary. It could be actually pulled in, but at the moment all we need is to able to navigate to it.
       this.template = new Virtue({id: virtueObj.templateId});
       this.appIds = virtueObj.applicationIds;
-      this.state = virtueObj.state;
+      this.state = VirtueState[virtueObj.state as string];
+      this.readableState = virtueObj.state;
       this.color = virtueObj.color;
     }
   }
@@ -147,14 +149,6 @@ export class VirtueInstance extends IndexedObj {
     // DELETED = 110,
     // UNPROVISIONED = 120
     return this.state < 20 || this.state > 70;
-  }
-
-  stop(): void {
-    //
-  }
-
-  stopVm(vm: VirtualMachine): void {
-    //
   }
 
 

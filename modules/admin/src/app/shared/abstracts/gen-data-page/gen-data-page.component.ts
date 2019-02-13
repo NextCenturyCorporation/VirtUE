@@ -120,11 +120,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * right away. Before onPullComplete was implemented, this was used to delay the initialization of page
    * components until data from the backend had probably been retrieved.
    */
-  refreshPage(wait?: boolean): void {
+  refreshPage(wait?: boolean, durationSeconds?: number): void {
     if (wait) {
+      if (durationSeconds === undefined) {
+        durationSeconds = 0.3;
+      }
+
       setTimeout(() => {
         this.pullData();
-      }, 300);
+      }, durationSeconds*1000);
       return;
     }
     // else
@@ -462,7 +466,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   }
 
   stopVirtue(virtue: VirtueInstance): void {
-    this.dataRequestService.flexiblePost(this.getRemoteSubdomain(virtue), ['stop/', virtue.getID()], "")
+    this.dataRequestService.flexiblePost(this.getRemoteSubdomain(virtue), ['stop', virtue.getID()], "")
     .toPromise().then(() => {
       this.refreshPage();
     });

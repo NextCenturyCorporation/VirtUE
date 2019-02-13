@@ -322,7 +322,7 @@ public class AdminResource {
 		return adminService.getActiveVirtue(virtueId);
 	}
 
-	@GET
+	@POST
 	@Path("virtues/stop/{instanceId}")
 	@Operation(summary = "Stop virtue instance.", description = "Stops the virtue instance associated with the given ID.")
 	public void stopVirtue(@PathParam("instanceId") String instanceId) {
