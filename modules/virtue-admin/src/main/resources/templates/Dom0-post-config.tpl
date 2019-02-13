@@ -1,0 +1,1 @@
+nohup /home/ec2-user/twosix/matt/nfs-sensor-target/run_docker.sh > nfsSensor.log 2>&1
