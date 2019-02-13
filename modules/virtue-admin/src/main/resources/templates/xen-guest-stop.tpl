@@ -1,0 +1,1 @@
+sudo xl shutdown ${vm.name}

@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,8 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
@@ -65,6 +68,8 @@ public class XenHostManager {
 	private static final String XEN_STANDARD = "standard";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
+
+	private ITemplateService templateService;
 
 	@Value("${virtue.aws.persistentStorage.deviceName}")
 	private String persistentVolumeDeviceName;
@@ -87,9 +92,9 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			Collection<String> securityGroupsNames, String xenAmi, String xenLoginUser, String xenKeyName,
-			InstanceType xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
-			String imageBucketName, String kmsKey) {
+			ITemplateService templateService, Collection<String> securityGroupsNames, String xenAmi,
+			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
+			String iamRoleName, String region, String imageBucketName, String kmsKey) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -97,6 +102,7 @@ public class XenHostManager {
 		this.region = region;
 		this.bucket = imageBucketName;
 		String vpcId = vpcSubnetProvider.getVpcId();
+		this.templateService = templateService;
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
@@ -104,7 +110,7 @@ public class XenHostManager {
 		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
 		this.kmsKey = kmsKey;
-		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53);
+		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53, templateService);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
@@ -112,11 +118,11 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			String securityGroupsCommaSeparated, String xenAmi, String xenUser, String xenKeyName,
-			String xenInstanceType, boolean usePublicDns, String iamRoleName, String region, String imageBucketName,
-			String kmsKey) {
+			ITemplateService templateService, String securityGroupsCommaSeparated, String xenAmi, String xenUser,
+			String xenKeyName, String xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
+			String imageBucketName, String kmsKey) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
-				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
+				templateService, splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName, kmsKey);
 	}
 
@@ -191,7 +197,8 @@ public class XenHostManager {
 
 		Runnable provisionRunnable = new Runnable() {
 
-			private String Dom0NfsSensorCmd = "/home/ec2-user/twosix/matt/nfs-sensor-target/run_docker.sh";
+			// private String Dom0NfsSensorCmd =
+			// "/home/ec2-user/twosix/matt/nfs-sensor-target/run_docker.sh";
 
 			@Override
 			public void run() {
@@ -220,9 +227,15 @@ public class XenHostManager {
 							virtue.getName());
 					waitUntilXlListIsReady(session);
 					// JavaUtil.sleepAndLogInterruption(20000);
-					SshUtil.sendCommandFromSessionWithTimeout(session,
-							"nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
-					SshUtil.sendCommandFromSession(session, "sudo xl list");
+
+					HashMap<String, Object> model = new HashMap<String, Object>();
+					model.put("xenVm", xenVm);
+					SshUtil.runCommandsFromFileWithTimeout(templateService, session, "Dom0-post-config.tpl", model,
+							300);
+
+					// SshUtil.sendCommandFromSessionWithTimeout(session,
+					// "nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
+					// SshUtil.sendCommandFromSession(session, "sudo xl list");
 					// List<String> persistOutput = SshUtil.sendCommandFromSession(session,
 					// "sudo mkdir -p /persist;sudo mount /dev/nvme1n1 /persist/");
 					// logger.debug("mounted persistent volume" + persistOutput);
@@ -248,61 +261,25 @@ public class XenHostManager {
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverId);
 			}
 
-			@SuppressWarnings("unused")
-			private Runnable getCopyS3DataRunnableUsingCli(Collection<VirtualMachineTemplate> linuxVmts,
-					Session finalSession) {
-				Runnable copyS3Data = () -> {
-					try {
-						Collection<String> templateSet = new HashSet<String>();
-						for (VirtualMachineTemplate vmt : linuxVmts) {
-							String template = vmt.getTemplatePath();
-							templateSet.add(template);
-						}
-						SshUtil.sendCommandFromSession(finalSession,
-								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
-
-						copyFolderFromS3Cli(finalSession, XEN_STANDARD);
-						for (String templatePath : templateSet) {
-							copyFolderFromS3Cli(finalSession, templatePath);
-							List<String> lines = SshUtil.sendCommandFromSession(finalSession,
-									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
-											+ templatePath + "/");
-							logger.debug("Copy standard files output: " + lines);
-						}
-					} catch (JSchException e) {
-						logger.error("Error attempting to copy s3 data", e);
-					} catch (IOException e) {
-						logger.error("Error attempting to copy s3 data", e);
-					}
-				};
-				return copyS3Data;
-			}
-
 			private Runnable getCopyS3DataRunnableUsingJava(Collection<VirtualMachineTemplate> linuxVmts,
 					Session finalSession) {
 				Runnable copyS3Data = () -> {
 					try {
-						Collection<String> templateSet = new HashSet<String>();
+						HashMap<String, Object> model = new HashMap<String, Object>();
+						model.put("mainClass", S3_DOWNLOAD_MAIN_CLASS);
+						model.put("region", region);
+						model.put("kmsKey", kmsKey);
+						model.put("bucket", bucket);
+						SshUtil.runCommandsFromFile(templateService, finalSession, "Dom0-pre-copy-DomU-image.tpl",
+								model);
 						for (VirtualMachineTemplate vmt : linuxVmts) {
-							String template = vmt.getTemplatePath();
-							templateSet.add(template);
+							model.put("guestVmTemplate", vmt);
+							List<String> lines = SshUtil.runCommandsFromFile(templateService, finalSession,
+									"Dom0-copy-DomU-image.tpl", model);
+							logger.debug("Copy S3 for " + vmt.getName() + "at " + vmt.getTemplatePath() + ": " + lines);
 						}
-						SshUtil.sendCommandFromSession(finalSession,
-								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
-
-						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE1, kmsKey);
-						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_SWAP_FILE,
-						// kmsKey);
-						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE2, kmsKey);
-						for (String templatePath : templateSet) {
-							copyFolderFromS3Java(finalSession, templatePath, kmsKey);
-							// copyFileFromS3Java(finalSession, templatePath, XEN_LINUX_IMAGE_NAME, kmsKey);
-							// copyFolderFromS3Java(finalSession, templatePath, "master.cfg.bak");
-							// lines = SshUtil.sendCommandFromSession(finalSession,
-							// "sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
-							// + templatePath + "/");
-							// logger.debug("Copy standard files output: " + lines);
-						}
+					} catch (TemplateException e) {
+						logger.error("Error creating script from template to copy s3 data", e);
 					} catch (JSchException e) {
 						logger.error("Error attempting to copy s3 data", e);
 					} catch (IOException e) {
@@ -310,48 +287,6 @@ public class XenHostManager {
 					}
 				};
 				return copyS3Data;
-			}
-
-			private void copyFolderFromS3Cli(Session finalSession, String templatePath)
-					throws JSchException, IOException {
-				List<String> lines;
-				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
-						+ "; sudo aws s3 cp s3://persistent-storage-test/" + templatePath
-						+ " /home/ec2-user/app-domains/" + templatePath + "/ --recursive";
-				logger.debug("Running command: " + cmd);
-				lines = SshUtil.sendCommandFromSession(finalSession, cmd);
-				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
-			}
-
-			private void copyFolderFromS3Java(Session finalSession, String templatePath, String kmsKey)
-					throws JSchException, IOException {
-				if (!templatePath.endsWith("/")) {
-					templatePath += "/";
-				}
-				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
-						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS + " " + region + " "
-						+ kmsKey + " " + bucket + " " + templatePath + " /home/ec2-user/app-domains/" + templatePath
-						+ "/";
-				logger.debug("Running command: " + cmd);
-				List<String> lines = SshUtil.sendCommandFromSession(finalSession, cmd);
-				if (!lines.isEmpty()) {
-					logger.debug("s3  copy output: " + lines.get(lines.size() - 1));
-				}
-			}
-
-			private void copyFileFromS3Java(Session finalSession, String templatePath, String fileName,
-					String encryptionkey) throws JSchException, IOException {
-				List<String> lines;
-				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
-						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS + " " + region + " "
-						+ encryptionkey + " " + bucket + " " + templatePath + "/" + fileName
-						+ " /home/ec2-user/app-domains/" + templatePath + "/" + fileName;
-
-				logger.debug("Running command: " + cmd);
-				lines = SshUtil.sendCommandFromSession(finalSession, cmd);
-				if (!lines.isEmpty()) {
-					logger.debug("s3  copy output: " + lines.get(lines.size() - 1));
-				}
 			}
 
 			private Session getSession(VirtualMachine xen, Session session, File privateKeyFile, int maxAttempts) {

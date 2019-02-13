@@ -1,0 +1,1 @@
+sudo xl create app-domains/${vm.name}/${vm.name}.cfg

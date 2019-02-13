@@ -238,6 +238,7 @@
 		<constructor-arg ref="persistentStorageManager"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg ref="templateService"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
