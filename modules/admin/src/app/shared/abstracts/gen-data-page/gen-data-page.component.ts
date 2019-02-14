@@ -128,7 +128,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
       setTimeout(() => {
         this.pullData();
-      }, durationSeconds*1000);
+      }, durationSeconds * 1000);
       return;
     }
     // else
