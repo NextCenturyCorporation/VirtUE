@@ -50,6 +50,8 @@ import { DatasetNames } from '../../gen-data-page/datasetNames.enum';
  */
 export abstract class ItemFormComponent extends GenericTabbedFormComponent implements OnInit {
 
+  selectedTab: number = 0;
+
   /**
    * It appears that we can't really use the Angular Form tool/paradigm without extensive refactoring.
    * As is, we have variables for all the different attributes one could set, as well as for all the data

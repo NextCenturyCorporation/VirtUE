@@ -602,6 +602,19 @@ export class GenericTableComponent<T> {
   }
 
   getColSortField(col) {
-    return (col.sortField ? col.sortField : undefined );
+    if (!col.sortField) {
+      return undefined;
+    }
+    // to ensure ordering is deterministic, when possible
+    return (elem: TableElement<T>): string => {
+      if (elem !== undefined && elem['getID'] !== undefined && typeof elem['getID'] === 'function') {
+        return col.sortField(elem) + elem['getID']();
+      }
+      else {
+        return col.sortField(elem);
+      }
+    };
+
+    // return (col.sortField ? col.sortField : undefined );
   }
 }

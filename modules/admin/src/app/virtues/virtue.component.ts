@@ -67,7 +67,7 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
     </button>
     <div id="content-main">
       <div id="content" class="content">
-        <mat-tab-group dynamicHeight=true>
+        <mat-tab-group dynamicHeight=true [(selectedIndex)]="selectedTab">
           <mat-tab label= {{mainTab.tabName}}>
             <app-virtue-main-tab #mainTab></app-virtue-main-tab>
           </mat-tab>
@@ -336,11 +336,11 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   authorizeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
-    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm).then(() => {});
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm);
   }
 
   revokeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
-    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm).then(() => {});
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm);
   }
 
   /**
