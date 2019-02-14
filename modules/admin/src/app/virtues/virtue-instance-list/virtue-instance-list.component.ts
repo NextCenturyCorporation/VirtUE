@@ -76,7 +76,7 @@ export class VirtueInstanceListComponent extends ItemListComponent implements On
         if (this.pageActive) {
           this.pullData();
         }
-      }, 5*1000);
+      }, 5 * 1000);
     }
   }
 
