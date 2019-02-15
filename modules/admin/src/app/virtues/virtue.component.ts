@@ -296,20 +296,6 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
       return false;
     }
 
-    // TODO perform checks here, so none of the below changes happen if the item
-    // isn't valid
-
-    // The following are required:
-    //  this.item.name,     can't be empty
-    //  this.item.version,  will be valid
-    //  this.item.enabled,  should either be true or false
-    //  this.item.color,    should be ok? make sure it has a default in the settings pane
-
-    // note that vmTemplates is set to undefined for a brief instant before the
-    // page navigates away, during which time an exception would occur on the
-    // table - that chunk of html has now been wrapped in a check, to not check
-    // the 's list size if vmTemplates is undefined
-    this.item.vmTemplates = undefined;
     return true;
   }
 
@@ -324,12 +310,12 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   updateVirtueSecurityGroupPermissions(virtueTemplateID: string): void {
-    for (let secPerm of this.item.newSecurityPermissions) {
+    for (let secPerm of this.item.getNewSecurityPermissions()) {
       secPerm.templateId = virtueTemplateID;
       this.authorizeSecGrpPermission(virtueTemplateID, secPerm);
     }
 
-    for (let secPerm of this.item.revokedSecurityPermissions) {
+    for (let secPerm of this.item.getRevokedSecurityPermissions()) {
       secPerm.templateId = virtueTemplateID;
       this.revokeSecGrpPermission(virtueTemplateID, secPerm);
     }

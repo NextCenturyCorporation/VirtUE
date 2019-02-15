@@ -44,7 +44,7 @@ export class Virtue extends Item {
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
 
-  vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
+  private vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
 
   vmTemplateIds: string[] = [];
 
@@ -54,33 +54,30 @@ export class Virtue extends Item {
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
   color: string = 'transparent';
 
-  /** #TODO what is this? #uncommented (unprovisioned) */
-  unprovisioned: boolean = true;
-
   /** What virtue should any links clicked within this Virtue automatically open in */
   defaultBrowserVirtueId: string;
-  defaultBrowserVirtue: Virtue;
+  private defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
   networkSecurityPermWhitelist: NetworkPermission[] = [];
-  newSecurityPermissions: NetworkPermission[] = [];
-  revokedSecurityPermissions: NetworkPermission[] = [];
+  private newSecurityPermissions: NetworkPermission[] = [];
+  private revokedSecurityPermissions: NetworkPermission[] = [];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
   allowedPasteTargetIds: string[] = [];
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
+  private allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
 
   /** this virtue's r/w/e permissions for the filesystem
    * Note that fileSystems is saved and loaded with the virtue. While everything else is saved as a list of IDs,
    * here, the list of IDs is just used to update the names of the saved fileSystems, since each virtue can set its own individual
    * permissions for a given fileSystem.
    */
-  fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
+  private fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
   fileSystemIds: string[] = [];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  printers: DictList<Printer> = new DictList<Printer>();
+  private printers: DictList<Printer> = new DictList<Printer>();
   printerIds: string[] = [];
 
   /**
@@ -113,7 +110,6 @@ export class Virtue extends Item {
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
 
-      this.unprovisioned = virtueObj.unprovisioned;
       this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
       this.version = virtueObj.version;
       this.color = virtueObj.color;
@@ -167,14 +163,6 @@ export class Virtue extends Item {
 
   getVmApps(): IndexedObj[] {
     return this.getGrandChildren(DatasetNames.VM_TS, DatasetNames.APPS);
-  }
-
-  getPrinters(): IndexedObj[] {
-    return this.getChildren(DatasetNames.PRINTERS);
-  }
-
-  getFileSystems(): IndexedObj[] {
-    return this.getChildren(DatasetNames.FILE_SYSTEMS);
   }
 
 
@@ -247,18 +235,44 @@ export class Virtue extends Item {
         enabled: this.enabled,
         vmTemplateIds: this.vmTemplateIds,
         fileSystemIds: this.fileSystemIds,
-        fileSystems: this.fileSystems.asList(),
         printerIds: this.printerIds,
         allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
         lastModification: this.modificationDate,
         networkSecurityPermWhitelist: this.networkSecurityPermWhitelist,
-        unprovisioned: this.unprovisioned,
         version: this.version,
         defaultBrowserVirtueId: this.defaultBrowserVirtueId,
         color: this.color
 
     };
     return virtue;
+  }
+
+  getVmTemplates() {
+    return this.vmTemplates;
+  }
+
+  getDefaultBrowserVirtue() {
+    return this.defaultBrowserVirtue;
+  }
+
+  getNewSecurityPermissions() {
+    return this.newSecurityPermissions;
+  }
+
+  getRevokedSecurityPermissions() {
+    return this.revokedSecurityPermissions;
+  }
+
+  getAllowedPasteTargets() {
+    return this.allowedPasteTargets;
+  }
+
+  getFileSystems() {
+    return this.fileSystems;
+  }
+
+  getPrinters() {
+    return this.printers;
   }
 }

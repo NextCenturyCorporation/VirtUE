@@ -89,7 +89,12 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
 
     for (let attribute in this.objectBeingExamined) {
       if (this.objectBeingExamined.hasOwnProperty(attribute)) {
-        attributeList.push( {[attribute]: this.objectBeingExamined[attribute]} );
+        if (this.isEmptyDict(this.objectBeingExamined[attribute])) {
+          attributeList.push( {[attribute]: "Dynamically instatiated, can't be built here."} );
+        }
+        else {
+          attributeList.push( {[attribute]: this.objectBeingExamined[attribute]} );
+        }
       }
     }
 
@@ -106,6 +111,13 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
     }
 
     this.routerService.submitPageTitle(this.prettyTitle);
+  }
+
+  isEmptyDict(obj) {
+    if (obj && obj instanceof DictList && (obj.asList().length === 0)) {
+      return true;
+    }
+    return false;
   }
 
   /**

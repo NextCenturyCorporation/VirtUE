@@ -116,7 +116,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
       let parents: Item[] = [];
 
       for (let v of allVirtues.asList()) {
-        if ((v as Virtue).vmTemplates.has(this.item.getID())) {
+        if ((v as Virtue).getVmTemplates().has(this.item.getID())) {
          parents.push(v);
         }
       }

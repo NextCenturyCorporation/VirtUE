@@ -11,11 +11,6 @@
       <div class="mui-col-md-11">
         <h4>General Settings</h4>
       </div>
-      <div *ngIf="item !== undefined" class="mui-col-md-2 float-right">
-        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="inViewMode()" (click)=tempAddRandomPrinter()>
-          Unprovisioned
-        </mat-checkbox>
-      </div>
     </div>
     <br>
     <div class="mui-row form-item">

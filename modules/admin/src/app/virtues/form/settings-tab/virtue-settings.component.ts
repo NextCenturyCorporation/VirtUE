@@ -278,7 +278,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (this.printerTable === undefined) {
       return;
     }
-    this.printerTable.populate(this.item.printers.asList());
+    this.printerTable.populate(this.item.getPrinters().asList());
   }
 
 
@@ -333,7 +333,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (this.fileSystemsPermsTable === undefined) {
       return;
     }
-    this.fileSystemsPermsTable.populate(this.item.fileSystems.asList());
+    this.fileSystemsPermsTable.populate(this.item.getFileSystems().asList());
   }
 
   /**
@@ -449,11 +449,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     return netPerm.ingress ? "Incoming" : "Outgoing";
   }
 
-  /**
-   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
-   *
-   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
-   */
   setUpNetworkPermsTable(): void {
     if (this.networkPermsTable === undefined) {
       return;
@@ -483,7 +478,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   */
   addNewNetworkPermission(newPermission: NetworkPermission): void {
     this.item.networkSecurityPermWhitelist.push(newPermission);
-    this.item.newSecurityPermissions.push(newPermission);
+    this.item.getNewSecurityPermissions().push(newPermission);
     this.updateNetworkPermsTable();
   }
 
@@ -539,7 +534,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       idx++;
     }
     let removedPermission = this.item.networkSecurityPermWhitelist.splice(idx, 1)[0];
-    this.item.revokedSecurityPermissions.push(removedPermission);
+    this.item.getRevokedSecurityPermissions().push(removedPermission);
     this.updateNetworkPermsTable();
   }
 
@@ -573,7 +568,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
          if (index > -1) {
             this.item.allowedPasteTargetIds.splice(index, 1);
          }
-         this.item.allowedPasteTargets.remove(i.getID());
+         this.item.getAllowedPasteTargets().remove(i.getID());
          this.updatePasteableVirtuesTable();
        }
      )];
@@ -625,7 +620,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       return;
     }
 
-    let items: Item[] = this.item.allowedPasteTargets.asList();
+    let items: Item[] = this.item.getAllowedPasteTargets().asList();
     if (allVirtues) {
       items = allVirtues.getSubset(this.item.allowedPasteTargetIds).asList();
     }
@@ -656,7 +651,10 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   }
 
 /************************************************************************************/
-
+/**
+ * This is currrently all place-holder, since individually-customized sensing levels isn't a priority right now.
+ *
+ */
   setUpSensorTable(): void {
     if (this.sensorTable === undefined) {
       return;
