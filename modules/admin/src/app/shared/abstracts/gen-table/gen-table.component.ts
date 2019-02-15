@@ -479,6 +479,7 @@ export class GenericTableComponent<T> {
       this.reverseSorting();
     } else {
       this.sortColumn = sortColumn;
+      this.sortDirection = SORT_DIR.ASC;
     }
   }
 

@@ -17,7 +17,7 @@ import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
 import { NetworkPermission } from '../shared/models/networkPerm.model';
-import { Virtue, ClipboardPermission } from '../shared/models/virtue.model';
+import { Virtue, ClipboardPermission, ClipboardPermissionOption } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
@@ -62,7 +62,7 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
     <div id="content-header">
       <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
-    <button mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+    <button *ngIf="inViewMode()" mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
       <label>View all Virtue details</label>
     </button>
     <div id="content-main">
@@ -235,10 +235,23 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    * @override [[ItemFormComponent.afterPullComplete]]()
    */
   afterPullComplete(): Promise<any> {
-    return this.getSecurityGroupPerms((virtueID: string) => this.getClipboardPermissions(virtueID));
+
+    if (this.mode !== Mode.CREATE) {
+      return this.getSecurityGroupPerms((virtueID: string) => this.getClipboardPermissions(virtueID));
+    }
+    else if (this.datasets[DatasetNames.VIRTUE_TS].asList().length > 0) {
+      // There are more potential clipboard targets than just the virtues - e.g. there's also a permission for the desktop instance.
+      // So just get some other virtue's list of clipboard permissions, and use that, with default values.
+      let randomVirtueID = this.datasets[DatasetNames.VIRTUE_TS].asList()[0].getID();
+      return this.getClipboardPermissions(randomVirtueID, true);
+    }
+    else {
+      return new Promise(() => {});
+    }
   }
 
   getSecurityGroupPerms(next?: (data?: any) => Promise<any>): Promise<any> {
+
     return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
       .pipe(
         tap(response => {
@@ -254,12 +267,12 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
 
-  getClipboardPermissions(virtueID: string): Promise<any> {
+  getClipboardPermissions(virtueID: string, resetValuesToDefault?: boolean): Promise<any> {
     return this.dataRequestService.getRecords(Subdomains.CLIP, [virtueID])
       .pipe(
         tap(response => {
           if (response !== undefined && Array.isArray(response)) {
-            this.initClipboardPerms(response);
+            this.setClipboardPerms(response, resetValuesToDefault);
           }
         }),
         catchError(this.ignoreError())
@@ -280,9 +293,20 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     this.settingsTab.update();
   }
 
-  initClipboardPerms(clipPerms): void {
+  setClipboardPerms(clipPerms, resetValuesToDefault?: boolean): void {
     let clips = [];
     for (let clipPerm of clipPerms) {
+      // bug, sweeping under a rug for now
+      // when dup, changes are made to the original client-side, and saved as a new object server side.
+      // So if you rename the duplicate and then go over to the clipboard settings, you'll see an row with the new name.
+      // But that option will actually update the item you're duplicating, not the duplicate you create.
+      if ((this.mode === Mode.DUPLICATE) && (clipPerm.destinationGroupId === this.item.getID())) {
+        continue;
+      }
+      if (resetValuesToDefault) {
+        clipPerm.sourceGroupId = 'un-instantiated';
+        clipPerm.permission = ClipboardPermissionOption.ALLOW;
+      }
       clips.push(new ClipboardPermission(clipPerm));
     }
     this.item.clipboardPermissions = clips;
@@ -332,7 +356,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     // needs to be done this way so permissions added during the creation/duplication of a virtue actually get
     // saved; remember the item doesn't have an ID until after it gets saved.
     let virtueTemplateID = this.item.getID();
-    if (this.mode === Mode.CREATE) {
+    if (this.mode === Mode.CREATE || this.mode === Mode.DUPLICATE) {
       virtueTemplateID = new Virtue(returnedObj).getID();
     }
 
@@ -343,6 +367,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
   updateClipboardPermissions(virtueTemplateID: string): void {
     for (let clipPerm of this.item.clipboardPermissions) {
+      clipPerm.source = virtueTemplateID; // for create and duplicate
       this.setClipboardPermission(clipPerm);
     }
   }
