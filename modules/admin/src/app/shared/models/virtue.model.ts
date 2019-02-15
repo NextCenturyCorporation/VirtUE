@@ -14,6 +14,26 @@ import { NetworkPermission } from './networkPerm.model';
 import { FileSystem } from './fileSystem.model';
 import { Printer } from './printer.model';
 
+export class ClipboardPermission {
+  source: string;
+  dest: string;
+  permission: ClipboardPermissionOption;
+
+  constructor( clip? ) {
+    if (clip) {
+      this.source = clip.sourceGroupId;
+      this.dest = clip.destinationGroupId;
+      this.permission = clip.permission;
+    }
+  }
+}
+
+export enum ClipboardPermissionOption {
+  ALLOW = "ALLOW",
+  DENY = "DENY",
+  ASK = "ASK"
+}
+
 /**
  * @class
  * Represents a template for a Virtue.
@@ -63,10 +83,8 @@ export class Virtue extends Item {
   private newSecurityPermissions: NetworkPermission[] = [];
   private revokedSecurityPermissions: NetworkPermission[] = [];
 
-  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargetIds: string[] = [];
-  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  private allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
+  /** this holds the IDs and permissions regarding the virtues that this virtue is allowed to paste data into. */
+  clipboardPermissions: ClipboardPermission[] = [];
 
   /** this virtue's r/w/e permissions for the filesystem
    * Note that fileSystems is saved and loaded with the virtue. While everything else is saved as a list of IDs,
@@ -100,10 +118,8 @@ export class Virtue extends Item {
       this.id = virtueObj.id;
       this.enabled = virtueObj.enabled;
       this.vmTemplateIds = virtueObj.vmTemplateIds;
-      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
       this.printerIds = virtueObj.printerIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
-
 
       this.lastEditor = virtueObj.lastEditor;
 
@@ -124,7 +140,6 @@ export class Virtue extends Item {
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
     if (datasetName === DatasetNames.VIRTUE_TS) {
       this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
-      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIds) as DictList<Virtue>;
     }
     if (datasetName === DatasetNames.VM_TS) {
       this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
@@ -236,7 +251,6 @@ export class Virtue extends Item {
         vmTemplateIds: this.vmTemplateIds,
         fileSystemIds: this.fileSystemIds,
         printerIds: this.printerIds,
-        allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
         lastModification: this.modificationDate,
         networkSecurityPermWhitelist: this.networkSecurityPermWhitelist,
@@ -262,10 +276,6 @@ export class Virtue extends Item {
 
   getRevokedSecurityPermissions() {
     return this.revokedSecurityPermissions;
-  }
-
-  getAllowedPasteTargets() {
-    return this.allowedPasteTargets;
   }
 
   getFileSystems() {

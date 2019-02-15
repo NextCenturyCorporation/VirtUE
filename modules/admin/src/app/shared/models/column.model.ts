@@ -160,7 +160,7 @@ export class ListColumn<E> extends LinkableColumn {
  * not necessarily the type of the objects held by the table's TableElements.
  * The dropdown box is marked as required, always.
  */
-export class DropdownColumn<E> extends Column implements Sortable {
+export class DropdownColumn<E> extends Column {
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
@@ -179,11 +179,6 @@ export class DropdownColumn<E> extends Column implements Sortable {
      * Parameter is the object held by the TableElement.
      */
     public formatElement: (elem: E) => string,
-
-    /**
-     * A function that returns a string representing the given object, which this column should use when sorting the objects.
-     */
-    public sortField: (elem: any) => string
   ) {
     super(label, width);
   }

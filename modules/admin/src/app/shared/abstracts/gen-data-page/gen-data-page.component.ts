@@ -14,7 +14,7 @@ import { DictList, Dict } from '../../models/dictionary.model';
 import { Item } from '../../models/item.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { User } from '../../models/user.model';
-import { Virtue } from '../../models/virtue.model';
+import { Virtue, ClipboardPermission } from '../../models/virtue.model';
 import { VirtueInstance } from '../../models/virtue-instance.model';
 import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
@@ -470,6 +470,11 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     .toPromise().then(() => {
       this.refreshPage();
     });
+  }
+
+  setClipboardPermission(clipPerm: ClipboardPermission): void {
+    this.dataRequestService.flexiblePost(Subdomains.CLIP, [clipPerm.source, clipPerm.dest], clipPerm.permission)
+      .toPromise().then(() => {});
   }
 
   addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): void {

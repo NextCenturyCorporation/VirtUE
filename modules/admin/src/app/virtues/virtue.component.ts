@@ -17,7 +17,7 @@ import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
 import { NetworkPermission } from '../shared/models/networkPerm.model';
-import { Virtue } from '../shared/models/virtue.model';
+import { Virtue, ClipboardPermission } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
@@ -235,11 +235,31 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    * @override [[ItemFormComponent.afterPullComplete]]()
    */
   afterPullComplete(): Promise<any> {
+    return this.getSecurityGroupPerms((virtueID: string) => this.getClipboardPermissions(virtueID));
+  }
+
+  getSecurityGroupPerms(next?: (data?: any) => Promise<any>): Promise<any> {
     return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
       .pipe(
         tap(response => {
           if (response !== undefined && Array.isArray(response)) {
             this.initializeNetworkPerms(response);
+          }
+
+          next(this.item.getID()).then(() => {});
+        }),
+        catchError(this.ignoreError())
+      )
+      .toPromise();
+  }
+
+
+  getClipboardPermissions(virtueID: string): Promise<any> {
+    return this.dataRequestService.getRecords(Subdomains.CLIP, [virtueID])
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.initClipboardPerms(response);
           }
         }),
         catchError(this.ignoreError())
@@ -258,6 +278,15 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
       this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
     }
     this.settingsTab.update();
+  }
+
+  initClipboardPerms(clipPerms): void {
+    let clips = [];
+    for (let clipPerm of clipPerms) {
+      clips.push(new ClipboardPermission(clipPerm));
+    }
+    this.item.clipboardPermissions = clips;
+    this.settingsTab.update({[DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS]});
   }
 
   /**
@@ -306,7 +335,16 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     if (this.mode === Mode.CREATE) {
       virtueTemplateID = new Virtue(returnedObj).getID();
     }
+
     this.updateVirtueSecurityGroupPermissions(virtueTemplateID);
+
+    this.updateClipboardPermissions(virtueTemplateID);
+  }
+
+  updateClipboardPermissions(virtueTemplateID: string): void {
+    for (let clipPerm of this.item.clipboardPermissions) {
+      this.setClipboardPermission(clipPerm);
+    }
   }
 
   updateVirtueSecurityGroupPermissions(virtueTemplateID: string): void {

@@ -105,7 +105,6 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
     }
     this.generalSensorTable.setUp({
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No sensor data at the moment. It's not yet implemented."
     });

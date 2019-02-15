@@ -150,7 +150,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
   defaultChildTableParams() {
     return {
       cols: this.getColumns(),
-      filters: [], // don't enable filtering by status on the form's child table.
       tableWidth: 0.75,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled,

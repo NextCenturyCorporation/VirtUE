@@ -6,8 +6,9 @@ import {  MatButtonModule,
 
 
 import { Item } from '../../../shared/models/item.model';
-import { Virtue } from '../../../shared/models/virtue.model';
+import { Virtue, ClipboardPermission, ClipboardPermissionOption } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 
 import {
   Column,
@@ -118,6 +119,9 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   */
  public item: Virtue;
 
+ /** For convenience until this page gets refactored out into its own data tab page */
+ allVirtues: DictList<Virtue> = new DictList<Virtue>();
+
   /** to notify the parent item form that one of this.item's lists of child ids has been changed */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
@@ -181,20 +185,20 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   update(changes?: any): void {
     if (changes) {
       if (changes[DatasetNames.VIRTUE_TS]) {
-        this.updatePasteableVirtuesTable(changes[DatasetNames.VIRTUE_TS]);
+        this.allVirtues = changes[DatasetNames.VIRTUE_TS];
       }
 
       if (changes.mode) {
         this.setMode(changes.mode);
-        this.setUpPasteableVirtuesTable();
       }
     }
+    this.updatePasteableVirtuesTable();
+    this.updateNetworkPermsTable();
+    this.updateFileSysPermsTable();
 
     // if (changes.printers) {
     //   // TODO update something
     // }
-    this.updateNetworkPermsTable();
-    this.updateFileSysPermsTable();
     // this.updatePrinterTable();
 
   }
@@ -265,7 +269,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
       elementIsDisabled: (p: Printer) => !p.enabled,
@@ -363,7 +366,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     }
     this.fileSystemsPermsTable.setUp({
       cols: this.getFileSysColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "This virtue hasn't been given access to any file systems.",
       elementIsDisabled: (fs: FileSystem) => !fs.enabled,
@@ -456,7 +458,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
     this.networkPermsTable.setUp({
       cols: this.getNetworkColumns(),
-      filters: [],
       tableWidth: 0.95,
       noDataMsg: "This Virtue has not been granted permission to access any network",
       editingEnabled: () => !this.inViewMode()
@@ -556,39 +557,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 /************************************************************************************/
 
   /**
-   * See [[ItemListComponent.getSubMenu]] for more details on this sort
-   * of method.
-   *
-   * @return Just a list with one option: to remove the attached Virtue from the list of ones this one can paste data into.
-   */
-  getPasteSubMenu(): SubMenuOptions[] {
-    return [
-       new SubMenuOptions("Remove", () => true, (i: Item) => {
-         let index = this.item.allowedPasteTargetIds.indexOf(i.getID(), 0);
-         if (index > -1) {
-            this.item.allowedPasteTargetIds.splice(index, 1);
-         }
-         this.item.getAllowedPasteTargets().remove(i.getID());
-         this.updatePasteableVirtuesTable();
-       }
-     )];
-  }
-
-  /**
-   * @return what columns should show up in the virtue's paste-permission table
-   *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
-   */
-  getPasteColumns(): Column[] {
-    return [
-      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
-                                                                                        () => this.getPasteSubMenu()),
-      new ListColumn('Available Applications', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
-      new TextColumn('Version',               2, (v: Virtue) => String(v.version)),
-      new TextColumn('Status',                1, this.formatStatus)
-    ];
-  }
-
-  /**
   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
   *
   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
@@ -600,54 +568,92 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
     this.allowedPasteTargetsTable.setUp({
       cols: this.getPasteColumns(),
-      coloredLabels: true,
-      getColor: (v: Virtue) => v.color,
-      filters: [],
-      tableWidth: 0.85,
+      tableWidth: 0.55,
       noDataMsg: this.getNoPasteDataMsg(),
-      elementIsDisabled: (v: Virtue) => !v.enabled,
+      filters: this.getClipboardFilters(),
       disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
 
   /**
-   * Fill in the table with the Virtue's current allow paste targets, if it has any.
-   * Use more recent definitions, if they are given.
+   * @return what columns should show up in the virtue's paste-permission table
+   *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
    */
-  updatePasteableVirtuesTable(allVirtues?: DictList<Virtue>): void {
-    if (this.allowedPasteTargetsTable === undefined) {
-      return;
+  getPasteColumns(): Column[] {
+    let cols: Column[] = [
+      new TextColumn('Destination Template',  5, (clip: ClipboardPermission) => this.getVirtName(clip.dest), SORT_DIR.ASC,
+                                                                              (v: Virtue) => this.viewItem(v)),
+      new ListColumn('Contained Apps', 4, (clip: ClipboardPermission) => this.getVirtApps(clip.dest),  this.formatName),
+    ];
+    if (this.mode !== Mode.VIEW) {
+      cols.push(new DropdownColumn('Permission', 3, 'permission', () => Object.values(ClipboardPermissionOption),
+                      (option: ClipboardPermissionOption) => option));
     }
-
-    let items: Item[] = this.item.getAllowedPasteTargets().asList();
-    if (allVirtues) {
-      items = allVirtues.getSubset(this.item.allowedPasteTargetIds).asList();
+    else {
+      cols.push(new TextColumn('Permission', 3, (clip: ClipboardPermission) => String(clip.permission)));
     }
-    this.allowedPasteTargetsTable.populate(items);
+    return cols;
+  }
 
+  getVirt(virtueID: string): Virtue {
+    if (this.allVirtues && this.allVirtues.asList().length === 0) {
+      return undefined;
+    }
+    if (!this.allVirtues.has(virtueID)) {
+      return undefined;
+    }
+    return this.allVirtues.get(virtueID);
+  }
+
+  getVirtName(virtueID: string): string {
+    let v: Virtue = this.getVirt(virtueID);
+    if (!v) {
+      return virtueID;
+    }
+    return v.getName()
+  }
+
+  getVirtApps(virtueID: string): IndexedObj[] {
+    let v: Virtue = this.getVirt(virtueID);
+    if (!v) {
+      return [];
+    }
+    return v.getVmApps();
+  }
+
+  getClipboardFilters(): {objectField: string, options: {value: string, text: string}[] } {
+    return {
+            objectField: 'permission',
+            options: [
+              {value: '*', text: 'All Permissions'},
+              {value: ClipboardPermissionOption.ALLOW, text: 'Allowed'},
+              {value: ClipboardPermissionOption.DENY, text: 'Denied'},
+              {value: ClipboardPermissionOption.ASK, text: 'Ask'}
+            ]
+          };
   }
 
   /**
-   * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
+   * Fill in the table with the Virtue's current allow paste targets, if it has any.
+   * Use more recent definitions, if they are given.
    */
-   activatePastableVirtueModal(): void {
-     this.activateVirtueSelectionModal( this.item.allowedPasteTargetIds, (selectedVirtueIds: string[]) => {
-         this.item.allowedPasteTargetIds = selectedVirtueIds;
-         this.onChildrenChange.emit();
-       });
-   }
+  updatePasteableVirtuesTable(): void {
+    if (this.allowedPasteTargetsTable === undefined) {
+      return;
+    }
+    this.setUpPasteableVirtuesTable();
+
+    this.allowedPasteTargetsTable.populate(this.item.clipboardPermissions);
+
+  }
+
   /**
   * @return a message telling the user that no paste permissions have been given to this
   * virtue, in a way that is clear and relevant for the current mode.
   */
   getNoPasteDataMsg(): string {
-    if (this.mode === Mode.VIEW) {
-      return "This virtue hasn't been granted access to paste data into any other virtues.";
-    }
-    else {
-      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
-    }
+    return "It appears no other Virtue templates exist yet.";
   }
 
 /************************************************************************************/
@@ -661,7 +667,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     }
     this.sensorTable.setUp({
       cols: this.getSensorColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No sensors have been connected."
     });

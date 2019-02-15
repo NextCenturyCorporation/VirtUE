@@ -69,7 +69,6 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
     }
     this.fileSystemsTable.setUp({
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No file systems have been made known to the system.",
       elementIsDisabled: (fs: FileSystem) => !fs.enabled

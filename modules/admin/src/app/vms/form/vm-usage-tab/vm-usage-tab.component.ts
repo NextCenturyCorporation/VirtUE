@@ -185,7 +185,6 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
       // opts: this.getParentSubMenu(),
       coloredLabels: true,
       getColor: (v: Virtue) => v.color,
-      filters: [],
       tableWidth: 0.66,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
       elementIsDisabled: (v: Virtue) => !v.enabled,
@@ -231,7 +230,6 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
   setUpInstanceTable(): void {
     this.instanceTable.setUp({
       cols: this.getInstanceColumns(),
-      filters: [],
       tableWidth: 0.66,
       noDataMsg: "Not yet implemented",
       editingEnabled: () => !this.inViewMode()

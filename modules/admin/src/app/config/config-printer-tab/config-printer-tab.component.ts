@@ -69,7 +69,6 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     }
     this.printersTable.setUp({
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No printers set up yet.",
       elementIsDisabled: (p: Printer) => !p.enabled

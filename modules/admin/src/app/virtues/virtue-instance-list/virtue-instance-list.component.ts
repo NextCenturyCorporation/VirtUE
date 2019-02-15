@@ -87,7 +87,6 @@ export class VirtueInstanceListComponent extends ItemListComponent implements On
   defaultTableParams() {
     return {
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
       noDataMsg: this.getNoDataMsg()
     };
