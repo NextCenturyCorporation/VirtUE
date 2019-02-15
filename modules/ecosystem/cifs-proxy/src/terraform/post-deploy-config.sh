@@ -80,16 +80,10 @@ network:
           nameservers:
             addresses: [${dcip}]
             search: [${domain}]
+          dhcp4-overrides:
+            use-dns: false
 EOF
 netplan apply
-# The version of netplan that we have can't suppress DHCP-provided
-# DNS, so we have to hack it. Note: This would be overridden by any
-# future netplan apply. See
-# https://bugs.launchpad.net/netplan/+bug/1759014/comments/5
-# https://askubuntu.com/questions/1001241/can-netplan-configured-nameservers-supersede-not-merge-with-the-dhcp-nameserve
-
-echo UseDNS=false | sudo tee -a /run/systemd/network/10-netplan-eth0.network
-sudo systemctl restart systemd-networkd
 
 sudo sed -i '/preserve_hostname: false/c\preserve_hostname: true' /etc/cloud/cloud.cfg
 hostnamectl set-hostname $hostname
