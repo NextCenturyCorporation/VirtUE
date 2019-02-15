@@ -584,8 +584,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     let cols: Column[] = [
       new TextColumn('Destination Template',  5, (clip: ClipboardPermission) => this.getVirtName(clip.dest), SORT_DIR.ASC,
                                                                               (v: Virtue) => this.viewItem(v)),
-      new TextColumn('.', 4, (clip: ClipboardPermission) => (clip.dest))
-      // new ListColumn('Contained Apps', 4, (clip: ClipboardPermission) => this.getVirtApps(clip.dest),  this.formatName),
+      new ListColumn('Contained Apps', 4, (clip: ClipboardPermission) => this.getVirtApps(clip.dest),  this.formatName),
     ];
     if (this.mode !== Mode.VIEW) {
       cols.push(new DropdownColumn('Permission', 3, 'permission', () => Object.values(ClipboardPermissionOption),
