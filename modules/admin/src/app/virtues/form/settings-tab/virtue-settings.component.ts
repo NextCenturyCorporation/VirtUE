@@ -611,7 +611,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (!v) {
       return virtueID;
     }
-    return v.getName()
+    return v.getName();
   }
 
   getVirtApps(virtueID: string): IndexedObj[] {
