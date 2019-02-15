@@ -13,6 +13,17 @@ repositories {
 
 mainClassName = "com.ncc.savior.desktop.sidebar.SidebarApplication"
 
+task fatJar(type: Jar) {
+	manifest {
+        attributes(
+                'Main-Class': 'com.ncc.savior.desktop.sidebar.SidebarApplication'
+        )
+    }
+    classifier = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 dependencies {
 	compile project(':common')
 	compile project(':clipboard')
