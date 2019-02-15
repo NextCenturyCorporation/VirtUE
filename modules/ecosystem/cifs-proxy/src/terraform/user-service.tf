@@ -111,6 +111,11 @@ EOF
 	destination = "/tmp/allow-delegation.sh"
   }
   
+  provisioner "file" {
+	source = "${var.netplan_deb}"
+	destination = "/tmp/netplan.deb"
+  }
+
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
@@ -121,6 +126,7 @@ EOF
 	  "sudo cp --target-directory=/usr/local/lib /tmp/${basename(var.proxy_jar)}",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
+	  "dpkg -i /tmp/netplan.deb",
 	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
 	  "sleep 5",
 	  "sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname} --verbose"
