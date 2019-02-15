@@ -114,7 +114,7 @@ variable "switch_principal_program" {
 
 variable "netplan_deb" {
   description = "Path to the netplan .deb package."
-  default = "../../../netplan/netplan.io_0.95-2.deb"
+  default = "../../../netplan/netplan.io_0.95-2_amd64.deb"
 }
 
 data "aws_vpc" "ad_vpc" {
