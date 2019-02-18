@@ -26,13 +26,13 @@ resource "aws_instance" "print_server" {
 
   user_data = <<EOF
 #!/bin/bash
-set -x
+set -x -e
 exec > /var/log/user_data.log 2>&1
 date
 # prevent questions about kerberos configuration (it'll get set by post-deploy-config.sh)
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && \
-apt-get upgrade && \
+apt-get -y --with-new-pkgs upgrade && \
 apt-get -y install \
 	adcli \
 	auth-client-config \
@@ -53,8 +53,6 @@ apt-get -y install \
 	sssd-tools
 
 sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
-
-#lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/ppd/cups-pdf/CUPS-PDF_opt.ppd
 
 date
 touch /tmp/user_data-finished
@@ -79,16 +77,16 @@ EOF
 	source = "post-deploy-config.sh"
 	destination = "/tmp/post-deploy-config.sh"
   }
-  
+
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
 	  "sudo systemctl enable smbd nmbd",
 	  "sudo systemctl start smbd nmbd",
+	  "sudo touch /etc/samba/virtue.conf",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/post-deploy-config.sh",
-	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.psname} --dcip ${local.ds_private_ip} --verbose",
-	  "sudo cupsctl DefaultAuthType=Negotiate,"
+	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.psname} --dcip ${local.ds_private_ip} --service cifs --security ads --keep-keytab --verbose",
 	]
   }  
 
