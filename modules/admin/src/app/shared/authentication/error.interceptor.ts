@@ -16,7 +16,6 @@ export class ErrorInterceptor implements HttpInterceptor {
             // some endpoints return plaintext instead of json, which kinda screws with angular's automatic-JSON-parser.
             // check for that.
             if (this.isPlaintextMsg(err)) {
-              console.log(err.error.text);
               return new Observable<HttpEvent<any>>( () => err);
             }
 
@@ -59,7 +58,10 @@ export class ErrorInterceptor implements HttpInterceptor {
 
     /** some endpoints return a plaintext response like "Success!" that breaks angular's automatic json-parser. */
     isPlaintextMsg(err) {
-      return err.error.error.toString().split(':')[0] === 'SyntaxError';
+      if (err.error.error) {
+        return err.error.error.toString().split(':')[0] === 'SyntaxError';
+      }
+      return false;
     }
 
     authFailure(errCode: number): boolean {
