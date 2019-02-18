@@ -236,20 +236,20 @@ public class VirtueService {
 				}
 				break;
 			default:
-				switch (c) {
-				case '-':
-				case '_':
-				case '.':
-					if (username.length() > 0) {
+				if (username.length() > 0) {
+					switch (c) {
+					case '-':
+					case '_':
+					case '.':
 						newChar = c;
-					} else {
-						continue;
+						break;
+					default:
+						// invalid char for username
+						newChar = '_';
+						break;
 					}
-					break;
-				default:
-					// invalid char for username
-					newChar = '_';
-					break;
+				} else {
+					continue;
 				}
 			}
 			username.append(newChar);
