@@ -26,7 +26,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private static final String SUDO_OR_NOTHING = "";
 	private static final String XPRA_CMD = SUDO_OR_NOTHING + " xpra";
 	private static final String XPRA_STOP = XPRA_CMD + " stop";
-	private static final String XPRA_START = XPRA_CMD + " start";
+	private static final String XPRA_START = "pkill X;" + XPRA_CMD + " start";
 	private static final String XPRA_LIST = XPRA_CMD + " list";
 
 	private SshConnectionParameters params;
@@ -93,7 +93,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 			session = getConnectedSessionWithRetries();
 			session.setTimeout(10000);
 			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
-			command+=" --systemd-run=no";
+			command += " --systemd-run=no --pulseaudio=no --mdns=no";
 			// command = "sudo systemctl enable xpra.socket;" + command;
 			channel = getConnectedChannel(command, session, null);
 			channel.setErrStream(System.err);
@@ -101,7 +101,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 			BufferedReader reader = new BufferedReader(stream);
 			channel.connect();
 			String line;
-			Thread.sleep(300);
+			Thread.sleep(20000);
 			while ((line = reader.readLine()) != null) {
 				String prefix = "available on display :";
 				if (line.contains(prefix)) {
