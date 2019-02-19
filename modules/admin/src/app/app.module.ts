@@ -235,7 +235,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     VmModalComponent,
     VirtueModalComponent,
     ColorModalComponent,
-    // PrinterModalComponent,
+    PrinterModalComponent,
     PrinterSelectionModalComponent,
     // FileSystemModalComponent,
     FileSystemSelectionModalComponent,

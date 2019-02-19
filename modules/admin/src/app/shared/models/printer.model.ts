@@ -29,7 +29,7 @@ export class Printer extends IndexedObj implements Toggleable {
   status: string;
 
   /** Whether the printer is enabled or disabled. */
-  enabled: boolean = false;
+  enabled: boolean = true;
 
   constructor( printer?: {id?: string, name: string, info?: string, status: string, address: string, enabled: boolean} ) {
     super();

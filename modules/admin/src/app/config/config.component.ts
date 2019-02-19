@@ -28,9 +28,9 @@ export class ConfigComponent extends GenericPageComponent {
 
   // @ViewChild('activeDirTab') activeDirTab: ConfigActiveDirTabComponent;
 
-  // @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
-
   @ViewChild('fileSysTab') fileSysTab: ConfigFileSysTabComponent;
+
+  @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
 
   // @ViewChild('sensorTab') sensorTab: ConfigSensorsTabComponent;
 
