@@ -39,7 +39,7 @@ public class ShareController {
 	@GetMapping("/share")
 	List<FileShare> getShares() {
 		LOGGER.entry();
-		ArrayList<FileShare> shares = new ArrayList<>(service.getShares());
+		List<FileShare> shares = new ArrayList<>(service.getShares());
 		LOGGER.exit(shares);
 		return shares;
 	}
