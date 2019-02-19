@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,6 +17,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
+import com.ncc.savior.util.SshUtil;
 
 /**
  * Helper class that starts applications and controls Xpra over SSH.
@@ -26,8 +29,10 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private static final String SUDO_OR_NOTHING = "";
 	private static final String XPRA_CMD = SUDO_OR_NOTHING + " xpra";
 	private static final String XPRA_STOP = XPRA_CMD + " stop";
-	private static final String XPRA_START = "pkill X;" + XPRA_CMD + " start";
-	private static final String XPRA_LIST = XPRA_CMD + " list";
+	private static final String XPRA_START = XPRA_CMD + " start";
+	private static final String XPRA_PROBE_LIST = "cd /run/user/1000/xpra/; ls -1 \\:*.log | egrep -o \"[0-9]+\"";
+	private static final String XPRA_TEST_DISLAY = XPRA_CMD + " version ";
+	private static final String XPRA_VERSION_MATCH = "[0-9]+.[0-9]+.[0-9]+.*";
 
 	private SshConnectionParameters params;
 
@@ -55,34 +60,55 @@ public class SshXpraInitiater implements IXpraInitiator {
 	public Set<Integer> getXpraServers() throws IOException {
 		Session session = null;
 		ChannelExec channel = null;
-		Set<Integer> set = new TreeSet<Integer>();
+		Set<Integer> displays = new TreeSet<Integer>();
 		try {
+			logger.debug("probing for xpra servers");
 			session = getConnectedSessionWithRetries();
-			channel = getConnectedChannel(XPRA_LIST, session, null);
+			channel = getConnectedChannel(XPRA_PROBE_LIST, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
 			String line;
 			while ((line = reader.readLine()) != null) {
-				String prefix = "LIVE session at :";
-				if (line.contains(prefix)) {
-					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
-					int display;
-					try {
-						display = Integer.parseInt(displayStr);
-					} catch (NumberFormatException e) {
-						logger.debug("failed to parse number from line=" + line);
-						display = Integer.parseInt(displayStr.split(" ")[0]);
-					}
-					set.add(display);
+				try {
+					logger.debug("found line " + line);
+					int display = Integer.parseInt(line);
+					displays.add(display);
+				} catch (NumberFormatException e) {
+					logger.error("Error parsing display from '" + line + "'");
 				}
-				// System.out.println(line);
+			}
+			Iterator<Integer> itr = displays.iterator();
+			while (itr.hasNext()) {
+				Integer d = itr.next();
+				if (!isDisplayReady(session, d)) {
+					itr.remove();
+				}
 			}
 		} catch (JSchException e) {
 			throw new IOException(e);
 		} finally {
 			closeAll(session, channel);
 		}
-		return set;
+		return displays;
+	}
+
+	private boolean isDisplayReady(Session session, Integer d) {
+		try {
+			logger.debug("attempting to probe display " + d);
+			List<String> lines = SshUtil.sendCommandFromSession(session, XPRA_TEST_DISLAY + ":" + d);
+			for (String line : lines) {
+				boolean matched = line.matches(XPRA_VERSION_MATCH);
+				if (matched) {
+					logger.debug("matched "+d);
+					return true;
+				}
+			}
+			logger.debug("Probe fails with output: "+lines);
+			return false;
+		} catch (JSchException | IOException e) {
+			logger.error("Error testing display=" + d, e);
+			return false;
+		}
 	}
 
 	@Override
@@ -92,30 +118,22 @@ public class SshXpraInitiater implements IXpraInitiator {
 		try {
 			session = getConnectedSessionWithRetries();
 			session.setTimeout(10000);
-			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
+			display = (display > 0 ? display : 201);
+			String command = XPRA_START + " :" + display;
 			command += " --systemd-run=no --pulseaudio=no --mdns=no";
-			// command = "sudo systemctl enable xpra.socket;" + command;
-			channel = getConnectedChannel(command, session, null);
-			channel.setErrStream(System.err);
-			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
-			BufferedReader reader = new BufferedReader(stream);
-			channel.connect();
-			String line;
-			Thread.sleep(20000);
-			while ((line = reader.readLine()) != null) {
-				String prefix = "available on display :";
-				if (line.contains(prefix)) {
-					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
-					display = Integer.parseInt(displayStr);
+			SshUtil.sendCommandFromSessionWithTimeout(session, command, 1000);
+			long timeoutTime = System.currentTimeMillis() + 60000;
+			while (System.currentTimeMillis() < timeoutTime) {
+				if (isDisplayReady(session, display)) {
+					return display;
 				}
-				logger.debug(line);
 			}
-		} catch (JSchException | InterruptedException e) {
+		} catch (JSchException e) {
 			throw new IOException(e);
 		} finally {
 			closeAll(session, channel);
 		}
-		return display;
+		throw new IOException("Unable to start display "+display);
 	}
 
 	@Override

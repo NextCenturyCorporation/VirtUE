@@ -102,10 +102,13 @@ public class SimpleApplicationManager implements IApplicationManager {
 		while (true) {
 			Set<Integer> displays = initiator.getXpraServersWithRetries();
 			if (displays.isEmpty()) {
-				int attemptedDisplay = 100 + rand.nextInt(100);
-				logger.debug("attempting to start server on display " + attemptedDisplay);
-				initiator.startXpraServer(attemptedDisplay);
-				Thread.sleep(2000);
+				try {
+					int attemptedDisplay = 100 + rand.nextInt(100);
+					logger.debug("attempting to start server on display " + attemptedDisplay);
+					return initiator.startXpraServer(attemptedDisplay);
+				} catch (IOException e) {
+					
+				}
 			} else {
 				display = displays.iterator().next();
 				logger.debug("using display " + display);
