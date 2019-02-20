@@ -147,6 +147,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+			cf = serviceProvider.getWindowsAccountGenerator().chainFutures(cf,v);
 			// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			fc.addFuture(cf);
