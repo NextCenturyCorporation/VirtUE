@@ -52,6 +52,8 @@ export enum VirtueState {
  */
 export class VirtueInstance extends IndexedObj {
 
+  id: string = "";
+
   // these are vm instances
   vmIds: string[] = [];
   vms: DictList<VirtualMachineInstance> = new DictList<VirtualMachineInstance>();
@@ -64,6 +66,7 @@ export class VirtueInstance extends IndexedObj {
   template: Virtue;
 
   state: VirtueState;
+  readableState: string;
 
   name: string = "";
   user: string = "";
@@ -89,11 +92,13 @@ export class VirtueInstance extends IndexedObj {
       this.vmIds = virtueObj.virtualMachineIds;
       this.name = virtueObj.name;
       this.user = virtueObj.username;
+      this.id = virtueObj.id;
       this.templateId = virtueObj.templateId;
       // maybe temporary. It could be actually pulled in, but at the moment all we need is to able to navigate to it.
       this.template = new Virtue({id: virtueObj.templateId});
       this.appIds = virtueObj.applicationIds;
-      this.state = virtueObj.state;
+      this.state = VirtueState[virtueObj.state as string];
+      this.readableState = virtueObj.state;
       this.color = virtueObj.color;
     }
   }
@@ -107,7 +112,7 @@ export class VirtueInstance extends IndexedObj {
   }
 
   getID(): string {
-    return this.templateId;
+    return this.id;
   }
 
   getDatasetName(): string {
@@ -144,14 +149,6 @@ export class VirtueInstance extends IndexedObj {
     // DELETED = 110,
     // UNPROVISIONED = 120
     return this.state < 20 || this.state > 70;
-  }
-
-  stop(): void {
-    //
-  }
-
-  stopVm(vm: VirtualMachine): void {
-    //
   }
 
 

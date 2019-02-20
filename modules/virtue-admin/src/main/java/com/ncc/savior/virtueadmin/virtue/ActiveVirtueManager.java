@@ -195,7 +195,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
 		if (v.isPresent()) {
 			VirtueInstance virtue = v.get();
-			if (virtue.getUsername().equals(user.getUsername())) {
+			if (virtue.getUsername().equals(user.getUsername()) || VirtueUser.isAdmin(user)) {
 				virtue = cloudManager.stopVirtue(virtue);
 				return virtue;
 			} else {

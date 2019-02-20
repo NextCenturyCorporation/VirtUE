@@ -346,7 +346,7 @@ public class AdminService {
 			Iterable<Printer> itrPrinters = resourceManager.getPrinters(new HashSet<String>(printerIds));
 			itrPrinters.forEach(printerSet::add); // go through the iterator and add each item to the printers ArrayList.
 		}
-		
+
 		List<FileSystem> fileSystems = new ArrayList<FileSystem>();
 		Collection<String> fsIds = template.getFileSystemIds();
 		if (fsIds != null) {
@@ -391,6 +391,15 @@ public class AdminService {
 		vmTemplate.setLastModification(new Date());
 		templateManager.addVmTemplate(vmTemplate);
 		return vmTemplate;
+	}
+
+	public void stopVirtue(String virtueId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance v = virtueManager.getActiveVirtue(virtueId);
+		if( v.getState().equals(VirtueState.RUNNING) || v.getState().equals(VirtueState.CREATING)
+					|| v.getState().equals(VirtueState.LAUNCHING) || v.getState().equals(VirtueState.RESUMING)) {
+			virtueManager.stopVirtue(user, v.getId());
+		}
 	}
 
 	public void deleteApplicationDefinition(String templateId) {

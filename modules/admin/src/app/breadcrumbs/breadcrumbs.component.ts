@@ -55,6 +55,12 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
           this.breadcrumbs = [];
         }
 
+        // if it's an update of the current page
+        if (crumb.href === "" && this.breadcrumbs.length > 0) {
+          this.breadcrumbs[this.breadcrumbs.length - 1].label = crumb.label;
+          return;
+        }
+
         // let indxExistingEntry: number = this.breadcrumbs.indexOf(crumb);
         let i: number = this.breadcrumbs.length - 1;
         for (; i >= 0; i-- ) {

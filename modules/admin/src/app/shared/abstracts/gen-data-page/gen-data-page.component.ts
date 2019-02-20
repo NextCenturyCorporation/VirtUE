@@ -15,6 +15,7 @@ import { Item } from '../../models/item.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { User } from '../../models/user.model';
 import { Virtue } from '../../models/virtue.model';
+import { VirtueInstance } from '../../models/virtue-instance.model';
 import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
@@ -119,11 +120,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * right away. Before onPullComplete was implemented, this was used to delay the initialization of page
    * components until data from the backend had probably been retrieved.
    */
-  refreshPage(wait?: boolean): void {
+  refreshPage(wait?: boolean, durationSeconds?: number): void {
     if (wait) {
+      if (durationSeconds === undefined) {
+        durationSeconds = 0.3;
+      }
+
       setTimeout(() => {
         this.pullData();
-      }, 300);
+      }, durationSeconds * 1000);
       return;
     }
     // else
@@ -249,7 +254,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       if (updateQueue[0].datasetName === DatasetNames.SENSORS && rawDataList) {
         rawDataList = this.cleanSensorData(rawDataList);
       }
-
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
@@ -431,7 +435,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     this.dataRequestService.deleteRecord(this.getRemoteSubdomain(obj), obj.getID()).then(() => {
       this.refreshPage();
     });
-
   }
 
   /**
@@ -451,24 +454,31 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       }
     }
 
-    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus).subscribe(
-      () => {
+    let sub = this.dataRequestService.setRecordAvailability(this.getRemoteSubdomain(obj), obj.getID(), newStatus)
+    .subscribe(() => {
         sub.unsubscribe();
         this.refreshPage();
       },
       error => {
         sub.unsubscribe();
         this.refreshPage();
+      });
+  }
+
+  stopVirtue(virtue: VirtueInstance): void {
+    this.dataRequestService.flexiblePost(this.getRemoteSubdomain(virtue), ['stop', virtue.getID()], "")
+    .toPromise().then(() => {
+      this.refreshPage();
     });
   }
 
-  addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): Promise<any> {
+  addRemoveSecGrpPermission(virtueTemplateID: string, action: string, secPerm: NetworkPermission): void {
     if (! (action === 'authorize' || action === 'revoke') ) {
       console.log("invalid request");
-      return new Promise<any>(() => {});
+      return;
     }
 
-    return this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [virtueTemplateID, action], JSON.stringify(secPerm))
-      .toPromise();
+    this.dataRequestService.flexiblePost(Subdomains.SEC_GRP, [virtueTemplateID, action], JSON.stringify(secPerm))
+      .toPromise().then(() => {});
   }
 }

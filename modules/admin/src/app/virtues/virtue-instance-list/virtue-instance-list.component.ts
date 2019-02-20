@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
@@ -44,6 +44,12 @@ import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.
     <div id="content-header" class="titlebar">
       <h1 class="titlebar-title">{{prettyTitle}}</h1>
     </div>
+    <div>
+      <mat-checkbox [(ngModel)]="pageActive" (ngModelChange)="afterPullComplete()">
+        <label>Update page automatically</label>
+      </mat-checkbox>
+      <br>&nbsp;
+    </div>
     <div id="content-main">
       <div id="content">
       <app-table #table></app-table>
@@ -51,8 +57,8 @@ import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.
     </div>
   </div>`
 })
-export class VirtueInstanceListComponent extends ItemListComponent {
-
+export class VirtueInstanceListComponent extends ItemListComponent implements OnDestroy {
+  pageActive: boolean = true;
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
@@ -62,6 +68,16 @@ export class VirtueInstanceListComponent extends ItemListComponent {
     dialog: MatDialog
   ) {
     super(routerService, dataRequestService, dialog);
+  }
+
+  afterPullComplete() {
+    if (this.pageActive) {
+      setTimeout(() => {
+        if (this.pageActive) {
+          this.pullData();
+        }
+      }, 5 * 1000);
+    }
   }
 
   getDatasetToDisplay(): DatasetNames {
@@ -91,7 +107,7 @@ export class VirtueInstanceListComponent extends ItemListComponent {
 
       // put this in once you actually pull the template in
       // new TextColumn('Template Version',  1, (v: VirtueInstance) => v.getTemplateVersion(),  SORT_DIR.ASC),
-      new TextColumn('State',            1,  (v: VirtueInstance) => String(v.state), SORT_DIR.ASC)
+      new TextColumn('State',            1,  (v: VirtueInstance) => v.readableState, SORT_DIR.ASC)
     ];
   }
 
@@ -121,8 +137,8 @@ export class VirtueInstanceListComponent extends ItemListComponent {
 
   getSubMenu(): SubMenuOptions[] {
     return [
-      new SubMenuOptions("View Template details",  () => true, (v: VirtueInstance) => this.viewItem(v.template))
-      // new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => this.stopVirtue(v)),
+      new SubMenuOptions("View Source Template",  () => true, (v: VirtueInstance) => this.viewItem(v.template)),
+      new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => this.stopVirtue(v)),
     ];
   }
 
@@ -148,4 +164,7 @@ export class VirtueInstanceListComponent extends ItemListComponent {
     return "No virtues are running at this time.";
   }
 
+  ngOnDestroy(): void {
+    this.pageActive = false;
+  }
 }

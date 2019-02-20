@@ -26,7 +26,6 @@ export class HeaderComponent implements OnInit {
     {label: 'Dashboard', link: '/dashboard'},
     {label: 'Settings', link: '/settings'},
     {label: 'Users', link: '/users'},
-    {label: 'Applications    ', link: '/applications'},
     {label: 'Instances',
       dropdownOptions: [
         {label: 'Virtue Instances', link: '/virtue-instances'},
@@ -38,7 +37,8 @@ export class HeaderComponent implements OnInit {
         {label: 'Virtue Templates', link: '/virtues'},
         {label: 'VM Templates', link: '/vm-templates'}
       ]
-    }
+    },
+    {label: 'Applications    ', link: '/applications'}
   ];
   constructor(
       public authService: AuthenticationService

@@ -163,6 +163,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
 			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_VIRTUE_TEMPLATE_ID).withValues(templateId));
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
 			dsgr.setFilters(filters);
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();

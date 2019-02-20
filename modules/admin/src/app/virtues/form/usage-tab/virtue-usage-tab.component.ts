@@ -195,14 +195,14 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
                                             (vm: VirtualMachineInstance) => this.viewVmInstance(vm)),
       // new ListColumn('Applications',      2, (v: VirtueInstance) => []),
       // put this in once you actually pull the template in
-      // new TextColumn('Template Version',  1, (v: VirtueInstance) => v.getTemplateVersion(),  SORT_DIR.ASC),
-      new TextColumn('State',            1,  (v: VirtueInstance) => String(v.state), SORT_DIR.ASC)
+      // new TextColumn('Template Version',  1, (v: VirtueInstance) => v.getTemplateVersion()),
+      new TextColumn('State',            1,  (v: VirtueInstance) => v.readableState)
     ];
   }
 
   getInstanceSubMenu(): SubMenuOptions[] {
     return [
-      new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => v.stop()),
+      // new SubMenuOptions("Stop",   (v: VirtueInstance) => !v.isStopped(), (v: VirtueInstance) => v.stop()),
     ];
   }
 

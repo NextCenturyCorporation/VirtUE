@@ -144,8 +144,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.setUpPasteableVirtuesTable();
     this.setUpNetworkPermsTable();
     this.setUpFileSysPermsTable();
-    this.setUpPrinterTable();
-    this.setUpSensorTable();
+    // this.setUpPrinterTable();
+    // this.setUpSensorTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
     // GenericTable would need to allow arbitrary objects/html in any column - so one could just as
@@ -195,14 +195,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     // }
     this.updateNetworkPermsTable();
     this.updateFileSysPermsTable();
-    this.updatePrinterTable();
+    // this.updatePrinterTable();
 
-    // temporary hard-coding
-    this.sensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
-                              new Sensor("In-Virtue Controller", VigilenceLevel.OFF),
-                              new Sensor("Logging - Aggregate", VigilenceLevel.OFF),
-                              new Sensor("Logging - Archive", VigilenceLevel.OFF),
-                              new Sensor("Certificates Infrastructure", VigilenceLevel.OFF)]);
   }
 
   /**
@@ -252,8 +246,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Name',    6, (p: Printer) => p.name, SORT_DIR.ASC),
-      new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
+      new TextColumn('Printer Name',    6, (p: Printer) => p.name),
+      new TextColumn('Printer Status',  4, (p: Printer) => p.status),
       new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
     ];
@@ -349,13 +343,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getFileSysColumns(): Column[] {
     return [
-      new TextColumn('Server & Drive',  3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
-      new TextColumn('Address',         3, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
-      new CheckboxColumn('Enabled',     2, 'enabled'),
-      new CheckboxColumn('Read',        1, 'readPerm'),
-      new CheckboxColumn('Write',       1, 'writePerm'),
-      new CheckboxColumn('Execute',     1, 'executePerm'),
-      new IconColumn('Revoke access',   1, 'delete', (fs: FileSystem) => this.removeFileSystem(fs))
+      new TextColumn('Drive name',  3, (fs: FileSystem) => fs.name, SORT_DIR.ASC, (fs: FileSystem) => this.toDetailsPage(fs)),
+      new TextColumn('Address',     3, (fs: FileSystem) => fs.address),
+      new TextColumn('Enabled',     2, (fs: FileSystem) => String(fs.enabled)),
+      new TextColumn('Permissions', 2, (fs: FileSystem) => fs.formatPerms()),
+      new BlankColumn(1),
+      new IconColumn('Revoke access', 1, 'delete', (fs: FileSystem) => this.removeFileSystem(fs))
     ];
   }
 
@@ -372,7 +365,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       cols: this.getFileSysColumns(),
       filters: [],
       tableWidth: 1,
-      noDataMsg: "No file systems have been set up in the global settings",
+      noDataMsg: "This virtue hasn't been given access to any file systems.",
       elementIsDisabled: (fs: FileSystem) => !fs.enabled,
       disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
@@ -427,11 +420,11 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getNetworkColumns(): Column[] {
     return [
-      new TextColumn('Direction',   1, (netPerm: NetworkPermission) => this.getDirection(netPerm), SORT_DIR.ASC),
-      new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp, SORT_DIR.ASC),
-      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => this.formatIfBlank(netPerm.ipProtocol), SORT_DIR.ASC),
-      new TextColumn('Port Range',   2, (netPerm: NetworkPermission) => this.formatPortRange(netPerm), SORT_DIR.ASC),
-      new TextColumn('Description', 5, (netPerm: NetworkPermission) => netPerm.description, SORT_DIR.ASC),
+      new TextColumn('Direction',   1, (netPerm: NetworkPermission) => this.getDirection(netPerm)),
+      new TextColumn('CIDR IP',     2, (netPerm: NetworkPermission) => netPerm.cidrIp),
+      new TextColumn('Protocol',    1, (netPerm: NetworkPermission) => this.formatIfBlank(netPerm.ipProtocol)),
+      new TextColumn('Port Range',   2, (netPerm: NetworkPermission) => this.formatPortRange(netPerm)),
+      new TextColumn('Description', 5, (netPerm: NetworkPermission) => netPerm.description),
       new IconColumn('Revoke',      1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }
@@ -595,8 +588,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                         () => this.getPasteSubMenu()),
       new ListColumn('Available Applications', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
-      new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
+      new TextColumn('Version',               2, (v: Virtue) => String(v.version)),
+      new TextColumn('Status',                1, this.formatStatus)
     ];
   }
 
@@ -678,7 +671,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
   getSensorColumns(): Column[] {
     return [
-      new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
+      new TextColumn("Sensor Context", 3, (s: Sensor) => s.name),
       new RadioButtonColumn("Off",          1, "level", VigilenceLevel.OFF),
       new RadioButtonColumn("Default",      1, "level", VigilenceLevel.DEFAULT),
       new RadioButtonColumn("Low",          1, "level", VigilenceLevel.LOW),

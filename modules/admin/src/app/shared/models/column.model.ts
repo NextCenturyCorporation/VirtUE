@@ -100,7 +100,7 @@ export class TextColumn extends LinkableColumn implements Sortable {
      * that column, for that TableElement. */
     public formatElement: (elem: any) => string,
     /** The default sort direction when a new column is sorted on. Usually ASC. */
-    public sortDefault: SORT_DIR,
+    public sortDefault?: SORT_DIR,
     /** see parent [[LinkableColumn]] */
     link?: (elem: any) => void,
     /** A function to return a list of SubMenuOptions which should appear, beneath the label in every row, in this column */
@@ -109,6 +109,11 @@ export class TextColumn extends LinkableColumn implements Sortable {
     sortField?: (elem: any) => string
   ) {
     super(label, width, link);
+
+    if (!sortDefault) {
+      this.sortDefault = SORT_DIR.ASC;
+    }
+
     if (sortField) {
       this.sortField = sortField;
     }
