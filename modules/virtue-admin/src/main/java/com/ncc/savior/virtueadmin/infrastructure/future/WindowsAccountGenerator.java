@@ -17,6 +17,11 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
+/**
+ * Future service which creates a new user with a random password for windows machines.
+ * 
+ *
+ */
 public class WindowsAccountGenerator
 		extends BaseIndividualScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Void> {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsAccountGenerator.class);
