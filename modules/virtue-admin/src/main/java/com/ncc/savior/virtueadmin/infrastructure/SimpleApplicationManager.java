@@ -102,9 +102,13 @@ public class SimpleApplicationManager implements IApplicationManager {
 		while (true) {
 			Set<Integer> displays = initiator.getXpraServersWithRetries();
 			if (displays.isEmpty()) {
-				int attemptedDisplay = 100 + rand.nextInt(100);
-				logger.debug("attempting to start server on display " + attemptedDisplay);
-				initiator.startXpraServer(attemptedDisplay);
+				try {
+					int attemptedDisplay = 100 + rand.nextInt(100);
+					logger.debug("attempting to start server on display " + attemptedDisplay);
+					return initiator.startXpraServer(attemptedDisplay);
+				} catch (IOException e) {
+					// Expecting to return with a display.  However, if it fails, we will just try again.
+				}
 			} else {
 				display = displays.iterator().next();
 				logger.debug("using display " + display);
@@ -126,11 +130,11 @@ public class SimpleApplicationManager implements IApplicationManager {
 					logger.debug("display check limit reached");
 					break;
 				}
-				Thread.sleep(250);
+				Thread.sleep(1000);
 			}
 			if (set.isEmpty() && maxTries > 0) {
 				logger.debug("Attempt to create display failed.  retries: " + maxTries);
-				Thread.sleep(500);
+				Thread.sleep(2000);
 			} else if (set.isEmpty()) {
 				// no tries left but no displays
 				String msg = "Unable to create Xpra server.";
