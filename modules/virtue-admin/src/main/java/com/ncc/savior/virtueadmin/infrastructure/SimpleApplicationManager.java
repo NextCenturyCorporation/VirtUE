@@ -107,7 +107,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 					logger.debug("attempting to start server on display " + attemptedDisplay);
 					return initiator.startXpraServer(attemptedDisplay);
 				} catch (IOException e) {
-					
+					// Expecting to return with a display.  However, if it fails, we will just try again.
 				}
 			} else {
 				display = displays.iterator().next();
