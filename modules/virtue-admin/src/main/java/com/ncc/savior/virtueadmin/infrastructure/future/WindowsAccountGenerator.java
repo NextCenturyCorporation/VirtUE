@@ -55,8 +55,7 @@ public class WindowsAccountGenerator
 				vm.setPassword(password);
 				vm.setWindowsUser(user);
 			} catch (JSchException | IOException e) {
-				// TODO FIX ME!!
-				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "", e);
+				throw new SaviorException(SaviorErrorCode.SSH_ERROR, "Error attempting to create new windows user.", e);
 			}
 		}
 		onSuccess(id, vm, wrapper.future);
@@ -64,9 +63,9 @@ public class WindowsAccountGenerator
 
 	private String createPassword() {
 		int length = 12 + random.nextInt(4);
-		String password = new Random().ints(length, 33, 122)
+		String password = new Random().ints(length, 65, 122)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
-		password="password123";
+//		password="password123";
 		return password;
 	}
 
