@@ -217,11 +217,11 @@ but got: \n       " + this.routerService.getRouterUrl());
     this.updatePage();
     this.initialPullComplete = true;
 
-    if (this.mode !== Mode.CREATE) {
-      this.afterPullComplete().then(() => {
+    this.afterPullComplete().then(() => {
+      if (this.mode !== Mode.CREATE) {
         this.updatePage();
-      });
-    }
+      }
+    });
   }
 
   /** @override-able */

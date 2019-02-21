@@ -216,9 +216,6 @@ export class GenericTableComponent<T> {
     /** see this.[[columns]] */
     cols: Column[];
 
-    /** see this.[[filterOptions]] */
-    filters: {value: string, text: string}[];
-
     /**
      * tableWidth must be between 1 and 12, inclusive.
      * see this.[[tableWidth]]
@@ -227,6 +224,9 @@ export class GenericTableComponent<T> {
 
     /** see this.[[noDataMessage]] */
     noDataMsg: string,
+
+    /** see this.[[filterOptions]] */
+    filters?: {objectField: string, options: {value: string, text: string}[]};
 
     /** see this.[[elementIsDisabled]] */
     elementIsDisabled?: ((obj: T) => boolean),
@@ -267,7 +267,10 @@ export class GenericTableComponent<T> {
       this.hasColoredLabels = false;
     }
 
-    this.filterOptions = params.filters;
+    if (params.filters) {
+      this.filterOptions = params.filters.options;
+      this.filterColumnName = params.filters.objectField;
+    }
     this.noDataMessage = params.noDataMsg;
 
     if ((params.tableWidth >= 0.01 && params.tableWidth <= 1)) {
@@ -476,6 +479,7 @@ export class GenericTableComponent<T> {
       this.reverseSorting();
     } else {
       this.sortColumn = sortColumn;
+      this.sortDirection = SORT_DIR.ASC;
     }
   }
 

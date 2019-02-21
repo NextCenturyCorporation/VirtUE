@@ -70,7 +70,6 @@ export class VmInstanceListComponent extends ItemListComponent {
   defaultTableParams() {
     return {
       cols: this.getColumns(),
-      filters: this.getTableFilters(),
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
       noDataMsg: this.getNoDataMsg()
     };
@@ -87,10 +86,6 @@ export class VmInstanceListComponent extends ItemListComponent {
       new TextColumn('os',              1,  (v: VirtualMachineInstance) => v.os,       SORT_DIR.ASC),
       new TextColumn('Hostname',           3,  (v: VirtualMachineInstance) => String(v.hostname), SORT_DIR.ASC)
     ];
-  }
-
-  getTableFilters(): {value: string, text: string}[] {
-    return [];
   }
 
   /**

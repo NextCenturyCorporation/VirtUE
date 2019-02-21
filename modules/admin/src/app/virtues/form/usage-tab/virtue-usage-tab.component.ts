@@ -172,7 +172,6 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
-      filters: [],
       tableWidth: 0.66,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
       elementIsDisabled: (u: User) => !u.enabled,
@@ -218,7 +217,6 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
   setUpInstanceTable(): void {
     this.instanceTable.setUp({
       cols: this.getInstanceColumns(),
-      filters: [],
       tableWidth: 0.66,
       noDataMsg: "There are no running instances of this template.",
       editingEnabled: () => !this.inViewMode()

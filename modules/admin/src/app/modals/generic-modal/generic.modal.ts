@@ -100,7 +100,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   defaultTableParams() {
     return {
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
       editingEnabled: () => true,

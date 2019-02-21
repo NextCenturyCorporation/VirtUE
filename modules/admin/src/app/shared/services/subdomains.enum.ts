@@ -14,5 +14,6 @@ export enum Subdomains {
   VIRTUES = "admin/virtues",
   VMS = "admin/vm/",
   SENSORS = "admin/sensing/",
-  SEC_GRP = "admin/securityGroup/template/"
+  SEC_GRP = "admin/securityGroup/template/",
+  CLIP = "admin/permission/"
 }

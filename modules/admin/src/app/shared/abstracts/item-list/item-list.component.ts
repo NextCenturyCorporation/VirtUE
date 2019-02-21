@@ -172,10 +172,13 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    *
    * @return a list of filter options to be displayed at the top of the list page.
    */
-  getTableFilters(): {value: string, text: string}[] {
-    return [{value: '*', text: 'All ' + this.pluralItem},
-            {value: 'true', text: 'Enabled ' + this.pluralItem},
-            {value: 'false', text: 'Disabled ' + this.pluralItem}];
+  getTableFilters(): {objectField: string, options: {value: string, text: string}[]} {
+    return {
+            objectField: 'enabled',
+            options: [{value: '*', text: 'All ' + this.pluralItem},
+              {value: 'true', text: 'Enabled ' + this.pluralItem},
+              {value: 'false', text: 'Disabled ' + this.pluralItem}]
+            };
   }
 
   /**

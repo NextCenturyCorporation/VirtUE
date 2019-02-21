@@ -133,7 +133,7 @@ export class DashboardComponent extends ItemListComponent {
   /**
    * @return an empty list; Apps can't be disabled, so nothing to filter
    */
-  getTableFilters(): {text: string, value: string}[] {
-    return [];
+  getTableFilters(): {objectField: string, options: {value: string, text: string}[] } {
+    return undefined;
   }
 }

@@ -11,11 +11,6 @@
       <div class="mui-col-md-11">
         <h4>General Settings</h4>
       </div>
-      <div *ngIf="item !== undefined" class="mui-col-md-2 float-right">
-        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="inViewMode()" (click)=tempAddRandomPrinter()>
-          Unprovisioned
-        </mat-checkbox>
-      </div>
     </div>
     <br>
     <div class="mui-row form-item">
@@ -67,18 +62,9 @@
     <br>
     <br>
 
-    <label> Allowed pastable virtues: </label>
+    <label> Clipboard Permissions: </label>
     <div class="mui-row form-item">
       <app-table #allowedPasteTargetsTable></app-table>
-
-      <div class="mui-col-md-2 float-right">
-        <br>
-        <label>Add Virtue &nbsp;&nbsp;</label>
-        <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" [disabled]="inViewMode()" >
-          <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."
-          ></mat-icon>
-        </button>
-      </div>
     </div>
   </div>
 </div>

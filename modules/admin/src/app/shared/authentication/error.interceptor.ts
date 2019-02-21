@@ -13,6 +13,11 @@ export class ErrorInterceptor implements HttpInterceptor {
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return next.handle(request)
           .pipe(catchError(err => {
+            // some endpoints return plaintext instead of json, which kinda screws with angular's automatic-JSON-parser.
+            // check for that.
+            if (this.isPlaintextMsg(err)) {
+              return new Observable<HttpEvent<any>>( () => err);
+            }
 
             // 255 means unknown error on the backend; not an authentication issue (hopefully), so don't log out.
             // That is, if you get this error, you aren't logged out on the backend, and so even if the app logs you out
@@ -49,6 +54,14 @@ export class ErrorInterceptor implements HttpInterceptor {
             return throwError(err);
         }))
         ;
+    }
+
+    /** some endpoints return a plaintext response like "Success!" that breaks angular's automatic json-parser. */
+    isPlaintextMsg(err) {
+      if (err.error.error) {
+        return err.error.error.toString().split(':')[0] === 'SyntaxError';
+      }
+      return false;
     }
 
     authFailure(errCode: number): boolean {

@@ -56,7 +56,6 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
   getTableParams() {
     return {
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg()
     };
