@@ -26,6 +26,7 @@ import {
   TextColumn,
   CheckboxColumn,
   IconColumn,
+  BlankColumn,
   SORT_DIR
 } from '../../shared/models/column.model';
 
@@ -79,8 +80,9 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
   getColumns(): Column[] {
     return [
-      new TextColumn("Printer", 4, (p: Printer) => p.name),
-      new TextColumn("Printer address", 3, (p: Printer) => p.address),
+      new BlankColumn(1),
+      new TextColumn("Description", 4, (p: Printer) => p.name),
+      new TextColumn("Printer address", 2, (p: Printer) => p.address),
       new TextColumn("Printer status", 2, (p: Printer) => p.status),
       new CheckboxColumn("Enable", 1, "enabled", undefined,
               (p: Printer, checked: boolean) => this.setItemAvailability(p, checked)),
@@ -102,7 +104,6 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
   addPrinter() {
     this.activatePrinterModal();
-    // this.createItem(new Printer({id: "2", name: "Brother HL", info: "b/w", address: "127.0.0.1", status: "on", enabled: true}));
   }
 
   editPrinter(p: Printer) {
