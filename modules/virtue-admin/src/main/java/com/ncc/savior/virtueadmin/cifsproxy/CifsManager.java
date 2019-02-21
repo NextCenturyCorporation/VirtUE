@@ -275,30 +275,36 @@ public class CifsManager {
 	 * @param virtue
 	 * @param user
 	 * @param fileSystems
-	 * @param myLinuxVms
+	 * @param vms
 	 * @param password
 	 */
-	public void addFilesystemLinux(VirtueInstance virtue, VirtueUser user, Collection<FileSystem> fileSystems,
-			Collection<VirtualMachine> myLinuxVms, String password) {
-		if (cifsEnabled) {
+	public void addFilesystemToVms(VirtueInstance virtue, VirtueUser user, Collection<FileSystem> fileSystems,
+			Collection<VirtualMachine> vms, String password) {
+		if (cifsEnabled && !vms.isEmpty()) {
 			VirtualMachine cifsVm = cifsProxyDao.getCifsVm(user);
 			String cifsProxyHostname = getHostnameFromDns(cifsVm);
 
 			CifsVirtueCreationParameter cifsVirtueParams = cifsRestWrapper.getVirtueParams(cifsProxyHostname,
 					user.getUsername(), password, virtue.getId());
-			logger.debug("Adding filesystems " + fileSystems + " for vms " + myLinuxVms + " user=" + user);
+			logger.debug("Adding filesystems " + fileSystems + " for vms " + vms + " user=" + user);
 			List<CifsShareCreationParameter> shares = cifsProxyDao.getSharesForVirtue(virtue.getId());
 			// copying values so we can reuse. Shares from database can't be iterated over
 			// more than once.
 			shares = new ArrayList<CifsShareCreationParameter>(shares);
 			// get credentials of for all file systems for user
-			for (VirtualMachine vm : myLinuxVms) {
+			for (VirtualMachine vm : vms) {
 				try {
 					String keyName = vm.getPrivateKeyName();
 					File privateKeyFile = keyManager.getKeyFileByName(keyName);
 					Session session = SshUtil.getConnectedSession(vm, privateKeyFile);
+					int windowsShareCount = 1;
 					for (CifsShareCreationParameter share : shares) {
-						runFileSystemLinuxScripts(cifsVirtueParams, cifsVm, session, share);
+						if (OS.LINUX.equals(vm.getOs())) {
+							runFileSystemLinuxScripts(cifsVirtueParams, cifsVm, session, share);
+						} else {
+							runFileSystemWindowsScripts(cifsVirtueParams, cifsVm, session, share, (byte) windowsShareCount);
+							windowsShareCount++;
+						}
 					}
 				} catch (JSchException | IOException e) {
 					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
@@ -539,6 +545,22 @@ public class CifsManager {
 			SshUtil.sftpFile(session, source, credentialFilePath);
 			SshUtil.runCommandsFromFile(templateService, session, "linuxFileSystemMount-post.tpl", model);
 		} catch (TemplateException | SftpException e) {
+			throw new IOException("Error mounting file system.", e);
+		}
+	}
+
+	private void runFileSystemWindowsScripts(CifsVirtueCreationParameter cifsVirtueParams, VirtualMachine cifsVm,
+			Session session, CifsShareCreationParameter share, byte count) throws IOException {
+		String drive = Character.toString((char)(71+count));
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("cifsVirtueParams", cifsVirtueParams);
+		model.put("cifsShare", share);
+		model.put("cifsVm", cifsVm);
+		model.put("drive", drive);
+		try {
+			List<String> lines = SshUtil.runCommandsFromFile(templateService, session, "windowsFileSystemMount.tpl", model);
+			logger.debug("mount windows output: "+lines);
+		} catch (TemplateException | JSchException | IOException e) {
 			throw new IOException("Error mounting file system.", e);
 		}
 	}
