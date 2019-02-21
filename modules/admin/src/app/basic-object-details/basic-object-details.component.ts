@@ -114,10 +114,7 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
   }
 
   isEmptyDict(obj) {
-    if (obj && obj instanceof DictList && (obj.asList().length === 0)) {
-      return true;
-    }
-    return false;
+    return (obj && obj instanceof DictList && (obj.asList().length === 0));
   }
 
   /**
