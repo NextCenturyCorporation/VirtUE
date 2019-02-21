@@ -67,8 +67,8 @@ public class WindowsAccountGenerator
 	}
 
 	private String createPassword() {
-		int length = 12 + random.nextInt(4);
-		String password = new Random().ints(length, 65, 122)
+		int length = 22 + random.nextInt(4);
+		String password = new Random().ints(length, 65, 90)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
 //		password="password123";
 		return password;
