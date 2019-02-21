@@ -1,7 +1,7 @@
 {
     "name": "Power User VM Windows",
     "os": "WINDOWS",
-    "templatePath": "ami-0145b58f0ced0e83d",
+    "templatePath": "ami-0abf68501390ca26f,
     "loginUser": "virtue-admin",
     "enabled": true,
     "applicationIds": [
