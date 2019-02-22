@@ -9,24 +9,42 @@
     </div>
   </div>
   <div class="mui-row form-item margin-top-15">
-    <div class="form-item margin-top-15">
-      <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-      <span *ngIf="!inViewMode()">
-        {{ item.enabled ? 'Enabled' : 'Disabled' }}
-      </span>
-      <mat-slide-toggle *ngIf="inViewMode()" [checked]="item.enabled" (change)="statusChange()" [color]="'primary'">
-        {{ item.enabled ? 'Enabled' : 'Disabled' }}
-      </mat-slide-toggle>
+    <div class="mui-col-md-3">
+      <div class="form-item margin-top-15">
+        <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
+        <span *ngIf="!inViewMode()">
+          {{ item.enabled ? 'Enabled' : 'Disabled' }}
+        </span>
+        <mat-slide-toggle *ngIf="inViewMode()" [checked]="item.enabled" (change)="statusChange()" [color]="'primary'">
+          {{ item.enabled ? 'Enabled' : 'Disabled' }}
+        </mat-slide-toggle>
+      </div>
     </div>
   </div>
   <br>
   <div class="mui-row">
-    <div class="mui-col-md-2">
-      <label>Select Operating System:</label>
+    <div class="mui-col-md-3">
+      <mat-form-field>
+        <input matInput [(ngModel)]="item.pathToAmiTemplate" [disabled]="inViewMode()" placeholder="AMI Template Path"   />
+      </mat-form-field>
     </div>
-    <div class="mui-col-md-4">
+  </div>
+  <br>
+  <div class="mui-row">
+    <div class="mui-col-md-3">
+      <mat-form-field>
+        <input matInput [(ngModel)]="item.securityTag" [disabled]="inViewMode()" placeholder="AWS Security Tag"   />
+      </mat-form-field>
+    </div>
+  </div>
+  <br>
+  <div class="mui-row">
+    <!-- <div class="mui-col-md-2">
+      <label>Select Operating System:</label>
+    </div> -->
+    <div class="mui-col-md-3">
       <mat-form-field class="form-field">
-        <mat-select [(ngModel)]="item.os" [disabled]="inViewMode()" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
+        <mat-select [(ngModel)]="item.os" [disabled]="inViewMode()" [ngModelOptions]="{standalone: true}" placeholder="Select Operating System" disableRipple>
           <mat-option *ngFor="let o of osOptions.getList()" [value]="o.os">{{ o.prettyName }} </mat-option>
         </mat-select>
       </mat-form-field>
