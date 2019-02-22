@@ -59,3 +59,10 @@ docker/server-images/workbench/admin.tar.gz
 *.dot
 /modules/ecosystem/cifs-proxy/switchprincipal
 modules/ecosystem/cifs-proxy/src/cpp/Makefile
+modules/ecosystem/netplan/netplan.io-0.95
+modules/ecosystem/netplan/netplan.io_0.95-2_amd64.*
+/modules/ecosystem/netplan/.patch-applied
+/modules/ecosystem/netplan/netplan.io-dbgsym_0.95-2_amd64.ddeb
+/modules/ecosystem/netplan/netplan.io_0.95-2.debian.tar.xz
+/modules/ecosystem/netplan/netplan.io_0.95-2.dsc
+/modules/ecosystem/netplan/netplan.io_0.95.orig.tar.gz

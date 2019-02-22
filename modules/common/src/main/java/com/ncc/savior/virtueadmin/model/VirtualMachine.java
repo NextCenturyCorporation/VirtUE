@@ -44,6 +44,7 @@ public class VirtualMachine {
 	// app ID to application
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
+	private String password;
 
 	@Transient
 	@Schema(description = "IDs for the applications that this virtual machine has available for the user.")
@@ -52,6 +53,7 @@ public class VirtualMachine {
 	private String internalHostname;
 	@Schema(description = "IP address for the internal network that the virtual machine resides.")
 	private String privateIpAddress;
+	private String windowsUser;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
@@ -225,4 +227,25 @@ public class VirtualMachine {
 	public String getInternalIpAddress() {
 		return this.privateIpAddress;
 	}
+
+	@JsonIgnore
+	public String getPassword() {
+		return password;
+	}
+
+	@JsonIgnore
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@JsonIgnore
+	public void setWindowsUser(String user) {
+		this.windowsUser = user;
+	}
+
+	@JsonIgnore
+	public String getWindowsUser() {
+		return windowsUser;
+	}
+
 }

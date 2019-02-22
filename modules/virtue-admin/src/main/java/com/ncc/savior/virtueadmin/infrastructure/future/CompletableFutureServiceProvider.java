@@ -61,6 +61,7 @@ public class CompletableFutureServiceProvider {
 	private IUpdateListener<VirtualMachine> vmNotifier;
 	private RunRemoteCommandCompletableFutureService runRemoteCommand;
 	private RunRemoteScriptCompletableFutureService runRemoteScript;
+	private WindowsAccountGenerator windowsAccountGenerator;
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
@@ -96,6 +97,7 @@ public class CompletableFutureServiceProvider {
 		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2, awsStatusTimeoutMillis);
 		runRemoteCommand = new RunRemoteCommandCompletableFutureService(executor, keyManager);
 		runRemoteScript = new RunRemoteScriptCompletableFutureService(executor, keyManager);
+		windowsAccountGenerator = new WindowsAccountGenerator(executor, false, 10, 1000, 10000, keyManager);
 		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override
@@ -203,5 +205,9 @@ public class CompletableFutureServiceProvider {
 
 	public BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void> getErrorCausingService() {
 		return errorCausingService;
+	}
+
+	public WindowsAccountGenerator getWindowsAccountGenerator() {
+		return windowsAccountGenerator;
 	}
 }

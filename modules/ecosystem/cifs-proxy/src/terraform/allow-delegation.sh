@@ -18,6 +18,7 @@ usage() {
 	echo -e "\t--delegater DELEGATER_HOST"
 	echo -e "\t--target TARGET_HOST"
 	echo -e "\t--dc DOMAIN_CONTROLLER [default=DOMAIN]"
+	echo -e "\t--base BASE [default=OU=Computers,OU=DOMAIN_PREFIX]"
 }
 
 domain=''
@@ -26,6 +27,7 @@ domainAdminPassword=''
 delegater=''
 target=''
 dc=''
+base=''
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -47,6 +49,9 @@ while [ $# -gt 0 ]; do
 		--dc) dc="$2"
 			  shift
 			  ;;
+		--base) base="$2"
+				shift
+				;;
 		--verbose) verbose=1
 				   ;;
 		--help|-h) usage
@@ -66,18 +71,21 @@ mustBeSet "$domainAdmin" ADMIN_USER
 mustBeSet "$domainAdminPassword" ADMIN_PASSWORD
 mustBeSet "$delegater" DELEGATER_HOST
 mustBeSet "$target" TARGET_HOST
+[ $verbose -eq 1 ] && set -x
+
 if [ -z "$dc" ]; then
 	dc=$domain
 fi
-
-[ $verbose -eq 1 ] && set -x
+if [ -z "$base" ]; then
+	domainPrefix=${domain/.*}
+	base="OU=Computers,OU=${domainPrefix}"
+fi
 
 ldapfile=/tmp/ldap-$$
-domainPrefix=${domain/.*}
 domainparts="${domain//./,dc=}"
-[ $verbose -eq 1 ] && ldapsearch -w "${domainAdminPassword}" -x -H ldap://${dc} -D "${domainAdmin}@${domain}" -b "OU=Computers,OU=${domainPrefix},DC=${domainparts}" cn="${delegater}"
+[ $verbose -eq 1 ] && ldapsearch -w "${domainAdminPassword}" -x -H ldap://${dc} -D "${domainAdmin}@${domain}" -b "${base},DC=${domainparts}" cn="${delegater}"
 cat > $ldapfile <<EOLDAP
-dn: cn=${delegater},ou=Computers,ou=${domainPrefix},dc=${domainparts}
+dn: cn=${delegater},${base},dc=${domainparts}
 changetype: modify
 add: msDS-AllowedToDelegateTo
 msDS-AllowedToDelegateTo: cifs/${target^^}
