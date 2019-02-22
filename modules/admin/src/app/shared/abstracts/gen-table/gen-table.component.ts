@@ -102,6 +102,8 @@ export class GenericTableComponent<T> {
   /** The message that should show up intead of any table data, when [[elements]] is undefined or empty. */
   private noDataMessage: string;
 
+  private dataHasLoaded: boolean = false;
+
   /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive.
   * Must be public to be used in template html file in production mode.*/
   public tableWidth: number;
@@ -214,9 +216,6 @@ export class GenericTableComponent<T> {
     /** see this.[[columns]] */
     cols: Column[];
 
-    /** see this.[[filterOptions]] */
-    filters: {value: string, text: string}[];
-
     /**
      * tableWidth must be between 1 and 12, inclusive.
      * see this.[[tableWidth]]
@@ -225,6 +224,9 @@ export class GenericTableComponent<T> {
 
     /** see this.[[noDataMessage]] */
     noDataMsg: string,
+
+    /** see this.[[filterOptions]] */
+    filters?: {objectField: string, options: {value: string, text: string}[]};
 
     /** see this.[[elementIsDisabled]] */
     elementIsDisabled?: ((obj: T) => boolean),
@@ -265,7 +267,10 @@ export class GenericTableComponent<T> {
       this.hasColoredLabels = false;
     }
 
-    this.filterOptions = params.filters;
+    if (params.filters) {
+      this.filterOptions = params.filters.options;
+      this.filterColumnName = params.filters.objectField;
+    }
     this.noDataMessage = params.noDataMsg;
 
     if ((params.tableWidth >= 0.01 && params.tableWidth <= 1)) {
@@ -294,6 +299,23 @@ export class GenericTableComponent<T> {
     }
   }
 
+  getNoDataMessage(): string {
+    if ( ! this.dataHasLoaded) {
+      return "Loading data, please wait.";
+    }
+    else {
+      return this.noDataMessage;
+    }
+  }
+
+  firstAttrIsString(obj) {
+      return (typeof this.getFirstAttribute(obj)) === 'string';
+  }
+
+  getFirstAttribute(obj) {
+    return obj[Object.keys(obj)[0]];
+  }
+
   /**
    * remove everything from [[elements]]
    */
@@ -306,6 +328,7 @@ export class GenericTableComponent<T> {
    * @param dataset the objects to be put into the table.
    */
   populate(dataset: any[]): void {
+    this.dataHasLoaded = true;
     this.clear();
     for (let d of dataset) {
       this.elements.push(new TableElement(d));
@@ -456,6 +479,7 @@ export class GenericTableComponent<T> {
       this.reverseSorting();
     } else {
       this.sortColumn = sortColumn;
+      this.sortDirection = SORT_DIR.ASC;
     }
   }
 
@@ -582,6 +606,19 @@ export class GenericTableComponent<T> {
   }
 
   getColSortField(col) {
-    return (col.sortField ? col.sortField : undefined );
+    if (!col.sortField) {
+      return undefined;
+    }
+    // to ensure ordering is deterministic, when possible
+    return (elem: TableElement<T>): string => {
+      if (elem !== undefined && elem['getID'] !== undefined && typeof elem['getID'] === 'function') {
+        return col.sortField(elem) + elem['getID']();
+      }
+      else {
+        return col.sortField(elem);
+      }
+    };
+
+    // return (col.sortField ? col.sortField : undefined );
   }
 }

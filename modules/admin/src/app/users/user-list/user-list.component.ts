@@ -42,18 +42,15 @@ export class UserListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
+
   }
 
-  /**
-   * called after all the datasetNames have loaded. Pass the user list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.USERS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.USERS;
   }
 
   /**
@@ -73,7 +70,7 @@ export class UserListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.VIRTUES, DatasetNames.USERS];
+    return [DatasetNames.VIRTUE_TS, DatasetNames.USERS];
 
   }
 

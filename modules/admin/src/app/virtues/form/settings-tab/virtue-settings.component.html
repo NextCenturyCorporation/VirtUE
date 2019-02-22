@@ -3,18 +3,13 @@
   <li class="mui--is-active"><a data-mui-toggle="tab" data-mui-controls="general">General</a></li>
   <li><a data-mui-toggle="tab" data-mui-controls="network">Network</a></li>
   <li><a data-mui-toggle="tab" data-mui-controls="resources">Resources</a></li>
-  <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li>
+  <!-- <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li> -->
 </ul>
 <div class="mui-tabs__pane mui--is-active" id="general">
   <div class="tab-pane-content no-overflow">
     <div class="mui-row form-item">
       <div class="mui-col-md-11">
         <h4>General Settings</h4>
-      </div>
-      <div *ngIf="item !== undefined" class="mui-col-md-2 float-right">
-        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="inViewMode()" (click)=tempAddRandomPrinter()>
-          Unprovisioned
-        </mat-checkbox>
       </div>
     </div>
     <br>
@@ -37,10 +32,10 @@
     </div>
     <br>
     <br>
-    <label>Set Default Virtue to open web-links in &nbsp;&nbsp;
+    <!-- <label>Set Default Virtue to open web-links in &nbsp;&nbsp;
       <button class="button-submit" (click)="activateDefaultBrowserVirtueModal()" [disabled]="inViewMode()" >
       </button>
-    </label>
+    </label> -->
     <br>
     <!-- <label> Default web-broswer virtue: </label>
     <div class="mui-row form-item">
@@ -67,18 +62,9 @@
     <br>
     <br>
 
-    <label> Allowed pastable virtues: </label>
+    <label> Clipboard Permissions: </label>
     <div class="mui-row form-item">
       <app-table #allowedPasteTargetsTable></app-table>
-
-      <div class="mui-col-md-2 float-right">
-        <br>
-        <label>Add Virtue &nbsp;&nbsp;</label>
-        <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" [disabled]="inViewMode()" >
-          <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."
-          ></mat-icon>
-        </button>
-      </div>
     </div>
   </div>
 </div>
@@ -95,7 +81,7 @@
           <div class="mui-col-md-2">
             <br>
             <label>Add new &nbsp;&nbsp;</label>
-            <button mat-mini-fab mat-button class="fab-button" [disabled]="inViewMode()" (click)="addNewNetworkPermission()" style="">
+            <button mat-mini-fab mat-button class="fab-button" [disabled]="inViewMode()" (click)="activateNetworkPermissionModal()" style="">
               <mat-icon class="plus" svgIcon="plus" aria-label="Add new network permission."></mat-icon>
             </button>
           </div>
@@ -134,7 +120,7 @@
         <br>
         <br>
 
-        <div >
+        <!-- <div >
           <div class="mui-row">
             <div class="mui-col-md-10">
               <br>
@@ -150,16 +136,17 @@
           </div>
           <app-table #printerTable></app-table>
 
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
 </div>
-<div class="mui-tabs__pane" id="sensors">
+<!-- <div class="mui-tabs__pane" id="sensors">
   <div class="tab-pane-content no-overflow">
     <h4>Sensor Settings</h4>
+    <app-table #sensorTable></app-table>
   </div>
-</div>
+</div> -->
 
 <!-- This seems potentially useful, but I don't think it's used at the moment. -->
 <script>

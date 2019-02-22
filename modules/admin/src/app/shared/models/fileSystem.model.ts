@@ -1,7 +1,7 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
 import { Toggleable } from './toggleable.interface';
-import { Subdomains } from '../services/subdomains.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -69,14 +69,11 @@ export class FileSystem extends IndexedObj implements Toggleable {
     return this.id;
   }
 
-  /**
-   * @return the FILE_SYSTEMS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.FILE_SYSTEMS;
+  getDatasetName(): string {
+    return DatasetNames.FILE_SYSTEMS;
   }
 
   formatPerms() {
-    return (this.readPerm ? " R " : "") + (this.writePerm ? " W " : "") + (this.executePerm ? " X " : "");
+    return (this.readPerm ? " R " : " _ ") + (this.writePerm ? " W " : " _ ") + (this.executePerm ? " X " : " _ ");
   }
 }

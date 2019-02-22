@@ -38,13 +38,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
-      super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
+      super(routerService, dataRequestService, dialog, dialogRef, data);
       this.pluralItem = "Virtual Machine Templates";
     }
 
@@ -75,7 +74,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS];
   }
 
   /**
@@ -89,6 +88,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.datasets[DatasetNames.VMS].asList());
+    this.fillTable(this.datasets[DatasetNames.VM_TS].asList());
   }
 }

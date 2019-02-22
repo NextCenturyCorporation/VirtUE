@@ -37,13 +37,12 @@ export class VirtueModalComponent extends GenericModalComponent {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<VirtueModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
+    super(routerService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "Virtue Templates";
   }
 
@@ -76,7 +75,7 @@ export class VirtueModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.datasets[DatasetNames.VIRTUES].asList());
+    this.fillTable(this.datasets[DatasetNames.VIRTUE_TS].asList());
   }
 
   /**
@@ -86,7 +85,7 @@ export class VirtueModalComponent extends GenericModalComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
   }
 
   /**

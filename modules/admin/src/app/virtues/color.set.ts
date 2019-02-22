@@ -18,7 +18,7 @@ export interface Color {
  */
 export class ColorSet {
   /** a static list of pre-defined colors */
-  readonly list: Color[] = [
+  public list: Color[] = [
     {prettyName: "Maroon",       hex: "#800000",  htmlName: "maroon"},
     {prettyName: "Crimson",      hex: "#DC143C",  htmlName: "crimson"},
     {prettyName: "Red",          hex: "#FF0000",  htmlName: "red"},
@@ -47,12 +47,4 @@ export class ColorSet {
     {prettyName: "Black",        hex: "#000000",  htmlName: "black"},
     {prettyName: "None",         hex: "transparent",  htmlName: "white"}
   ];
-
-  /**
-   * Get the set of colors
-   * @return the static list of colors
-   */
-  getList(): Color[] {
-    return this.list;
-  }
 }

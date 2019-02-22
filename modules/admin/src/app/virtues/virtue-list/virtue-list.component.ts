@@ -47,19 +47,14 @@ export class VirtueListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the virtue list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.VIRTUES].asList());
-    this.tempAddRandomPrinter();
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.VIRTUE_TS;
   }
 
   /**
@@ -67,14 +62,14 @@ export class VirtueListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i),
-                                                                                                    () => this.getSubMenu()),
-      new ListColumn('Virtual Machines',  2, (v: Virtue) => v.getVms(),     this.formatName,    (i: Item) => this.viewItem(i)),
-      new ListColumn('Applications',      2, (v: Virtue) => v.getVmApps(),  this.formatName),
-      new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
-      new TextColumn('Version',           1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date', 2, (v: Virtue) => v.readableModificationDate,          SORT_DIR.DESC),
-      new TextColumn('Status',            1, this.formatStatus,                 SORT_DIR.ASC)
+      new TextColumn('Template Name',    2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i),
+                                                                                                  () => this.getSubMenu()),
+      new ListColumn('Virtual Machines', 2, (v: Virtue) => v.getVms(),     this.formatName,    (i: Item) => this.viewItem(i)),
+      new ListColumn('Applications',     2, (v: Virtue) => v.getVmApps(),  this.formatName, (a: Item) => this.toDetailsPage(a)),
+      new TextColumn('Last Editor',      2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
+      new TextColumn('Version',          1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
+      new TextColumn('Modification Date', 2, (v: Virtue) => v.readableModificationDate, SORT_DIR.DESC),
+      new TextColumn('Status',           1, this.formatStatus,                 SORT_DIR.ASC)
     ];
   }
 
@@ -90,7 +85,7 @@ export class VirtueListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS];
   }
 
 

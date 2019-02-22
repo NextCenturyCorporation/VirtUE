@@ -46,11 +46,10 @@ export class AppsListComponent extends ItemListComponent {
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
     // TODO fix app versioning - maybe make automatic?
     // Apps need versions, but they can't default to anything, and it must be made clear
@@ -58,11 +57,8 @@ export class AppsListComponent extends ItemListComponent {
     // "version" as in "this is the 4th change I've made to this Chrome application item".
   }
 
-  /**
-   * called after all the datasets have loaded. Pass the app list to the table.
-   */
-  onPullComplete(): void {
-    this.setItems(this.datasets[DatasetNames.APPS].asList());
+  getDatasetToDisplay(): DatasetNames {
+    return DatasetNames.APPS;
   }
 
   /**
@@ -70,7 +66,8 @@ export class AppsListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Application Name',  5, (a: Application) => a.getName(), SORT_DIR.ASC, undefined, () => this.getSubMenu()),
+      new TextColumn('Application Name',  5, (a: Application) => a.getName(), SORT_DIR.ASC,
+                                                (a: Application) => this.toDetailsPage(a), () => this.getSubMenu()),
       new TextColumn('Version',           3, (a: Application) => String(a.version), SORT_DIR.ASC),
       new TextColumn('Operating System',  4, (a: Application) => a.os, SORT_DIR.DESC),
     ];
@@ -109,8 +106,8 @@ export class AppsListComponent extends ItemListComponent {
    * overrides parent, [[ItemListComponent.getTableFilters]]
    * @return an empty list; Apps can't be disabled, so nothing to filter
    */
-  getTableFilters(): {text: string, value: string}[] {
-    return [];
+  getTableFilters(): {objectField: string, options: {value: string, text: string}[] } {
+    return undefined;
   }
 
   /**

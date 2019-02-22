@@ -4,7 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatSlideToggleModule } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+import 'rxjs/add/operator/map';
+import { catchError, tap } from 'rxjs/operators';
 
+import { Subdomains } from '../shared/services/subdomains.enum';
 import { RouterService } from '../shared/services/router.service';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
@@ -12,7 +16,8 @@ import { DataRequestService } from '../shared/services/dataRequest.service';
 import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
-import { Virtue } from '../shared/models/virtue.model';
+import { NetworkPermission } from '../shared/models/networkPerm.model';
+import { Virtue, ClipboardPermission, ClipboardPermissionOption } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
@@ -55,11 +60,14 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} Virtue: &nbsp;&nbsp;{{item.name}}</h1>
+      <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
+    <button *ngIf="inViewMode()" mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+      <label>View all Virtue details</label>
+    </button>
     <div id="content-main">
       <div id="content" class="content">
-        <mat-tab-group dynamicHeight=true>
+        <mat-tab-group dynamicHeight=true [(selectedIndex)]="selectedTab">
           <mat-tab label= {{mainTab.tabName}}>
             <app-virtue-main-tab #mainTab></app-virtue-main-tab>
           </mat-tab>
@@ -115,18 +123,17 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/virtues', activatedRoute, routerService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
     this.item = new Virtue();
 
-    this.datasetName = DatasetNames.VIRTUES;
-    this.childDatasetName = DatasetNames.VMS;
+    this.datasetName = DatasetNames.VIRTUE_TS;
+    this.childDatasetName = DatasetNames.VM_TS;
 
   }
 
@@ -209,11 +216,101 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
+    this.settingsTab.update({[DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS], mode: this.mode});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allUsers: this.datasets[DatasetNames.USERS], mode: this.mode});
+    this.usageTab.update({
+                          [DatasetNames.USERS]: this.datasets[DatasetNames.USERS],
+                          [DatasetNames.VIRTUES]: this.datasets[DatasetNames.VIRTUES],
+                          mode: this.mode});
+  }
+
+  /**
+   * Virtue templates have attributes that don't come with the actual Item, and must be querried separately
+   *  - NetworkPermissions
+   *  - ClipboardPermissions
+   *  - filesystems?
+   *
+   * @override [[ItemFormComponent.afterPullComplete]]()
+   */
+  afterPullComplete(): Promise<any> {
+
+    if (this.mode !== Mode.CREATE) {
+      return this.getSecurityGroupPerms((virtueID: string) => this.getClipboardPermissions(virtueID));
+    }
+    else if (this.datasets[DatasetNames.VIRTUE_TS].asList().length > 0) {
+      // There are more potential clipboard targets than just the virtues - e.g. there's also a permission for the desktop instance.
+      // So just get some other virtue's list of clipboard permissions, and use that, with default values.
+      let randomVirtueID = this.datasets[DatasetNames.VIRTUE_TS].asList()[0].getID();
+      return this.getClipboardPermissions(randomVirtueID, true);
+    }
+    else {
+      return new Promise(() => {});
+    }
+  }
+
+  getSecurityGroupPerms(next?: (data?: any) => Promise<any>): Promise<any> {
+
+    return this.dataRequestService.getRecords(Subdomains.SEC_GRP, this.item.getID())
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.initializeNetworkPerms(response);
+          }
+
+          next(this.item.getID()).then(() => {});
+        }),
+        catchError(this.ignoreError())
+      )
+      .toPromise();
+  }
+
+
+  getClipboardPermissions(virtueID: string, resetValuesToDefault?: boolean): Promise<any> {
+    return this.dataRequestService.getRecords(Subdomains.CLIP, [virtueID])
+      .pipe(
+        tap(response => {
+          if (response !== undefined && Array.isArray(response)) {
+            this.setClipboardPerms(response, resetValuesToDefault);
+          }
+        }),
+        catchError(this.ignoreError())
+      )
+      .toPromise();
+  }
+
+  ignoreError() {
+    return (err: any) => {
+      return new Observable<HttpEvent<any>>( () => err);
+    };
+  }
+
+  initializeNetworkPerms(netPerms) {
+    for (let secGrp of netPerms) {
+      this.item.networkSecurityPermWhitelist.push(new NetworkPermission(secGrp));
+    }
+    this.settingsTab.update();
+  }
+
+  setClipboardPerms(clipPerms, resetValuesToDefault?: boolean): void {
+    let clips = [];
+    for (let clipPerm of clipPerms) {
+      // bug, sweeping under a rug for now
+      // when dup, changes are made to the original client-side, and saved as a new object server side.
+      // So if you rename the duplicate and then go over to the clipboard settings, you'll see an row with the new name.
+      // But that option will actually update the item you're duplicating, not the duplicate you create.
+      if ((this.mode === Mode.DUPLICATE) && (clipPerm.destinationGroupId === this.item.getID())) {
+        continue;
+      }
+      if (resetValuesToDefault) {
+        clipPerm.sourceGroupId = 'un-instantiated';
+        clipPerm.permission = ClipboardPermissionOption.ALLOW;
+      }
+      clips.push(new ClipboardPermission(clipPerm));
+    }
+    this.item.clipboardPermissions = clips;
+    this.settingsTab.update({[DatasetNames.VIRTUE_TS]: this.datasets[DatasetNames.VIRTUE_TS]});
   }
 
   /**
@@ -225,12 +322,19 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   getNeededDatasets(): DatasetNames[] {
     return [
             DatasetNames.APPS,
+            DatasetNames.VM_TS,
             DatasetNames.VMS,
             DatasetNames.PRINTERS,
             DatasetNames.FILE_SYSTEMS,
+            DatasetNames.VIRTUE_TS,
             DatasetNames.VIRTUES,
             DatasetNames.USERS];
   }
+
+  getTitle(): string {
+    return this.mode + " Virtue Template:  " + (this.item.getName() ? this.item.getName() : "");
+  }
+
 
   /**
    * Pull in/record any uncollected inputs, and check that the item is valid to be saved
@@ -244,21 +348,48 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     if ( !this.settingsTab.collectData() ) {
       return false;
     }
-    // TODO perform checks here, so none of the below changes happen if the item
-    // isn't valid
 
-    // The following are required:
-    //  this.item.name,     can't be empty
-    //  this.item.version,  will be valid
-    //  this.item.enabled,  should either be true or false
-    //  this.item.color,    should be ok? make sure it has a default in the settings pane
-
-    // note that vmTemplates is set to undefined for a brief instant before the
-    // page navigates away, during which time an exception would occur on the
-    // table - that chunk of html has now been wrapped in a check, to not check
-    // the 's list size if vmTemplates is undefined
-    this.item.vmTemplates = undefined;
     return true;
+  }
+
+  afterSave(returnedObj?: any): void {
+    // needs to be done this way so permissions added during the creation/duplication of a virtue actually get
+    // saved; remember the item doesn't have an ID until after it gets saved.
+    let virtueTemplateID = this.item.getID();
+    if (this.mode === Mode.CREATE || this.mode === Mode.DUPLICATE) {
+      virtueTemplateID = new Virtue(returnedObj).getID();
+    }
+
+    this.updateVirtueSecurityGroupPermissions(virtueTemplateID);
+
+    this.updateClipboardPermissions(virtueTemplateID);
+  }
+
+  updateClipboardPermissions(virtueTemplateID: string): void {
+    for (let clipPerm of this.item.clipboardPermissions) {
+      clipPerm.source = virtueTemplateID; // for create and duplicate
+      this.setClipboardPermission(clipPerm);
+    }
+  }
+
+  updateVirtueSecurityGroupPermissions(virtueTemplateID: string): void {
+    for (let secPerm of this.item.getNewSecurityPermissions()) {
+      secPerm.templateId = virtueTemplateID;
+      this.authorizeSecGrpPermission(virtueTemplateID, secPerm);
+    }
+
+    for (let secPerm of this.item.getRevokedSecurityPermissions()) {
+      secPerm.templateId = virtueTemplateID;
+      this.revokeSecGrpPermission(virtueTemplateID, secPerm);
+    }
+  }
+
+  authorizeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'authorize', secPerm);
+  }
+
+  revokeSecGrpPermission(virtueTemplateID: string, secPerm: NetworkPermission) {
+    this.addRemoveSecGrpPermission(virtueTemplateID, 'revoke', secPerm);
   }
 
   /**

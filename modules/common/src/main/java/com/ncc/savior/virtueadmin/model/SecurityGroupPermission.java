@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * A domain object for a single security group permission. This maps to AWS
  * IpPermission. Each security group can have many Security Group Permissions.
- * 
+ *
  *
  */
 @JsonInclude(Include.NON_NULL)
@@ -19,13 +19,13 @@ public class SecurityGroupPermission {
 	public static final Comparator<? super SecurityGroupPermission> TEMPLATE_ID_COMPARATOR = new TemplateIdComparator();
 	@Schema(description = "True if the security group pertains to connections coming into into the virtue, false if the connection is outgoing.")
 	private boolean ingress;
-	@Schema(description = "Port the connection came from.")
+	@Schema(description = "Bottom of the range of ports to open.")
 	private Integer fromPort;
-	@Schema(description = "Port the connection came to.")
+	@Schema(description = "Top of the range of ports to open")
 	private Integer toPort;
 	@Schema(description = "CIDR block of that the permission should pertain to.")
 	private String cidrIp;
-	@Schema(description = "Protocol for.  Usually TCP or UDP.")
+	@Schema(description = "Protocol for this connection.  Usually TCP or UDP.")
 	private String ipProtocol;
 	@Schema(description = "Human readable description of the purpose of this security group.")
 	private String description;

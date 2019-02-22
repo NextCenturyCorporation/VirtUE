@@ -167,16 +167,16 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		// Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();
+		String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		try {
 			Future<Exception> cifsPriorTask = cifsManager.cifsBeforeVirtueCreation(vi, fileSystems);
-			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			linuxFuture.thenAccept((myLinuxVms) -> {
 				// Authentication auth2 =
 				// SecurityContextHolder.getContext().getAuthentication();
 				try {
 					Exception e = cifsPriorTask.get();
 					if (e == null) {
-						cifsManager.addFilesystemLinux(vi, user, fileSystems, myLinuxVms, password);
+						cifsManager.addFilesystemToVms(vi, user, fileSystems, myLinuxVms, password);
 					} else {
 						throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, "Cifs Prior Task failed!", e);
 					}
@@ -205,6 +205,14 @@ public class XenAwsMixCloudManager implements ICloudManager {
 			}
 			logger.debug("Finished adding vms to Windows Startup Services");
 			return winVms;
+		}).thenApply((Collection<VirtualMachine> finishedWindowsBoxes) -> {
+			try {
+				cifsManager.addFilesystemToVms(vi, user, fileSystems, finishedWindowsBoxes, password);
+			} catch (Throwable t) {
+				// TODO need to fix how we handle this error.
+				logger.error("error creating cifs", t);
+			}
+			return finishedWindowsBoxes;
 		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
 			// Once startup services are done on windows machines, set VM state to running
 			// and notify (notify saves to DB typically)

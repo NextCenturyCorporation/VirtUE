@@ -2,13 +2,18 @@
 /**
  * @enum
  * The paths on the backend which must be queried for each of those datasets
+ *
  */
 export enum Subdomains {
   APPS = "admin/application/",
-  VMS = "admin/virtualMachine/template/",
-  VIRTUES = "admin/virtue/template/",
+  VM_TS = "admin/virtualMachine/template/",
+  VIRTUE_TS = "admin/virtue/template/",
   USERS = "admin/user/",
   PRINTERS = "admin/printer/",
   FILE_SYSTEMS = "admin/fileSystem/",
-  SENSORS = "admin/????"
+  VIRTUES = "admin/virtues",
+  VMS = "admin/vm/",
+  SENSORS = "admin/sensing/",
+  SEC_GRP = "admin/securityGroup/template/",
+  CLIP = "admin/permission/"
 }

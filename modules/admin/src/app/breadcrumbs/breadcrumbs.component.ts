@@ -3,6 +3,8 @@ import { ActivationEnd, NavigationStart, ActivatedRoute, RouterModule, Router } 
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { RouterService } from '../shared/services/router.service';
+
 import { Breadcrumb } from '../shared/models/breadcrumb.model';
 
 /**
@@ -36,44 +38,42 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   breadcrumbs: Breadcrumb[] = [];
 
   /**
-   * The subscription which persists across the lifetime of the page, collecting navigation events as they occur,
+   * The subscription which persists across the lifetime of the page, collecting new-page-events as they occur,
    * and being cut once this component is destroyed.
    */
   routerSub: Subscription;
 
   constructor(
     /** Handles the navigation to/from different pages. Injected, and so is constant across components. */
-    private router: Router,
-    /** Injected, records information about the route that may be relevant when we change breadcrumbs to build up. */
-    private activatedRoute: ActivatedRoute
+    private routerService: RouterService
   ) { }
 
-  /**
-   * on render, start a subscription that tracks each router event upon navigation, and chains each stop together into a
-   * list of breadcrumbs that can be displayed to the user as links.
-   * Currently, you end up with a list of how the app navigated to that page, according to app-router's specifications, not
-   * how the *user* got to that page. Should be changed eventually - see note at top of class.
-   */
   ngOnInit() {
-    let tempCrumbs: Breadcrumb[] = [];
-    this.routerSub = this.router.events.subscribe(
-      e => {
-      // This function gets called many times on each navigation.
-
-      // NavigationStart appears to be one of the first events in the chain that get
-      // get fired off when you navigate to a new link. So when you see that event, reset
-      // tempCrumbs, so the breadcrumb list starts with a clean slate.
-      if (e instanceof NavigationStart) {
-        tempCrumbs = [];
-      }
-      // ActivationEnd events occur once for every page that was hit while navigating to
-      // this one. For each such event, add a link to the corresponding page.
-      else if (e instanceof ActivationEnd) {
-        if (e.snapshot.data.breadcrumb) {
-          tempCrumbs.unshift(e.snapshot.data.breadcrumb);
+    this.routerSub = this.routerService.onNewPage.subscribe(
+      crumb => {
+        if (this.routerService.isTopDomainPage(crumb.href)) {
+          this.breadcrumbs = [];
         }
-        this.breadcrumbs = tempCrumbs;
-      }
+
+        // if it's an update of the current page
+        if (crumb.href === "" && this.breadcrumbs.length > 0) {
+          this.breadcrumbs[this.breadcrumbs.length - 1].label = crumb.label;
+          return;
+        }
+
+        // let indxExistingEntry: number = this.breadcrumbs.indexOf(crumb);
+        let i: number = this.breadcrumbs.length - 1;
+        for (; i >= 0; i-- ) {
+          if (crumb.href === this.breadcrumbs[i].href) {
+            break;
+          }
+        }
+
+        if (i !== -1) {
+          this.breadcrumbs = this.breadcrumbs.slice(0, i);
+        }
+
+        this.breadcrumbs.push(crumb);
     });
   }
 

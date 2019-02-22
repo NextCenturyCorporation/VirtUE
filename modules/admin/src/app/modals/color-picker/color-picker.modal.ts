@@ -50,10 +50,11 @@ export class ColorModalComponent implements OnInit {
     /** the data the calling ocmponent passes in. Should contain a 'color' field, to initialize the selection to. */
     @Inject(MAT_DIALOG_DATA) public data: {color: string}
   ) {
-      this.selectedColor = this.colorSet.getList().find(c => c.hex === data.color);
+      this.selectedColor = this.colorSet.list.find(c => c.hex === data.color);
 
       if (!this.selectedColor) {
-        this.selectedColor = this.colorSet.getList().find(c => c.prettyName === "None");
+        this.selectedColor = {prettyName: "Custom", hex: data.color, htmlName: "Custom"};
+        this.colorSet.list.push(this.selectedColor);
       }
 
   }

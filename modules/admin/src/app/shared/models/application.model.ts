@@ -2,7 +2,7 @@
 import { Item } from './item.model';
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
-import { Subdomains } from '../services/subdomains.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -62,11 +62,8 @@ export class Application extends Item {
     }
   }
 
-  /**
-   * @return the APPS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.APPS;
+  getDatasetName(): string {
+    return DatasetNames.APPS;
   }
 
   removeUnspecifiedChild(obj): void {}

@@ -46,10 +46,9 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
     this.tabLabel = "Printers";
   }
 
@@ -70,7 +69,6 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     }
     this.printersTable.setUp({
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No printers set up yet.",
       elementIsDisabled: (p: Printer) => !p.enabled

@@ -1,7 +1,7 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
 import { Toggleable } from './toggleable.interface';
-import { Subdomains } from '../services/subdomains.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -48,10 +48,7 @@ export class Printer extends IndexedObj implements Toggleable {
     return this.id;
   }
 
-  /**
-   * @return the PRINTERS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.PRINTERS;
+  getDatasetName(): string {
+    return DatasetNames.PRINTERS;
   }
 }

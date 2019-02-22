@@ -12,6 +12,7 @@ import { RouterService } from '../../services/router.service';
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
+import { Application } from '../../models/application.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { Item } from '../../models/item.model';
 import { Toggleable } from '../../models/toggleable.interface';
@@ -44,11 +45,11 @@ export abstract class GenericPageComponent {
    * @return the item's name/identifier, with '(disabled)' next to it when applicable.
    */
   formatName( item: Item ): string {
-    if (item.enabled) {
-      return item.getName();
+    if (item.enabled === false && !(item instanceof Application)) {
+      return item.getName() + " (disabled)";
     }
     else {
-      return item.getName() + " (disabled)";
+      return item.getName();
     }
   }
 
@@ -59,6 +60,10 @@ export abstract class GenericPageComponent {
    */
   formatStatus( obj: Toggleable ): string {
     return obj.enabled ? 'Enabled' : 'Disabled';
+  }
+
+  toDetailsPage( obj: IndexedObj ) {
+    this.routerService.goToPage("view", [obj.getDatasetName(), obj.getID()]);
   }
 
   /**
@@ -82,7 +87,7 @@ export abstract class GenericPageComponent {
     this.routerService.goToPage(item.getDupURL());
   }
 
-  toPreviousPage() {
+  toPreviousPage(): void {
     this.routerService.toPreviousPage();
   }
 

@@ -8,7 +8,6 @@ import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * Represents a virtual machine template.
@@ -51,7 +50,7 @@ export class VirtualMachine extends Item {
       this.enabled = vmObj.enabled;
       this.os = vmObj.os;
       this.applicationIds = vmObj.applicationIds;
-      this.version = vmObj.version;
+      this.version = vmObj.version; // currently doesn't exist, figure out later
       this.lastEditor = vmObj.lastEditor;
       this.modificationDate = vmObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
@@ -59,12 +58,8 @@ export class VirtualMachine extends Item {
 
   }
 
-
-  /**
-   * @return the VMS subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.VMS;
+  getDatasetName(): string {
+    return DatasetNames.VM_TS;
   }
 
   /**

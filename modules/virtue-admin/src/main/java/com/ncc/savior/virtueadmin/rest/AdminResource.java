@@ -274,7 +274,6 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	@Operation(summary = "Update virtue template.", description = "Updates a virtue template associated with the ID in the path based on the request body.")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
-		logger.debug("here! " + template);
 		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 		return virtueTemplate;
 	}
@@ -321,6 +320,13 @@ public class AdminResource {
 	@Operation(summary = "Get virtue instance.", description = "Returns a single virtue instance associated with the given ID.")
 	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
 		return adminService.getActiveVirtue(virtueId);
+	}
+
+	@POST
+	@Path("virtues/stop/{instanceId}")
+	@Operation(summary = "Stop virtue instance.", description = "Stops the virtue instance associated with the given ID.")
+	public void stopVirtue(@PathParam("instanceId") String instanceId) {
+		adminService.stopVirtue(instanceId);
 	}
 
 	@GET
@@ -971,9 +977,6 @@ public class AdminResource {
 	@Path("fileSystem")
 	@Operation(summary = "Get all shared file systems.", description = "Returns a list of all the metadata for a shared file systems(I.E. Samba share) on the system.")
 	public Iterable<FileSystem> getAllFileSystems() {
-		// ArrayList<FileSystem> ps = new ArrayList<FileSystem>();
-		// ps.add(new FileSystem("id", "name", "address", "status", true));
-		// return ps;
 		return adminService.getAllFileSystems();
 	}
 

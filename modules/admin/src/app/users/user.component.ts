@@ -49,8 +49,11 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
   template: `
   <div id="content-container">
     <div id="content-header">
-        <h1 class="titlebar-title">{{mode}} User Account: &nbsp;&nbsp;{{item.name}}</h1>
+        <h1 class="titlebar-title">{{getTitle()}}</h1>
     </div>
+    <button mat-button (disabled)=!inViewMode() (click)="toDetailsPage(item)">
+      <label>View all User details</label>
+    </button>
     <div id="content-main">
       <div id="content" class="content">
         <mat-tab-group dynamicHeight=true>
@@ -88,17 +91,16 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
   constructor(
     activatedRoute: ActivatedRoute,
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/users', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
+    super('/users', activatedRoute, routerService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User();
 
     this.datasetName = DatasetNames.USERS;
-    this.childDatasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
   /**
@@ -182,7 +184,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS, DatasetNames.USERS];
   }
 
   /**
@@ -214,6 +216,10 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     // if not editing, make sure username isn't taken
 
     return true;
+  }
+
+  getTitle(): string {
+    return this.mode + " User Account:  " + this.item.name;
   }
 
   /**

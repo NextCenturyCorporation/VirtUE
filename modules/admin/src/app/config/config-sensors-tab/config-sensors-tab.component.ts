@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material';
 import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
-import { SensingModel } from '../../shared/models/sensing.model';
+import { SensorRecord } from '../../shared/models/sensor.model';
 
 import {
   Column,
@@ -63,10 +63,9 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
     this.tabLabel = "Global Sensors";
   }
 
@@ -106,7 +105,6 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
     }
     this.generalSensorTable.setUp({
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: "No sensor data at the moment. It's not yet implemented."
     });

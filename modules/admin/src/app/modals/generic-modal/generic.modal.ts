@@ -27,10 +27,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  * See the commented-out GenericPageComponent.activateModal() function for the unimplemented design.
  *
  */
-// @Component({
-//   selector: 'app-generic-modal',
-//   templateUrl: './generic.modal.html'
-// })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
@@ -62,7 +58,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    */
   constructor(
       routerService: RouterService,
-      baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
 
@@ -72,7 +67,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
-      super(routerService, baseUrlService, dataRequestService, dialog);
+      super(routerService, dataRequestService, dialog);
       if (data && data['selectedIDs']) {
         this.selectedIDs = data['selectedIDs'];
       }
@@ -105,7 +100,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   defaultTableParams() {
     return {
       cols: this.getColumns(),
-      filters: [],
       tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
       editingEnabled: () => true,

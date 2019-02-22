@@ -28,6 +28,7 @@ import {
   MatIconModule,
   MatIconRegistry,
   MatInputModule,
+  MatMenuModule,
   MatRadioModule,
   MatSelectModule,
   MatSlideToggleModule,
@@ -36,7 +37,7 @@ import {
 } from '@angular/material';
 
 import { FlexLayoutModule } from "@angular/flex-layout";
-
+import { Ng2DropdownModule } from 'ng2-material-dropdown';
 
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
 
@@ -54,6 +55,9 @@ import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fi
 import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
+import { SimpleTableComponent } from './shared/abstracts/gen-table/simple-table/simple-table.component';
+
+import { BasicObjectDetailsComponent } from './basic-object-details/basic-object-details.component';
 
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
@@ -61,6 +65,7 @@ import { UserMainTabComponent} from './users/form/main-tab/main-user-tab.compone
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
+import { VirtueInstanceListComponent } from './virtues/virtue-instance-list/virtue-instance-list.component';
 import { VirtueComponent } from './virtues/virtue.component';
 import { VirtueMainTabComponent } from './virtues/form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './virtues/form/settings-tab/virtue-settings.component';
@@ -73,8 +78,11 @@ import { PrinterModalComponent } from './modals/printer-modal/printer.modal';
 import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-selection.modal';
 // import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
 import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
+import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
+import { NetworkPermissionModalComponent } from './modals/networkPerm-modal/networkPerm.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmInstanceListComponent } from './vms/vm-instance-list/vm-instance-list.component';
 import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './vms/form/vm-usage-tab/vm-usage-tab.component';
 import { VmComponent} from './vms/vm.component';
@@ -88,7 +96,6 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { DialogsComponent } from './dialogs/dialogs.component';
-
 
 import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
@@ -123,12 +130,17 @@ import { LoginComponent } from './shared/authentication/login.component';
     DashboardComponent,
 
     GenericTableComponent,
+    SimpleTableComponent,
+
+    BasicObjectDetailsComponent,
+    // SensorDetailsComponent,
 
     UserListComponent,
     UserComponent,
     UserMainTabComponent,
 
     VirtueListComponent,
+    VirtueInstanceListComponent,
     VirtueMainTabComponent,
     VirtueSettingsTabComponent,
     VirtueUsageTabComponent,
@@ -141,13 +153,15 @@ import { LoginComponent } from './shared/authentication/login.component';
     ColorModalComponent,
     PrinterModalComponent,
     PrinterSelectionModalComponent,
-    // FileSystemModalComponent,
+    FileSystemModalComponent,
     FileSystemSelectionModalComponent,
+    NetworkPermissionModalComponent,
 
     ListFilterPipe,
     PageNotFoundComponent,
 
     VmListComponent,
+    VmInstanceListComponent,
     VmComponent,
     VmMainTabComponent,
     VmUsageTabComponent,
@@ -182,11 +196,13 @@ import { LoginComponent } from './shared/authentication/login.component';
     MatGridListModule,
     MatIconModule,
     MatInputModule,
+    MatMenuModule,
     MatRadioModule,
     MatSlideToggleModule,
     MatSelectModule,
     MatTabsModule,
     MatToolbarModule,
+    Ng2DropdownModule,
     ReactiveFormsModule,
     SplitPaneModule
   ],
@@ -222,7 +238,9 @@ import { LoginComponent } from './shared/authentication/login.component';
     // PrinterModalComponent,
     PrinterSelectionModalComponent,
     // FileSystemModalComponent,
-    FileSystemSelectionModalComponent
+    FileSystemSelectionModalComponent,
+    FileSystemModalComponent,
+    NetworkPermissionModalComponent
   ]
 })
 

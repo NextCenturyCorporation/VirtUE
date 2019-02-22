@@ -40,7 +40,7 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 /**
  * Main AWS based implementation of {@link ISecurityGroupManager}. Creates,
  * edits, deletes security groups based on a key which is typically templateID.
- * 
+ *
  */
 public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final String FILTER_VPC_ID = "vpc-id";
@@ -163,6 +163,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
 			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_VIRTUE_TEMPLATE_ID).withValues(templateId));
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
 			dsgr.setFilters(filters);
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
@@ -177,6 +178,9 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 					}
 				}
 			}
+			List<SecurityGroupPermission> defaultPermissions = new ArrayList<SecurityGroupPermission>();
+			defaultPermissions.add(new SecurityGroupPermission(false, null, null, "0.0.0.0/0", "-1", "default"));
+			return defaultPermissions;
 		}
 		throw new SaviorException(SaviorErrorCode.SECURITY_GROUP_NOT_FOUND,
 				"Unable to find security group matching template ID=" + templateId);
@@ -301,7 +305,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	/**
 	 * Returns true if the security group has the required tags and values to
 	 * indicate that it was auto generated and owned by this server.
-	 * 
+	 *
 	 * @param sg
 	 * @return
 	 */
@@ -357,7 +361,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 
 	/**
 	 * Returns null if no existing security group is found.
-	 * 
+	 *
 	 * @param templateId
 	 * @return
 	 */

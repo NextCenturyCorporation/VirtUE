@@ -272,8 +272,8 @@ public class SshUtil {
 	 * @param dataModel
 	 * @return
 	 * @throws TemplateException
-	 * @throws IOException 
-	 * @throws JSchException 
+	 * @throws IOException
+	 * @throws JSchException
 	 */
 	public static List<String> runCommandsFromFile(ITemplateService templateService, Session session,
 			String templateName, Map<String, Object> dataModel) throws TemplateException, JSchException, IOException {
@@ -285,9 +285,18 @@ public class SshUtil {
 		}
 		return output;
 	}
-	
+
+	public static List<String> runScriptFromFile(ITemplateService templateService, Session session,
+			String templateName, Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
+		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
+		String line = String.join("\n", lines);
+		List<String> o = SshUtil.sendCommandFromSession(session, line);
+		return o;
+	}
+
 	public static List<String> runCommandsFromFileWithTimeout(ITemplateService templateService, Session session,
-			String templateName, Map<String, Object> dataModel, long timeoutMillis) throws TemplateException, JSchException, IOException {
+			String templateName, Map<String, Object> dataModel, long timeoutMillis)
+			throws TemplateException, JSchException, IOException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		List<String> output = new ArrayList<String>();
 		for (String line : lines) {

@@ -100,7 +100,7 @@ export class TextColumn extends LinkableColumn implements Sortable {
      * that column, for that TableElement. */
     public formatElement: (elem: any) => string,
     /** The default sort direction when a new column is sorted on. Usually ASC. */
-    public sortDefault: SORT_DIR,
+    public sortDefault?: SORT_DIR,
     /** see parent [[LinkableColumn]] */
     link?: (elem: any) => void,
     /** A function to return a list of SubMenuOptions which should appear, beneath the label in every row, in this column */
@@ -109,6 +109,11 @@ export class TextColumn extends LinkableColumn implements Sortable {
     sortField?: (elem: any) => string
   ) {
     super(label, width, link);
+
+    if (!sortDefault) {
+      this.sortDefault = SORT_DIR.ASC;
+    }
+
     if (sortField) {
       this.sortField = sortField;
     }
@@ -155,7 +160,7 @@ export class ListColumn<E> extends LinkableColumn {
  * not necessarily the type of the objects held by the table's TableElements.
  * The dropdown box is marked as required, always.
  */
-export class DropdownColumn<E> extends Column implements Sortable {
+export class DropdownColumn<E> extends Column {
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
@@ -174,11 +179,6 @@ export class DropdownColumn<E> extends Column implements Sortable {
      * Parameter is the object held by the TableElement.
      */
     public formatElement: (elem: E) => string,
-
-    /**
-     * A function that returns a string representing the given object, which this column should use when sorting the objects.
-     */
-    public sortField: (elem: any) => string
   ) {
     super(label, width);
   }
@@ -221,13 +221,14 @@ export class InputFieldColumn extends Column implements Sortable {
     width: number,
     /** the name of the attribute within the object held by each TableElement that this input field should be mapped to. */
     public inputFieldName: string,
-
-    /**
-     * A function that returns a string representing the given object, which this column should use when sorting the objects.
-     */
-    public sortField: (elem: any) => string
+    /** A function that returns a string representing the given object, which this column should use when sorting the objects.*/
+    public sortField: (elem: any) => string,
+    public required?: boolean
     ) {
       super(label, width);
+      if (this.required === undefined) {
+        this.required = false;
+      }
     }
 }
 
@@ -269,7 +270,7 @@ export class RadioButtonColumn extends Column {
     /** the field to be watched/set by this column's radio button. */
     public fieldName: string,
     /** the value to be given to [[fieldName]], if this column is selected. */
-    public value: string
+    public value: any
     ) {
       super(label, width);
     }

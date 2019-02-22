@@ -3,8 +3,17 @@
     <span class="navbar-brand">Savior VirtUE</span>
     <ng-container *ngIf=authService.isAuthenticated()>
       <ul class="nav navbar-nav">
-          <li *ngFor="let n of getNavOptions()" class="nav-item" routerLinkActive="active">
-            <a class="nav-link" routerLink="{{ n.link }}" title="{{ n.value }}">{{ n.value }}</a>
+          <li *ngFor="let option of getNavOptions()" class="nav-item" routerLinkActive="active">
+
+            <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.label }}">{{ option.label }}</a>
+            <ng-container *ngIf="option.dropdownOptions !== undefined">
+
+                <button mat-button class="nav-link" [matMenuTriggerFor]="menu" >{{option.label}}</button>
+                <mat-menu #menu="matMenu" yPosition="below" [overlapTrigger]="false">
+                  <button *ngFor="let page of option.dropdownOptions" routerLink="{{ page.link }}" mat-menu-item>{{page.label}}</button>
+                </mat-menu>
+            </ng-container>
+
           </li>
       </ul>
       <ul class="nav navbar-nav" ng-style="{margin-left: auto; margin-right: 0;float: right;}">

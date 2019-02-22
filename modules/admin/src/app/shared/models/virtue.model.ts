@@ -7,13 +7,32 @@ import { VirtualMachine } from './vm.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
-import { Subdomains } from '../services/subdomains.enum';
 
 import { DictList } from './dictionary.model';
 
 import { NetworkPermission } from './networkPerm.model';
 import { FileSystem } from './fileSystem.model';
 import { Printer } from './printer.model';
+
+export class ClipboardPermission {
+  source: string;
+  dest: string;
+  permission: ClipboardPermissionOption;
+
+  constructor( clip? ) {
+    if (clip) {
+      this.source = clip.sourceGroupId;
+      this.dest = clip.destinationGroupId;
+      this.permission = clip.permission;
+    }
+  }
+}
+
+export enum ClipboardPermissionOption {
+  ALLOW = "ALLOW",
+  DENY = "DENY",
+  ASK = "ASK"
+}
 
 /**
  * @class
@@ -45,7 +64,7 @@ export class Virtue extends Item {
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
 
-  vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
+  private vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
 
   vmTemplateIds: string[] = [];
 
@@ -55,31 +74,28 @@ export class Virtue extends Item {
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
   color: string = 'transparent';
 
-  /** #TODO what is this? #uncommented (unprovisioned) */
-  unprovisioned: boolean = true;
-
   /** What virtue should any links clicked within this Virtue automatically open in */
   defaultBrowserVirtueId: string;
-  defaultBrowserVirtue: Virtue;
+  private defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
-  networkWhitelist: NetworkPermission[] = [];
+  networkSecurityPermWhitelist: NetworkPermission[] = [];
+  private newSecurityPermissions: NetworkPermission[] = [];
+  private revokedSecurityPermissions: NetworkPermission[] = [];
 
-  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargetIds: string[] = [];
-  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
+  /** this holds the IDs and permissions regarding the virtues that this virtue is allowed to paste data into. */
+  clipboardPermissions: ClipboardPermission[] = [];
 
   /** this virtue's r/w/e permissions for the filesystem
    * Note that fileSystems is saved and loaded with the virtue. While everything else is saved as a list of IDs,
    * here, the list of IDs is just used to update the names of the saved fileSystems, since each virtue can set its own individual
    * permissions for a given fileSystem.
    */
-  fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
+  private fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
   fileSystemIds: string[] = [];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  printers: DictList<Printer> = new DictList<Printer>();
+  private printers: DictList<Printer> = new DictList<Printer>();
   printerIds: string[] = [];
 
   /**
@@ -102,26 +118,14 @@ export class Virtue extends Item {
       this.id = virtueObj.id;
       this.enabled = virtueObj.enabled;
       this.vmTemplateIds = virtueObj.vmTemplateIds;
-      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
       this.printerIds = virtueObj.printerIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
-
-      for (let fs of virtueObj.fileSystems) {
-        this.fileSystems.add(fs.id, fs);
-      }
 
       this.lastEditor = virtueObj.lastEditor;
 
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
 
-      if (virtueObj.networkWhitelist) {
-        for (let netPerm of virtueObj.networkWhitelist) {
-          this.networkWhitelist.push(new NetworkPermission(netPerm));
-        }
-      }
-
-      this.unprovisioned = virtueObj.unprovisioned;
       this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
       this.version = virtueObj.version;
       this.color = virtueObj.color;
@@ -129,22 +133,15 @@ export class Virtue extends Item {
 
   }
 
-  /**
-   * @return the VIRTUES subdomain
-   */
-  getSubdomain(): string {
-    return Subdomains.VIRTUES;
+  getDatasetName(): string {
+    return DatasetNames.VIRTUE_TS;
   }
 
-  /**
-   * #uncommented
-   */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
-    if (datasetName === DatasetNames.VIRTUES) {
+    if (datasetName === DatasetNames.VIRTUE_TS) {
       this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
-      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIds) as DictList<Virtue>;
     }
-    if (datasetName === DatasetNames.VMS) {
+    if (datasetName === DatasetNames.VM_TS) {
       this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
     }
     else if (datasetName === DatasetNames.FILE_SYSTEMS) {
@@ -176,19 +173,11 @@ export class Virtue extends Item {
 
 
   getVms(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VMS);
+    return this.getChildren(DatasetNames.VM_TS);
   }
 
   getVmApps(): IndexedObj[] {
-    return this.getGrandChildren(DatasetNames.VMS, DatasetNames.APPS);
-  }
-
-  getPrinters(): IndexedObj[] {
-    return this.getChildren(DatasetNames.PRINTERS);
-  }
-
-  getFileSystems(): IndexedObj[] {
-    return this.getChildren(DatasetNames.FILE_SYSTEMS);
+    return this.getGrandChildren(DatasetNames.VM_TS, DatasetNames.APPS);
   }
 
 
@@ -208,7 +197,7 @@ export class Virtue extends Item {
   }
 
   removeVm(vm: VirtualMachine) {
-    this.removeChild(vm.getID(), DatasetNames.VMS);
+    this.removeChild(vm.getID(), DatasetNames.VM_TS);
   }
 
   removePrinter(printer: Printer) {
@@ -223,14 +212,14 @@ export class Virtue extends Item {
   /** @override [[Item.getRelatedDict]] */
   getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
     switch (datasetName) {
-      case DatasetNames.VMS:
+      case DatasetNames.VM_TS:
         return this.vmTemplates;
       case DatasetNames.PRINTERS:
         return this.printers;
       case DatasetNames.FILE_SYSTEMS:
         return this.fileSystems;
       default:
-        console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS}, was", datasetName);
+        console.log("You shouldn't be here. Requested dataset: ", datasetName);
         return null;
     }
   }
@@ -242,14 +231,14 @@ export class Virtue extends Item {
    */
   getRelatedIDList(datasetName: DatasetNames): string[] {
     switch (datasetName) {
-      case DatasetNames.VMS:
+      case DatasetNames.VM_TS:
         return this.vmTemplateIds;
       case DatasetNames.PRINTERS:
         return this.printerIds;
       case DatasetNames.FILE_SYSTEMS:
         return this.fileSystemIds;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    console.log("You shouldn't be here. Requested dataset: ", datasetName);
     return [];
   }
 
@@ -261,18 +250,39 @@ export class Virtue extends Item {
         enabled: this.enabled,
         vmTemplateIds: this.vmTemplateIds,
         fileSystemIds: this.fileSystemIds,
-        fileSystems: this.fileSystems.asList(),
         printerIds: this.printerIds,
-        allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
         lastModification: this.modificationDate,
-        networkWhitelist: this.networkWhitelist,
-        unprovisioned: this.unprovisioned,
+        networkSecurityPermWhitelist: this.networkSecurityPermWhitelist,
         version: this.version,
         defaultBrowserVirtueId: this.defaultBrowserVirtueId,
         color: this.color
 
     };
     return virtue;
+  }
+
+  getVmTemplates() {
+    return this.vmTemplates;
+  }
+
+  getDefaultBrowserVirtue() {
+    return this.defaultBrowserVirtue;
+  }
+
+  getNewSecurityPermissions() {
+    return this.newSecurityPermissions;
+  }
+
+  getRevokedSecurityPermissions() {
+    return this.revokedSecurityPermissions;
+  }
+
+  getFileSystems() {
+    return this.fileSystems;
+  }
+
+  getPrinters() {
+    return this.printers;
   }
 }

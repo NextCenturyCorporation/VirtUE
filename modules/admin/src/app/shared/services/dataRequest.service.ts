@@ -41,6 +41,23 @@ export class DataRequestService {
     private messageService: MessageService,
   ) {}
 
+  private buildUrl(subdomain: string, params?: string | string[]) {
+    let url = subdomain;
+    if (params) {
+      if (! Array.isArray(params)) {
+        params = [params];
+      }
+
+      if (url.substr(-1) !== '/') {
+        url += '/';
+      }
+
+      for (let param of params) {
+        url += param + '/';
+      }
+    }
+    return url;
+  }
 
   /**
    * Request all items in the dataset at {subdomain}
@@ -50,8 +67,8 @@ export class DataRequestService {
    *
    * @return a subscription that will return a list of objects, if/when available.
    */
-  public getRecords(subdomain: string): Observable<IndexedObj[]> {
-    let url = subdomain;
+  public getRecords(subdomain: string, params?: string | string[]): Observable<IndexedObj[]> {
+    let url = this.buildUrl(subdomain, params);
     return this.httpClient.get<IndexedObj[]>(url, httpOptions).catch(this.errorHandler);
   }
 
@@ -82,6 +99,18 @@ export class DataRequestService {
    */
   public createRecord(subdomain: string, itemData: string): Observable<IndexedObj> {
     let url = subdomain;
+    return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
+  }
+
+  /**
+   * @param subdomain the path describing to virtue-admin what set of data to save this item to
+   * @param itemData a JSON.stringify-ed Item. Must have the attributes the backend expects to see.
+   *                 Those are set in each item-form's [[finalizeItem]] method.
+   *
+   * @return a subscription that will return the saved object as it exists on the backend.
+   */
+  public flexiblePost(subdomain: string, params: string | string[], itemData: string): Observable<IndexedObj> {
+    let url = this.buildUrl(subdomain, params);
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 

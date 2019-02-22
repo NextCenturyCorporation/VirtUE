@@ -66,11 +66,10 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    */
   constructor(
     routerService: RouterService,
-    baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(routerService, baseUrlService, dataRequestService, dialog);
+    super(routerService, dataRequestService, dialog);
 
     let params = this.getListOptions();
 
@@ -80,10 +79,10 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
 
     // pull the top subdomain, e.g. '/users', '/virtues', etc., out of the url.
     // Used only when to navigate to the create page for this type of item, via the 'Add new {{itemName}}' button.
-    this.subdomain = this.getSubdomain();
+    this.subdomain = this.getLocalSubdomain();
   }
 
-  protected getSubdomain(): string {
+  protected getLocalSubdomain(): string {
     return '/' + this.routerService.getRouterUrlPieces()[0];
   }
 
@@ -93,19 +92,6 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   ngOnInit(): void {
     this.cmnDataComponentSetup();
     this.setUpTable();
-  }
-
-  /**
-   * returns the default parameters for the table on a list page, using subclass-defined features.
-   */
-  defaultTableParams() {
-    return {
-      cols: this.getColumns(),
-      filters: this.getTableFilters(),
-      tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
-      noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Toggleable) => !i.enabled
-    };
   }
 
   /**
@@ -128,11 +114,38 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   }
 
   /**
+   * returns the default parameters for the table on a list page, using subclass-defined features.
+   */
+  defaultTableParams(): any {
+    return {
+      cols: this.getColumns(),
+      filters: this.getTableFilters(),
+      tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Toggleable) => !i.enabled
+    };
+  }
+
+  /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
    * @param paramsObject the parameters to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 
+  /**
+   * called after all the datasets have loaded. Pass the app list to the table.
+   */
+  onPullComplete(): void {
+    this.setItems(this.datasets[this.getDatasetToDisplay()].asList());
+    this.routerService.submitPageTitle(this.prettyTitle);
+
+    this.afterPullComplete();
+  }
+
+  abstract getDatasetToDisplay(): DatasetNames;
+
+  /** override-able, for any subclass-specific functionality */
+  afterPullComplete(): void {}
 
   /**
    * Populates the table with the input list of items.
@@ -159,10 +172,13 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    *
    * @return a list of filter options to be displayed at the top of the list page.
    */
-  getTableFilters(): {value: string, text: string}[] {
-    return [{value: '*', text: 'All ' + this.pluralItem},
-            {value: 'true', text: 'Enabled ' + this.pluralItem},
-            {value: 'false', text: 'Disabled ' + this.pluralItem}];
+  getTableFilters(): {objectField: string, options: {value: string, text: string}[]} {
+    return {
+            objectField: 'enabled',
+            options: [{value: '*', text: 'All ' + this.pluralItem},
+              {value: 'true', text: 'Enabled ' + this.pluralItem},
+              {value: 'false', text: 'Disabled ' + this.pluralItem}]
+            };
   }
 
   /**

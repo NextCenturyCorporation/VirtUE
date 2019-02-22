@@ -6,6 +6,7 @@ import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
+import { Application } from '../../../shared/models/application.model';
 
 import {
   Column,
@@ -65,7 +66,7 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
       routerService: RouterService,
       dialog: MatDialog) {
     super(routerService, dialog);
-    this.childDatasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
   /**
@@ -118,9 +119,11 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
   getColumns(): Column[] {
     return [
       new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
-                                                                                          () => this.getSubMenu()),
-      new ListColumn('Virtual Machines', 3, (v: Virtue) => v.getVms(), this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
-      new ListColumn('Available Apps', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
+                                                                                () => this.getSubMenu()),
+      new ListColumn('Virtual Machines', 3, (v: Virtue) => v.getVms(), this.formatName,
+                                                                                (vm: VirtualMachine) => this.viewItem(vm)),
+      new ListColumn('Available Apps', 4, (v: Virtue) => v.getVmApps(),  this.formatName,
+                                                                                (a: Application) => this.toDetailsPage(a)),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
     ];
   }
