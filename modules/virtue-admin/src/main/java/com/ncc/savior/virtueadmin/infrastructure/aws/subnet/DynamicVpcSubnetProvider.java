@@ -57,6 +57,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private String availabilityZone;
 	private CidrBlock nextCidrBlockToTry;
 	private String serverId;
+	private NetworkAclManager networkAclManager;
 
 	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, String vpcName,
 			String firstCidrBlock, String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId,
@@ -67,6 +68,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		this.startingCidrBlock = CidrBlock.fromString(firstCidrBlock);
 		this.nextCidrBlockToTry = startingCidrBlock;
 		this.endCidrBlock = CidrBlock.fromString(endNonInclusiveCidrBlock);
+
 		if (startingCidrBlock.greaterOrEqual(endCidrBlock)) {
 			throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 					"Ending CIDR block must be greater than starting CIDR block!  Starting=" + startingCidrBlock
@@ -80,6 +82,8 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		} else {
 			logger.error("Failed to find vpc with name=" + vpcName);
 		}
+		this.networkAclManager = new NetworkAclManager(serverIdProvider, ec2Wrapper, vpcId, startingCidrBlock,
+				endCidrBlock);
 	}
 
 	@Override
@@ -95,10 +99,10 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				// database. We should clear it (because AWS is king) and save one that reflects
 				// AWS.
 				logger.debug("Save to database failed, attempted to overwrite", e);
-				
+
 				Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
 				logger.debug(all.toString());
-				
+
 				Iterable<CidrBlockAssignment> col = cidrRepo.findByCidrBlock(assignment.getCidrBlock());
 				logger.debug("Deleting " + col);
 				cidrRepo.deleteAll(col);
@@ -190,6 +194,8 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
 					.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
 			ec2.associateRouteTable(associateRouteTableRequest);
+
+			networkAclManager.associateSubnetWithAcl(subnet);
 
 			logger.debug("created cidrBlock subnet at " + cidrBlock + " " + subnet);
 			return subnet;
