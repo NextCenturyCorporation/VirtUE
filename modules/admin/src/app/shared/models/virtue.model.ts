@@ -74,10 +74,6 @@ export class Virtue extends Item {
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
   color: string = 'transparent';
 
-  /** What virtue should any links clicked within this Virtue automatically open in */
-  defaultBrowserVirtueId: string;
-  private defaultBrowserVirtue: Virtue;
-
   /** A list of networks this Virtue is permitted to connect to */
   networkSecurityPermWhitelist: NetworkPermission[] = [];
   private newSecurityPermissions: NetworkPermission[] = [];
@@ -126,7 +122,6 @@ export class Virtue extends Item {
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
 
-      this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
       this.version = virtueObj.version;
       this.color = virtueObj.color;
     }
@@ -138,9 +133,6 @@ export class Virtue extends Item {
   }
 
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
-    if (datasetName === DatasetNames.VIRTUE_TS) {
-      this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
-    }
     if (datasetName === DatasetNames.VM_TS) {
       this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
     }
@@ -255,7 +247,6 @@ export class Virtue extends Item {
         lastModification: this.modificationDate,
         networkSecurityPermWhitelist: this.networkSecurityPermWhitelist,
         version: this.version,
-        defaultBrowserVirtueId: this.defaultBrowserVirtueId,
         color: this.color
 
     };
@@ -264,10 +255,6 @@ export class Virtue extends Item {
 
   getVmTemplates() {
     return this.vmTemplates;
-  }
-
-  getDefaultBrowserVirtue() {
-    return this.defaultBrowserVirtue;
   }
 
   getNewSecurityPermissions() {

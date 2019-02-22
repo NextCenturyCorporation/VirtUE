@@ -61,7 +61,7 @@ export class UserListComponent extends ItemListComponent {
     return [
       new TextColumn('Username',           2, (u: User) => u.getName(), SORT_DIR.ASC, (u: User) => this.viewItem(u),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Active Virtues',  3, (u: User) => u.getActiveVirtues(), this.formatName,
+      new ListColumn('Active Virtues',  3, (u: User) => u.getActiveVirtues(), (v: VirtueInstance) => v.getLabel(),
                                                                             (v: VirtueInstance) => this.toDetailsPage(v)),
       new ListColumn('Available Virtues',  3, (u: User) => u.getVirtues(), this.formatName, (v: Virtue) => this.viewItem(v)),
       new TextColumn('Authorized Roles',   2, this.formatRoles),
@@ -113,7 +113,7 @@ export class UserListComponent extends ItemListComponent {
     if (!user.roles) {
       return '';
     }
-    return user.roles.sort().toString();
+    return user.roles.sort().join(", ");
   }
 
 }
