@@ -65,7 +65,7 @@ export class HeaderComponent implements OnInit {
   }
 
   /**
-   * Copied from stackoverflow - do not trust
+   * Copied from stackoverflow - trust only with caution
    * https://stackoverflow.com/questions/53618333/how-to-open-and-close-angular-mat-menu-on-hover/53618962#53618962
    * Makes menu tabs open and close on mouse-over and mouse-leave.
    */

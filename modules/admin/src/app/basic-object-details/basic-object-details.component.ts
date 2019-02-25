@@ -79,11 +79,12 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    */
   onPullComplete(): void {
     if ((this.neededDataset === undefined) || !(this.datasets[this.neededDataset].has(this.objectID))) {
+      this.table.setItems([]);
       return;
     }
+
     let objects = this.datasets[this.neededDataset];
     this.objectBeingExamined = objects.get(this.objectID);
-
 
     let attributeList = [];
 
@@ -125,7 +126,7 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
-    return "";
+    return "The requested record was not found.";
   }
 
   getRouteParam(paramName: string): string {
