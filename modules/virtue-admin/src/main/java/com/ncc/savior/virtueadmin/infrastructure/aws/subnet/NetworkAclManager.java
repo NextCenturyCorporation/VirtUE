@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
@@ -51,15 +52,28 @@ public class NetworkAclManager {
 	private CidrBlock endCidr;
 	private CidrBlock startCidr;
 	private boolean useExistingCidrWithoutChecking = true;
+	@Value("${virtue.test:false}")
+	private boolean test;
 
-	public NetworkAclManager(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper, String vpcId,
-			CidrBlock startingCidrBlock, CidrBlock endCidrBlock) {
+	public NetworkAclManager(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper, String vpcName,
+			String startingCidrBlock, String endCidrBlock) {
 		this.serverId = serverIdProvider.getServerId();
 		this.ec2 = ec2Wrapper.getEc2();
-		this.vpcId = vpcId;
-		this.startCidr = startingCidrBlock;
-		this.endCidr = endCidrBlock;
-		virtueIsolationAclId = getOrGenerateVirtueIsolationAcl();
+		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
+		if (vpcId != null) {
+			this.vpcId = vpcId;
+		} else {
+			logger.error("Failed to find vpc with name=" + vpcName);
+		}
+		this.startCidr = CidrBlock.fromString(startingCidrBlock);
+		this.endCidr = CidrBlock.fromString(endCidrBlock);
+
+	}
+
+	protected void init() {
+		if (!test) {
+			virtueIsolationAclId = getOrGenerateVirtueIsolationAcl();
+		}
 	}
 
 	private String getOrGenerateVirtueIsolationAcl() {
@@ -121,12 +135,13 @@ public class NetworkAclManager {
 	}
 
 	private boolean testProperIsolationAcl(NetworkAcl acl) {
-//		List<String> cidrs = IpToCidrUtil.rangeToCidrList(startCidr.ipToInteger(), endCidr.ipToInteger() - 1);
-//		List<NetworkAclEntry> entries = acl.getEntries();
-//		for (NetworkAclEntry entry : entries) {
-//			String existingCidr = entry.getCidrBlock();
-//
-//		}
+		// List<String> cidrs = IpToCidrUtil.rangeToCidrList(startCidr.ipToInteger(),
+		// endCidr.ipToInteger() - 1);
+		// List<NetworkAclEntry> entries = acl.getEntries();
+		// for (NetworkAclEntry entry : entries) {
+		// String existingCidr = entry.getCidrBlock();
+		//
+		// }
 		return false;
 	}
 

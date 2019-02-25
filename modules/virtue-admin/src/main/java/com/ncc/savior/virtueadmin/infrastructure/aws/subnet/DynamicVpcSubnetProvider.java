@@ -59,7 +59,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private String serverId;
 	private NetworkAclManager networkAclManager;
 
-	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, String vpcName,
+	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, NetworkAclManager networkAclManager,String vpcName,
 			String firstCidrBlock, String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId,
 			String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
@@ -82,8 +82,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		} else {
 			logger.error("Failed to find vpc with name=" + vpcName);
 		}
-		this.networkAclManager = new NetworkAclManager(serverIdProvider, ec2Wrapper, vpcId, startingCidrBlock,
-				endCidrBlock);
+		this.networkAclManager = networkAclManager;
 	}
 
 	@Override
