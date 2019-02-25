@@ -80,7 +80,7 @@ public class CidrBlock {
 		return myInt >= otherInt;
 	}
 
-	private int ipToInteger() {
+	public int ipToInteger() {
 		int a = getA() << 24;
 		int b = getB() << 16;
 		int c = getC() << 8;
@@ -120,6 +120,10 @@ public class CidrBlock {
 	@Override
 	public String toString() {
 		return a + DOT + b + DOT + c + DOT + d + SLASH + netmask;
+	}
+	
+	public String toIp() {
+		return a + DOT + b + DOT + c + DOT + d;
 	}
 
 	@Override

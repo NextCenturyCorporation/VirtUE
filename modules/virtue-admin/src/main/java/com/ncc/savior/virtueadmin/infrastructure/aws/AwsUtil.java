@@ -63,6 +63,7 @@ public class AwsUtil {
 	public static final String TAG_VM_INSTANCE_ID = "savior-vm-instance-id";
 	public static final String TAG_PRIMARY = "savior-primary";
 	public static final String TAG_SECONDARY = "savior-secondary";
+	public static final String FILTER_VPC_ID = "vpc-id";
 
 	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
