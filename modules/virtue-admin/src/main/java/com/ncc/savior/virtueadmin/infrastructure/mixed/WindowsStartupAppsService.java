@@ -104,7 +104,7 @@ public class WindowsStartupAppsService {
 					for (VirtualMachine vm : v.getVms()) {
 						// go through each VM for windwos boxes
 						if (OS.WINDOWS.equals(vm.getOs())) {
-							boolean mySuccess = addWindowsStartupServices(xenVm.get(), vm);
+							boolean mySuccess = addWindowsStartupServices(xenVm.get(), vm, v);
 							success &= mySuccess;
 						}
 					}
@@ -117,7 +117,7 @@ public class WindowsStartupAppsService {
 		return false;
 	}
 
-	public boolean addWindowsStartupServices(VirtualMachine nfsOrXen, VirtualMachine windows) {
+	public boolean addWindowsStartupServices(VirtualMachine nfsOrXen, VirtualMachine windows, VirtueInstance v) {
 		Session session = null;
 		logger.debug("Attempting to mount NFS on windows box for virtue " + nfsOrXen.getId());
 		try {
@@ -125,7 +125,7 @@ public class WindowsStartupAppsService {
 			session = SshUtil.getConnectedSession(windows, keyFile);
 			Map<String, Object> dataModel = new HashMap<String, Object>();
 			dataModel.put("nfs", nfsOrXen);
-			dataModel.put("vm",windows);
+			dataModel.put("vm", windows);
 			SshUtil.runCommandsFromFile(templateService, session, windowsStartupScript, dataModel);
 			// String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
 			// String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());

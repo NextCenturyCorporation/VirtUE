@@ -198,7 +198,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 			logger.debug("Adding vms to Windows Startup Services");
 			for (VirtualMachine windows : winVms) {
 				try {
-					windowsNfsMountingService.addWindowsStartupServices(xen, windows);
+					windowsNfsMountingService.addWindowsStartupServices(xen, windows, vi);
 				} catch (Throwable t) {
 					logger.error("error adding to windows services", t);
 				}

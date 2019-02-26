@@ -230,6 +230,7 @@ public class XenHostManager {
 
 					HashMap<String, Object> model = new HashMap<String, Object>();
 					model.put("xenVm", xenVm);
+					model.put("virtue", virtue);
 					SshUtil.runCommandsFromFileWithTimeout(templateService, session, "Dom0-post-config.tpl", model,
 							300);
 
