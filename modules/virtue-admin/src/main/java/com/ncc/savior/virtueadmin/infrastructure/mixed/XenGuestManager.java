@@ -108,7 +108,7 @@ public class XenGuestManager {
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
-						vmt.getTemplatePath(), vmt.getSecurityTag(), vm, true);
+						vmt.getTemplatePath(), vmt.getSecurityTag(), vm, virtue, true);
 				externalSensingPort += numSensingPorts;
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
 				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
@@ -136,11 +136,13 @@ public class XenGuestManager {
 
 	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
 			int startingInternalPort, int numSensingPorts, String templatePath, String role, VirtualMachine vm,
-			boolean create) throws JSchException, IOException, SftpException, TemplateException {
+			VirtueInstance instance, boolean create)
+			throws JSchException, IOException, SftpException, TemplateException {
 
 		String ipAddress = "0.0.0.0";
 		String name = vm.getName();
 		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("virtue", instance);
 		model.put("vm", vm);
 		model.put("templatePath", templatePath);
 		model.put("securityRole", (role == null ? "" : role));
@@ -323,7 +325,7 @@ public class XenGuestManager {
 	}
 
 	public void startGuests(Collection<VirtualMachine> linuxVms,
-			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture, VirtueInstance virtue) {
 		Session session = null;
 		try {
 			session = SshUtil.getConnectedSession(xenVm, keyFile);
@@ -336,7 +338,7 @@ public class XenGuestManager {
 				// throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not
 				// properly implemented!");
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
-						null, null, vm, false);
+						null, null, vm, virtue, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
 		} catch (Exception e) {
@@ -445,7 +447,7 @@ public class XenGuestManager {
 	}
 
 	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture,
-			String virtue) {
+			VirtueInstance virtue) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture, virtue);
@@ -461,14 +463,14 @@ public class XenGuestManager {
 	}
 
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, VirtueInstance virtue) {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			startGuests(vms, vmFuture);
+			startGuests(vms, vmFuture, virtue);
 		}
 		return vms;
 	}

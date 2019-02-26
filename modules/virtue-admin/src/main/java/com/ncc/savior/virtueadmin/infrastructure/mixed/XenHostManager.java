@@ -460,7 +460,7 @@ public class XenHostManager {
 
 		Runnable startGuestsRunnable = () -> {
 			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
-			guestManager.startGuests(linuxVms, finalLinuxFuture);
+			guestManager.startGuests(linuxVms, finalLinuxFuture, virtueInstance);
 		};
 		xenFuture.thenRun(startGuestsRunnable);
 		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
