@@ -55,7 +55,6 @@ export class User extends Item {
     else if (datasetName === DatasetNames.VIRTUES) {
       this.activeVirtues = new DictList<VirtueInstance>();
       for (let v of dataset.asList() as VirtueInstance[]) {
-        console.log(v.user)
         if (v.user === this.getName()) {
           this.activeVirtues.add(v.getID(), v);
         }
