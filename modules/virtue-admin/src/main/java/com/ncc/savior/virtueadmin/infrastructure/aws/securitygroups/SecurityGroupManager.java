@@ -43,7 +43,6 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
  *
  */
 public class SecurityGroupManager implements ISecurityGroupManager {
-	private static final String FILTER_VPC_ID = "vpc-id";
 	private static final String FILTER_GROUP_ID = "group-id";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityGroupManager.class);
 
@@ -294,7 +293,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private List<SecurityGroup> getAllSecurityGroupsFromAws() {
 		DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
 		Collection<Filter> filters = new ArrayList<Filter>();
-		filters.add(new Filter(FILTER_VPC_ID).withValues(vpcId));
+		filters.add(new Filter(AwsUtil.FILTER_VPC_ID).withValues(vpcId));
 		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
 		describeSecurityGroupsRequest.setFilters(filters);
 		DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(describeSecurityGroupsRequest);
