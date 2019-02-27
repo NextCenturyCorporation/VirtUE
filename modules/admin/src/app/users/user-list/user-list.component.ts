@@ -4,6 +4,7 @@ import { Location } from '@angular/common';
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
+import { VirtueInstance } from '../../shared/models/virtue-instance.model';
 import {  Column,
           TextColumn,
           ListColumn,
@@ -58,11 +59,13 @@ export class UserListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Username',           3, (u: User) => u.getName(), SORT_DIR.ASC, (u: User) => this.viewItem(u),
+      new TextColumn('Username',           2, (u: User) => u.getName(), SORT_DIR.ASC, (u: User) => this.viewItem(u),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Available Virtues',  4, (u: User) => u.getVirtues(), this.formatName, (u: User) => this.viewItem(u)),
-      new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
-      new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)
+      new ListColumn('Active Virtues',  3, (u: User) => u.getActiveVirtues(), this.formatName,
+                                                                            (v: VirtueInstance) => this.toDetailsPage(v)),
+      new ListColumn('Available Virtues',  3, (u: User) => u.getVirtues(), this.formatName, (v: Virtue) => this.viewItem(v)),
+      new TextColumn('Authorized Roles',   2, this.formatRoles),
+      new TextColumn('Account Status',     1, this.formatStatus, SORT_DIR.DESC)
     ];
   }
 
@@ -70,7 +73,7 @@ export class UserListComponent extends ItemListComponent {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.VIRTUE_TS, DatasetNames.USERS];
+    return [DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES, DatasetNames.USERS];
 
   }
 

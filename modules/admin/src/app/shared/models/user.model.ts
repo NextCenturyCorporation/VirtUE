@@ -1,6 +1,7 @@
 
 import { Item } from './item.model';
 import { Virtue } from './virtue.model';
+import { VirtueInstance } from './virtue-instance.model';
 
 import { DictList } from './dictionary.model';
 
@@ -18,10 +19,9 @@ export class User extends Item {
   /** What roles this User is granted - currently can be 'User' and/or 'Admin' */
   roles: string[] = [];
 
-  /** #uncommented */
+  activeVirtues: DictList<VirtueInstance> = new DictList<VirtueInstance>();
   virtueTemplates: DictList<Virtue> = new DictList<Virtue>();
 
-  /** #uncommented */
   virtueTemplateIds: string[] = [];
 
   /**
@@ -52,6 +52,15 @@ export class User extends Item {
     if (datasetName === DatasetNames.VIRTUE_TS) {
       this.virtueTemplates = dataset.getSubset(this.virtueTemplateIds) as DictList<Virtue>;
     }
+    else if (datasetName === DatasetNames.VIRTUES) {
+      this.activeVirtues = new DictList<VirtueInstance>();
+      for (let v of dataset.asList() as VirtueInstance[]) {
+        console.log(v.user)
+        if (v.user === this.getName()) {
+          this.activeVirtues.add(v.getID(), v);
+        }
+      }
+    }
   }
 
   /**
@@ -77,7 +86,10 @@ export class User extends Item {
     if (datasetName === DatasetNames.VIRTUE_TS) {
       return this.virtueTemplates;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS, was", datasetName);
+    if (datasetName === DatasetNames.VIRTUES) {
+      return this.activeVirtues;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS or VIRTUES, was", datasetName);
     return undefined;
   }
 
@@ -91,8 +103,12 @@ export class User extends Item {
     if (datasetName === DatasetNames.VIRTUE_TS) {
       return this.virtueTemplateIds;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS, was", datasetName);
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUE_TS or VIRTUES, was", datasetName);
     return [];
+  }
+
+  getActiveVirtues(): IndexedObj[] {
+    return this.getChildren(DatasetNames.VIRTUES);
   }
 
   getVirtues(): IndexedObj[] {

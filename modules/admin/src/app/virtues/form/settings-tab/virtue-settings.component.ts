@@ -148,7 +148,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.setUpPasteableVirtuesTable();
     this.setUpNetworkPermsTable();
     this.setUpFileSysPermsTable();
-    // this.setUpPrinterTable();
+    this.setUpPrinterTable();
     // this.setUpSensorTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
@@ -195,11 +195,11 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.updatePasteableVirtuesTable();
     this.updateNetworkPermsTable();
     this.updateFileSysPermsTable();
+    this.updatePrinterTable();
 
-    // if (changes.printers) {
+    // if (changes.printers) { // up-to-date data on printer status ould be cool
     //   // TODO update something
     // }
-    // this.updatePrinterTable();
 
   }
 
@@ -250,7 +250,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Name',    6, (p: Printer) => p.name),
+      new TextColumn('Printer Description',    6, (p: Printer) => p.name),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status),
       new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )

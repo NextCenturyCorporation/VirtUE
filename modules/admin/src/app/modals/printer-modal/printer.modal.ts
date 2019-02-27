@@ -1,7 +1,13 @@
-import { Component, EventEmitter, Inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 
+import { RouterService } from '../../shared/services/router.service';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+import { GenericPageComponent } from '../../shared/abstracts/gen-page/gen-page.component';
+
+import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { Printer } from '../../shared/models/printer.model';
 
 
@@ -16,34 +22,40 @@ import { Printer } from '../../shared/models/printer.model';
   // styleUrls: ['./printer.modal.css']
 })
 export class PrinterModalComponent implements OnInit {
+  title: string = "";
 
-  /** what the calling component subscribes to, in order to receive back the created printer */
-  createPrinter = new EventEmitter<Printer>();
+  getPrinter = new EventEmitter();
 
-  newPrinter: Printer;
-
-  constructor(
-    /** a reference to the dialog box itself */
-    private dialogRef: MatDialogRef<PrinterModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-
-
-  }
+  printer: Printer = new Printer();
 
   /**
-   * Don't do anything special on render.
+   * @param dialogRef injected, is a reference to the modal dialog box itself.
    */
-  ngOnInit() {}
+  constructor(
+      /** injected, is a reference to the modal dialog box itself. */
+      public dialogRef: MatDialogRef<PrinterModalComponent>,
+      @Inject( MAT_DIALOG_DATA ) data: any
+    ) {
+      if (data && data['printer']) {
+        this.printer = data.printer;
+        this.title = "Edit Printer: " + data.printer.name;
+      }
+      else {
+        this.printer = new Printer();
+        this.title = "Create New Printer";
+      }
+  }
 
+  ngOnInit(): void {
+
+  }
 
   submit(): void {
-    this.createPrinter.emit(this.newPrinter);
+    this.getPrinter.emit(new Printer(this.printer));
     this.dialogRef.close();
   }
 
-  cancel() {
+  cancel(): void {
     this.dialogRef.close();
   }
-
 }
