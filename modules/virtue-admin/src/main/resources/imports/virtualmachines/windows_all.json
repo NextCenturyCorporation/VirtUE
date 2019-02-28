@@ -1,7 +1,7 @@
 {
 	"name": "windows All VM",
 	"os": "WINDOWS",
-	"templatePath": "ami-0abf68501390ca26f,
+	"templatePath": "ami-0abf68501390ca26f",
 	"loginUser": "virtue-admin",
 	"enabled": true,
 	"applicationIds": [
