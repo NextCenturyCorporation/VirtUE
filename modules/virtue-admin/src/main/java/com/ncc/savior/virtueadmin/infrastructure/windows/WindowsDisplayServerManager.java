@@ -191,7 +191,6 @@ public class WindowsDisplayServerManager {
 		while (System.currentTimeMillis() <= timeoutTime) {
 			VirtualMachine dsvm = wdsDao.getDisplayServerVmByWindowsApplicationVmId(winAppVmId);
 			if (dsvm != null) {
-				logger.debug("test");
 				VmState state = dsvm.getState();
 				if (VmState.RUNNING.equals(state)) {
 					return;
