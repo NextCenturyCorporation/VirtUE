@@ -1,5 +1,5 @@
-#echo mount -o mtype=hard ${nfs.internalIpAddress}:/disk/nfs t: > "c:\\Users\\All Users\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat"
-#echo C:\\Users\\Administrator\\savior\\bin\\run-all.bat > "c:\\Users\\All Users\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\startSensors.bat"
+echo mount -o mtype=hard ${nfs.internalIpAddress}:/disk/nfs t: > "c:\\Users\\All Users\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat"
+echo C:\\Users\\Administrator\\savior\\bin\\run-all.bat > "c:\\Users\\All Users\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\startSensors.bat"
 echo echo test > "c:\virtue\user-setup.bat"
 echo echo running user setup > "c:\\virtue\\user-setup.bat"
 echo mount -o mtype=hard ${nfs.internalIpAddress}:/disk/nfs t: >> "c:\\virtue\\user-setup.bat"
