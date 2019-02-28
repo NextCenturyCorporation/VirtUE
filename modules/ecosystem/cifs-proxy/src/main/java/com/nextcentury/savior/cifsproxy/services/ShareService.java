@@ -164,6 +164,14 @@ public class ShareService {
 	protected Map<String, FileShare> sharesByName = new ConcurrentHashMap<>();
 
 	/**
+	 * Locked while coming up with an export name that doesn't conflict.
+	 * 
+	 * @see #sharesByName
+	 * @see #createExportName(FileShare)
+	 */
+	final protected Object sharesByNameAddLock = new Object();
+
+	/**
 	 * Ensure that the root mountpoint exists.
 	 * 
 	 * @see #MOUNT_ROOT
@@ -242,7 +250,7 @@ public class ShareService {
 		if (share.getPath() == null || share.getPath().isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("path cannot be empty");
 			LOGGER.throwing(e);
-			throw e; 
+			throw e;
 		}
 		if (permissions.isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("permissions cannot be empty");
@@ -260,7 +268,11 @@ public class ShareService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		share.initExportedName(createExportName(share));
+		String startingName = share.getName().trim();
+		synchronized (sharesByNameAddLock) {
+			share.initExportedName(createExportName(startingName));
+			sharesByName.put(share.getName(), share);
+		}
 		try {
 			mountShare(session, share);
 			exportShare(share);
@@ -688,7 +700,6 @@ public class ShareService {
 		ProcessBuilder processBuilder = createProcessBuilder(null);
 		processBuilder.command(args);
 		runProcess(processBuilder, "mount");
-		sharesByName.put(share.getName(), share);
 		LOGGER.exit();
 	}
 
@@ -860,9 +871,8 @@ public class ShareService {
 	 * @param share
 	 * @return
 	 */
-	private String createExportName(FileShare share) {
+	private String createExportName(String startingName) {
 		StringBuilder exportName = new StringBuilder();
-		String startingName = share.getName().trim();
 		// replace invalid characters
 		int maxLength = Math.min(startingName.length(), MAX_SHARE_NAME_LENGTH);
 		for (int i = 0; i < maxLength; i++) {
@@ -879,13 +889,14 @@ public class ShareService {
 		// ensure there are no duplicates
 		Collection<FileShare> shares = sharesByName.values();
 		int suffix = 1;
+		int baseLength = exportName.length();
 		while (shares.stream()
 				.anyMatch((FileShare fs) -> fs.getExportedName().equalsIgnoreCase(exportName.toString()))) {
 			suffix++;
 			String suffixAsString = Integer.toString(suffix);
 			// replace the end with the suffix
-			int baseLength = Math.min(exportName.length(), MAX_SHARE_NAME_LENGTH - suffixAsString.length());
-			exportName.replace(baseLength, exportName.length(), suffixAsString);
+			int newBaseLength = Math.min(baseLength, MAX_SHARE_NAME_LENGTH - suffixAsString.length());
+			exportName.replace(newBaseLength, exportName.length(), suffixAsString);
 		}
 
 		return exportName.toString();
