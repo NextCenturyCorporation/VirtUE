@@ -9,13 +9,12 @@ export class LoginGuard implements CanActivate {
   constructor(private router: Router, private authenticationService: AuthenticationService) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    // If they're logged in, redirect them to somewhere besides the log in page, so they don't get used to having to log
-    // in unnecessarily.
     if ( ! this.authenticationService.isAuthenticated()) {
         return true;
     }
 
-    // not logged in, so redirect to login page with the return url
+    // If they're logged in, redirect them to somewhere besides the log in page, so they don't get used to having to log
+    // in unnecessarily.
     this.router.navigate(['/dashboard']);
     return false;
   }
