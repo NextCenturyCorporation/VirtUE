@@ -381,6 +381,7 @@ public class SshUtil {
 			} catch (JSchException e) {
 				numTries--;
 				lastException = e;
+				JavaUtil.sleepAndLogInterruption(timeBetweenTriesMillis);
 			}
 		} while (numTries > 0);
 		throw lastException;

@@ -64,6 +64,13 @@ public class AwsUtil {
 	public static final String TAG_PRIMARY = "savior-primary";
 	public static final String TAG_SECONDARY = "savior-secondary";
 	public static final String FILTER_VPC_ID = "vpc-id";
+	public static final String FILTER_STATE_NAME = "instance-state-name";
+	public static final String STATE_PENDING = "pending";
+	public static final String STATE_RUNNING = "running";
+	public static final String STATE_STOPPING = "stopping";
+	public static final String STATE_STOPPED = "stopped";
+	public static final String STATE_SHUTTING_DOWN = "shutting-down";
+	public static final String STATE_TERMINATED = "terminated";
 
 	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();

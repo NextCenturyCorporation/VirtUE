@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
@@ -48,6 +49,7 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class XenGuestImageGenerator {
+	private static final String S3_UPLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestImageGenerator.class);
 	private Collection<String> securityGroupIds;
 	private String systemUser = "System";
@@ -70,11 +72,14 @@ public class XenGuestImageGenerator {
 
 	@Value("${virtue.test:false}")
 	private boolean test;
+	private String region;
+	private String kmsKey;
+	private String bucket;
 
 	public XenGuestImageGenerator(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, CompletableFutureServiceProvider serviceProvider, String xenAmi,
 			String xenInstanceTypeStr, String securityGroupsCommaSeparated, String iamRoleName, String xenKeyName,
-			String xenLoginUser, String subnetName) {
+			String xenLoginUser, String subnetName, String region, String bucket, String kmsKey) {
 		super();
 		serverId = serverIdProvider.getServerId();
 		String vpcId = vpcSubnetProvider.getVpcId();
@@ -100,7 +105,8 @@ public class XenGuestImageGenerator {
 		new Thread(() -> {
 			while (true) {
 				try {
-					ImageResult image = createNewDomUImage(null).get();
+					String templatePath = "test-" + System.currentTimeMillis();
+					ImageResult image = createNewDomUImage(new ImageDescriptor(templatePath)).get();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -122,6 +128,8 @@ public class XenGuestImageGenerator {
 			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SECONDARY)
 					.withValues(VirtueSecondaryPurpose.XEN_HOST.toString()));
 			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+			filters.add(new Filter(AwsUtil.FILTER_STATE_NAME).withValues(AwsUtil.STATE_RUNNING, AwsUtil.STATE_PENDING,
+					AwsUtil.STATE_STOPPING, AwsUtil.STATE_STOPPED));
 			describeInstancesRequest.withFilters(filters);
 			DescribeInstancesResult result = ec2Wrapper.getEc2().describeInstances(describeInstancesRequest);
 			List<String> instanceIds = new ArrayList<String>();
@@ -142,11 +150,12 @@ public class XenGuestImageGenerator {
 		String imageLoginUser = "user";
 		// get Dom0Vm
 		CompletableFuture<VirtualMachine> vmFuture = getDomOVm();
-		CompletableFuture<ImageResult> imageResult = new CompletableFuture<ImageResult>();
+		CompletableFuture<ImageResult> imageResultFuture = new CompletableFuture<ImageResult>();
 
 		vmFuture.handle((xenVm, ex) -> {
 			if (ex == null) {
 				try {
+					logger.info("Starting image creation:");
 					File privateKeyFile = keyManager.getKeyFileByName(xenVm.getPrivateKeyName());
 					Session sshDom0Session = SshUtil.getConnectedSession(xenVm, privateKeyFile);
 					Map<String, Object> dataModel = new HashMap<String, Object>();
@@ -157,22 +166,38 @@ public class XenGuestImageGenerator {
 					// start base DomU
 					VirtualMachine xenGuestVm = startDomU(xenVm, imageLoginUser, sshDom0Session);
 					dataModel.put("guestVm", xenGuestVm);
-					Session sshDomUSession = SshUtil.getConnectedSession(xenGuestVm, privateKeyFile);
+					JavaUtil.sleepAndLogInterruption(4000);
+					Session sshDomUSession = SshUtil.getConnectedSessionWithRetries(xenGuestVm, privateKeyFile, 5, 500);
 					// run pre-domU scripts
 					lines = SshUtil.runScriptFromFile(templateService, sshDomUSession,
 							"image/imageCreation-DomUBefore.tpl", dataModel);
 					// run ansible
+					// TODO ANSIBLE
 					// run post-domU scripts
 					lines = SshUtil.runScriptFromFile(templateService, sshDomUSession,
 							"image/imageCreation-DomUAfter.tpl", dataModel);
 					// run post-dom0 scripts
 					lines = SshUtil.runScriptFromFile(templateService, sshDom0Session,
 							"image/imageCreation-Dom0After.tpl", dataModel);
+					// shutdown domU
+					dataModel.put("vm", xenGuestVm);
+					lines = SshUtil.runCommandsFromFile(templateService, sshDom0Session, "xen-guest-stop.tpl",
+							dataModel);
+
 					// push files
-					imageResult.complete(null);
+					String templatePath = imageDescriptor.getTemplatePath();
+					dataModel.put("mainClass", S3_UPLOAD_MAIN_CLASS);
+					dataModel.put("region", region);
+					dataModel.put("kmsKey", kmsKey);
+					dataModel.put("bucket", bucket);
+					dataModel.put("templatePath", templatePath);
+					lines = SshUtil.runScriptFromFile(templateService, sshDom0Session, "image/imageCreation-upload.tpl",
+							dataModel);
+					ImageResult imageResult = new ImageResult(templatePath);
+					imageResultFuture.complete(imageResult);
 				} catch (JSchException | IOException | TemplateException e) {
 					logger.error("error in image creation", e);
-					imageResult.completeExceptionally(e);
+					imageResultFuture.completeExceptionally(e);
 				}
 				Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 				vms.add(xenVm);
@@ -182,7 +207,7 @@ public class XenGuestImageGenerator {
 			}
 			return xenVm;
 		});
-		return imageResult;
+		return imageResultFuture;
 	}
 
 	private VirtualMachine startDomU(VirtualMachine xenVm, String guestLoginUser, Session dom0Session)
