@@ -30,7 +30,7 @@ export class ConfigComponent extends GenericPageComponent {
 
   @ViewChild('fileSysTab') fileSysTab: ConfigFileSysTabComponent;
 
-  @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
+  // @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
 
   // @ViewChild('sensorTab') sensorTab: ConfigSensorsTabComponent;
 
