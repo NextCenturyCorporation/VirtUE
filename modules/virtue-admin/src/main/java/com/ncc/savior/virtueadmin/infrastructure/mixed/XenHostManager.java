@@ -350,7 +350,7 @@ public class XenHostManager {
 		future.completeExceptionally(ex);
 	}
 
-	protected void waitUntilXlListIsReady(Session session) {
+	public static void waitUntilXlListIsReady(Session session) {
 		boolean success = false;
 		while (!success) {
 			try {

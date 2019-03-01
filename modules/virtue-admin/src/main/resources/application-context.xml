@@ -144,8 +144,10 @@
 	<!-- <constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
 	<!-- <constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
 	<!-- </bean> -->
-	
-	<bean name="networkAclManager" class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.NetworkAclManager" init-method="init">
+
+	<bean name="networkAclManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.NetworkAclManager"
+		init-method="init">
 		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
@@ -278,6 +280,21 @@
 		class="com.ncc.savior.virtueadmin.infrastructure.images.S3EncryptingImageManager">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
+	</bean>
+
+	<bean name="xenGuestImageGenerator"
+		class="com.ncc.savior.virtueadmin.infrastructure.images.XenGuestImageGenerator" init-method="init">
+		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
 	</bean>
 
 	<bean name="importExportService"

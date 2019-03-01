@@ -104,6 +104,30 @@ public class AwsEc2Wrapper {
 			runInstancesRequest.withIamInstanceProfile(iamInstanceProfile);
 		}
 		String instanceId = UUID.randomUUID().toString();
+		List<Tag> tags = getTagsFromVirtueMods(vmt, name, virtueMods, instanceId);
+		runInstancesRequest
+				.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance).withTags(tags));
+		// .withSecurityGroups(securityGroups);
+		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+
+		List<Instance> instances = result.getReservation().getInstances();
+		if (instances.size() != 1) {
+			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+		}
+
+		Instance instance = instances.get(0);
+
+		String loginUsername = vmt.getLoginUser();
+		String privateKeyName = serverKeyName;
+
+		vm = new VirtualMachine(instanceId, name, new ArrayList<ApplicationDefinition>(vmt.getApplications()),
+				VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
+				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
+		return vm;
+	}
+
+	private List<Tag> getTagsFromVirtueMods(VirtualMachineTemplate vmt, String name,
+			VirtueCreationAdditionalParameters virtueMods, String instanceId) {
 		List<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(AwsUtil.TAG_NAME, name));
@@ -130,25 +154,7 @@ public class AwsEc2Wrapper {
 				tags.add(new Tag(AwsUtil.TAG_USERNAME, virtueMods.getUsername()));
 			}
 		}
-		runInstancesRequest
-				.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance).withTags(tags));
-		// .withSecurityGroups(securityGroups);
-		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
-
-		List<Instance> instances = result.getReservation().getInstances();
-		if (instances.size() != 1) {
-			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
-		}
-
-		Instance instance = instances.get(0);
-
-		String loginUsername = vmt.getLoginUser();
-		String privateKeyName = serverKeyName;
-
-		vm = new VirtualMachine(instanceId, name, new ArrayList<ApplicationDefinition>(vmt.getApplications()),
-				VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
-		return vm;
+		return tags;
 	}
 
 	public void startVirtualMachines(Collection<VirtualMachine> vms) {

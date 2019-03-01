@@ -207,6 +207,9 @@ public class XenGuestManager {
 		List<String> lines = SshUtil.runCommandsFromFileWithTimeout(templateService, session,
 				"xen-guest-start-sensors.tpl", model, 200);
 		logger.debug("output: " + lines);
+		lines = SshUtil.runCommandsFromFileWithTimeout(templateService, session,
+				"Dom0-sshForwarding.tpl", model, 200);
+		logger.debug("output: " + lines);
 
 		// setupPortForward(session, externalSshPort, ipAddress, internalPort);
 		// printIpTables(session);
@@ -242,7 +245,7 @@ public class XenGuestManager {
 		fc.combineFutures(linuxFuture);
 	}
 
-	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
+	public static String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
 		String ipAddress;
 		logger.debug("Attempting to get IP address of guest.");
 		CommandHandler ch = getCommandHandlerFromSession(session);
@@ -250,7 +253,7 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
+	private static CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
 		Channel myChannel = session.openChannel("shell");
 		OutputStream ops = myChannel.getOutputStream();
 		PrintStream ps = new PrintStream(ops, true);
@@ -279,7 +282,7 @@ public class XenGuestManager {
 		logger.debug(lines.toString());
 	}
 
-	private String getIpFromConsole(CommandHandler ch, String name) {
+	private static String getIpFromConsole(CommandHandler ch, String name) {
 		String ipAddress;
 		ch.sendln("sudo xl console " + name);
 		JavaUtil.sleepAndLogInterruption(200);
