@@ -80,8 +80,11 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
   onPullComplete(): void {
     if ((this.neededDataset === undefined) || !(this.datasets[this.neededDataset].has(this.objectID))) {
       this.table.setItems([]);
+      this.prettyTitle = "The requested record was not found.";
+      this.routerService.submitPageTitle(this.prettyTitle);
       return;
     }
+
 
     let objects = this.datasets[this.neededDataset];
     this.objectBeingExamined = objects.get(this.objectID);

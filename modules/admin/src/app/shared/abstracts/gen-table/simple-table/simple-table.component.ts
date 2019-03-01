@@ -30,6 +30,9 @@ import { Mode } from '../../gen-form/mode.enum';
 })
 export class SimpleTableComponent extends GenericTableComponent<{key: string, value: string}> implements OnInit {
 
+  public noDataMsg: string = "Nothing to display."
+
+
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
@@ -46,9 +49,6 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
    * Called automatically on page render.
    */
   ngOnInit(): void {
-    // meaningless, just to have something before data loads completely
-
-
     this.setUp(this.getTableParams());
   }
 
@@ -57,7 +57,7 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
     return {
       cols: this.getColumns(),
       tableWidth: 12,
-      noDataMsg: this.getNoDataMsg()
+      noDataMsg: this.noDataMsg
     };
   }
 
@@ -101,11 +101,5 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
     return value;
   }
 
-  /**
-   * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
-   */
-  getNoDataMsg(): string {
-    return "";
-  }
 
 }
