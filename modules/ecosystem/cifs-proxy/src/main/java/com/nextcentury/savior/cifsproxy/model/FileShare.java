@@ -1,6 +1,9 @@
 package com.nextcentury.savior.cifsproxy.model;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -12,7 +15,7 @@ import org.springframework.lang.NonNull;
  * @author clong
  *
  */
-public class FileShare implements Comparable<FileShare> {
+public class FileShare implements Comparable<FileShare>, Exportable {
 
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
 
@@ -23,7 +26,7 @@ public class FileShare implements Comparable<FileShare> {
 	 *
 	 */
 	public enum ShareType {
-	CIFS
+		CIFS
 	};
 
 	/**
@@ -35,6 +38,18 @@ public class FileShare implements Comparable<FileShare> {
 	public enum SharePermissions {
 		READ, WRITE
 	}
+
+	/**
+	 * Characters disallowed in file share names. Control characters (0x00-0x1F) are
+	 * also invalid. From https://msdn.microsoft.com/en-us/library/cc422525.aspx
+	 */
+	protected static final String INVALID_SHARE_NAME_CHARS = "\"\\/[]:|<>+=;,*?";
+	
+	/**
+	 * Maximum length for the name of a file share. From
+	 * https://msdn.microsoft.com/en-us/library/cc246567.aspx
+	 */
+	protected static final int MAX_SHARE_NAME_LENGTH = 80;
 
 	private String name;
 	private String virtueId;
@@ -143,16 +158,70 @@ public class FileShare implements Comparable<FileShare> {
 				+ ", type: " + type;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.nextcentury.savior.cifsproxy.model.Exportable#getExportedName()
+	 */
+	@Override
 	public String getExportedName() {
 		return exportedName;
 	}
-	
-	public void initExportedName(String name) {
+
+	public void initExportedName(Collection<? extends FileShare> existingFileShares) throws IllegalStateException {
 		if (exportedName != null && exportedName.length() != 0) {
-			IllegalStateException e = new IllegalStateException("cannot init already-set exportedName '" + exportedName + "'");
+			IllegalStateException e = new IllegalStateException(
+					"cannot init already-set exportedName '" + exportedName + "'");
 			LOGGER.throwing(e);
 			throw e;
 		}
-		exportedName = name;
+		exportedName = createExportName(name, existingFileShares);
+	}
+
+	/**
+	 * Generate a suitable export name for the share. Per Microsoft specs, it must
+	 * be at most {@link FileShare#MAX_SHARE_NAME_LENGTH} characters long, and may
+	 * not contain any characters from {@link FileShare#INVALID_SHARE_NAME_CHARS}.
+	 * 
+	 * To ensure functionality with Samba, leading and trailing spaces will not be
+	 * generated, either. (It's possible that would work, but Samba strips leading
+	 * spaces from normal parameter values.)
+	 * 
+	 * It also must be different from any export names currently in use, where case
+	 * is not significant.
+	 * 
+	 * @param existingFileShares
+	 * 
+	 * @param share
+	 * @return
+	 */
+	protected static String createExportName(String shareName, Collection<? extends Exportable> existingFileShares) {
+		String startingName = shareName.trim();
+		StringBuilder exportName = new StringBuilder();
+		// replace invalid characters
+		int maxLength = Math.min(startingName.length(), FileShare.MAX_SHARE_NAME_LENGTH);
+		for (int i = 0; i < maxLength; i++) {
+			int c = startingName.codePointAt(i);
+			char newChar;
+			if (FileShare.INVALID_SHARE_NAME_CHARS.indexOf(c) != -1 || c <= 0x1F) {
+				newChar = '_';
+			} else {
+				newChar = startingName.charAt(i);
+			}
+			exportName.append(newChar);
+		}
+
+		// ensure there are no duplicates
+		List<String> existingNames = existingFileShares.stream().map(Exportable::getExportedName)
+				.map(String::toLowerCase).collect(Collectors.toList());
+		int suffix = 1;
+		int baseLength = exportName.length();
+		while (existingNames.contains(exportName.toString().toLowerCase())) {
+			suffix++;
+			String suffixAsString = Integer.toString(suffix);
+			// replace the end with the suffix
+			int newBaseLength = Math.min(baseLength, FileShare.MAX_SHARE_NAME_LENGTH - suffixAsString.length());
+			exportName.replace(newBaseLength, exportName.length(), suffixAsString);
+		}
+
+		return exportName.toString();
 	}
 }

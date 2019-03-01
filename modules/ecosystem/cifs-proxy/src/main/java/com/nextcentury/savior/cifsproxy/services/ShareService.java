@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,7 @@ import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
 import com.nextcentury.savior.cifsproxy.DelegatingAuthenticationManager;
 import com.nextcentury.savior.cifsproxy.GssApi;
+import com.nextcentury.savior.cifsproxy.model.Exportable;
 import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.model.FileShare.SharePermissions;
 import com.nextcentury.savior.cifsproxy.model.FileShare.ShareType;
@@ -81,18 +81,6 @@ public class ShareService {
 	private static final String MOUNT_QUERY_COMMAND = "findmnt";
 	private static final String[] MOUNT_QUERY_COMMAND_ARGS = { "--json", "--canonicalize", "--types", "cifs",
 			"--nofsroot" };
-
-	/**
-	 * Maximum length for the name of a file share. From
-	 * https://msdn.microsoft.com/en-us/library/cc246567.aspx
-	 */
-	private static final int MAX_SHARE_NAME_LENGTH = 80;
-
-	/**
-	 * Characters disallowed in file share names. Control characters (0x00-0x1F) are
-	 * also invalid. From https://msdn.microsoft.com/en-us/library/cc422525.aspx
-	 */
-	private static final String INVALID_SHARE_NAME_CHARS = "\"\\/[]:|<>+=;,*?";
 
 	/**
 	 * A regular expression for a valid character in a POSIX filename (for POSIX
@@ -167,7 +155,7 @@ public class ShareService {
 	 * Locked while coming up with an export name that doesn't conflict.
 	 * 
 	 * @see #sharesByName
-	 * @see #createExportName(FileShare)
+	 * @see FileShare#createExportName(FileShare)
 	 */
 	final protected Object sharesByNameAddLock = new Object();
 
@@ -268,9 +256,8 @@ public class ShareService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		String startingName = share.getName().trim();
 		synchronized (sharesByNameAddLock) {
-			share.initExportedName(createExportName(startingName));
+			share.initExportedName(sharesByName.values());
 			sharesByName.put(share.getName(), share);
 		}
 		try {
@@ -856,52 +843,6 @@ public class ShareService {
 		LOGGER.exit();
 	}
 
-	/**
-	 * Generate a suitable export name for the share. Per Microsoft specs, it must
-	 * be at most {@link #MAX_SHARE_NAME_LENGTH} characters long, and may not
-	 * contain any characters from {@link #INVALID_SHARE_NAME_CHARS}.
-	 * 
-	 * To ensure functionality with Samba, leading and trailing spaces will not be
-	 * generated, either. (It's possible that would work, but Samba strips leading
-	 * spaces from normal parameter values.)
-	 * 
-	 * It also must be different from any export names currently in use, where case
-	 * is not significant.
-	 * 
-	 * @param share
-	 * @return
-	 */
-	private String createExportName(String startingName) {
-		StringBuilder exportName = new StringBuilder();
-		// replace invalid characters
-		int maxLength = Math.min(startingName.length(), MAX_SHARE_NAME_LENGTH);
-		for (int i = 0; i < maxLength; i++) {
-			int c = startingName.codePointAt(i);
-			char newChar;
-			if (INVALID_SHARE_NAME_CHARS.indexOf(c) != -1 || c <= 0x1F) {
-				newChar = '_';
-			} else {
-				newChar = startingName.charAt(i);
-			}
-			exportName.append(newChar);
-		}
-
-		// ensure there are no duplicates
-		Collection<FileShare> shares = sharesByName.values();
-		int suffix = 1;
-		int baseLength = exportName.length();
-		while (shares.stream()
-				.anyMatch((FileShare fs) -> fs.getExportedName().equalsIgnoreCase(exportName.toString()))) {
-			suffix++;
-			String suffixAsString = Integer.toString(suffix);
-			// replace the end with the suffix
-			int newBaseLength = Math.min(baseLength, MAX_SHARE_NAME_LENGTH - suffixAsString.length());
-			exportName.replace(newBaseLength, exportName.length(), suffixAsString);
-		}
-
-		return exportName.toString();
-	}
-
 	public static void main(String[] args) throws IOException {
 		ShareService shareService = new ShareService();
 		shareService.MOUNT_ROOT = "/mnt/cifs-proxy";
@@ -909,7 +850,7 @@ public class ShareService {
 		shareService.scan();
 		Set<FileShare> shares = shareService.getShares();
 		System.out.println("Found " + shares.size() + " shares:");
-		for (FileShare fileShare : shares) {
+		for (Exportable fileShare : shares) {
 			System.out.println(fileShare);
 		}
 	}

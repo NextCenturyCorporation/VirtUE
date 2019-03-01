@@ -84,7 +84,6 @@ public class Virtue {
 		this.username = username;
 		LOGGER.exit();
 	}
-	
 
 	public void initPassword(String password) {
 		LOGGER.entry(password);
