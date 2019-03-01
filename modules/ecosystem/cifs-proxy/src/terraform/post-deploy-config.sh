@@ -28,6 +28,7 @@ hostname=''
 dcip=''
 service=http
 keepKeytab=0
+security=user
 pretend=0
 verbose=0
 
@@ -122,7 +123,7 @@ echo "${domainAdminPassword}" | \
 domainPrefix=${domain/.*}
 cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
 (
-echo security = user
+echo security = ${security}
 echo realm = ${domain}
 echo workgroup = "${domainPrefix}"
 echo kerberos method = secrets and keytab
