@@ -3,18 +3,30 @@
     <span class="navbar-brand">Savior VirtUE</span>
     <ng-container *ngIf=authService.isAuthenticated()>
       <ul class="nav navbar-nav">
-          <li *ngFor="let option of getNavOptions()" class="nav-item" routerLinkActive="active">
+        <li *ngFor="let option of getNavOptions()" class="nav-item" routerLinkActive="active">
 
-            <a *ngIf="option.link !== undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.label }}">{{ option.label }}</a>
-            <ng-container *ngIf="option.dropdownOptions !== undefined">
+          <a *ngIf="option.dropdownOptions === undefined" class="nav-link" routerLink="{{ option.link }}" title="{{ option.label }}">{{ option.label }}</a>
 
-                <button mat-button class="nav-link" [matMenuTriggerFor]="menu" >{{option.label}}</button>
-                <mat-menu #menu="matMenu" yPosition="below" [overlapTrigger]="false">
-                  <button *ngFor="let page of option.dropdownOptions" routerLink="{{ page.link }}" mat-menu-item>{{page.label}}</button>
-                </mat-menu>
-            </ng-container>
+          <ng-container *ngIf="option.dropdownOptions !== undefined">
+            <button #button mat-button [matMenuTriggerFor]="levelOne" #levelOneTrigger="matMenuTrigger" title="{{ option.label }}"
+                (mouseenter)="levelOneTrigger.openMenu()" (mouseleave)="buttonLeave(levelOneTrigger, button)" style="z-index:1050">
+              <span>{{option.label}}
+              </span>
+            </button>
 
-          </li>
+            <mat-menu #levelOne="matMenu" direction="down" yPosition="below" [overlapTrigger]="false">
+              <span (mouseenter)="menuenter()" (mouseleave)="menuLeave(levelOneTrigger, button)">
+              <ng-container *ngFor="let page of option.dropdownOptions">
+                <li class="p-0" routerLink="{{ page.link }}" title="{{ page.label }}" mat-menu-item>
+                  <a class="nav-link">
+                    {{page.label}}
+                  </a>
+                </li>
+              </ng-container>
+              </span>
+            </mat-menu>
+          </ng-container>
+        </li>
       </ul>
       <ul class="nav navbar-nav" ng-style="{margin-left: auto; margin-right: 0;float: right;}">
         <li class="nav-item" routerLinkActive="active" ng-style="{margin-left: auto; margin-right: 0;float: right;}">

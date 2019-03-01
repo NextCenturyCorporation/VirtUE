@@ -51,7 +51,7 @@ export class AuthenticationService {
     logout() {
         this.authenticated = false;
         return this.httpClient.post(
-          `/login?logout`, // Spring's default logout endpoint
+          `/logout`, // note that this redirects to /login?logout - calling the latter directly works, but gives an error.
           {},
           {
             headers: new HttpHeaders().set(InterceptorRemoteDestinationHeader, ''),

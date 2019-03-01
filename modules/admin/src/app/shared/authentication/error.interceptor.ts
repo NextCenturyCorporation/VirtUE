@@ -36,11 +36,7 @@ export class ErrorInterceptor implements HttpInterceptor {
               }
 
               if (errCode === 255) {
-                alert(err.error);
-                if (request.method === "DELETE") {
-                  console.log("You may have tried to delete something that other items reference. The backend isn't " +
-                  "currently set up to handle that. ");
-                }
+                this.handleUnknownError(request, err);
                 return new Observable<HttpEvent<any>>( () => err);
               }
 
@@ -62,6 +58,33 @@ export class ErrorInterceptor implements HttpInterceptor {
         return err.error.error.toString().split(':')[0] === 'SyntaxError';
       }
       return false;
+    }
+
+    handleUnknownError(request, err): void {
+      if (request.method === "DELETE") {
+        console.log("You may have tried to delete something that other items reference. The backend isn't " +
+        "currently set up to handle that. ");
+      }
+      if (typeof err.error === 'string') {
+        let errorMsg = err.error.toString();
+        if (errorMsg.split('\n').length > 1 ) {
+          let exceptionPart = errorMsg.split('\n')[1];
+          if (exceptionPart.split(':').length > 1) {
+            let exceptionMessage = exceptionPart.split(':')[1].trim();
+            if (exceptionMessage === 'Unknown error') {
+              alert(err.message);
+              return;
+            }
+            else {
+              alert(exceptionMessage);
+              return;
+            }
+          }
+        }
+      }
+
+      alert(err.error);
+      return;
     }
 
     authFailure(errCode: number): boolean {

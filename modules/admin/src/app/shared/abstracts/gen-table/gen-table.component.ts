@@ -29,6 +29,16 @@ import { DictList } from '../../models/dictionary.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
+export type FilterSettings = {
+  objectField: string,
+  options: TableFilter[]
+};
+
+export type TableFilter = {
+  value: string,
+  text: string
+};
+
 
 /**
  * @class
@@ -146,7 +156,7 @@ export class GenericTableComponent<T> {
    *
    * See note on [[ItemListComponent.getTableFilters]]().
    */
-  filterOptions: {text: string, value: string}[];
+  filterOptions: TableFilter[];
 
   /**
    * This is the name of the attribute of the objects held by this table's TableElements that the filter should be applied to.
@@ -226,7 +236,7 @@ export class GenericTableComponent<T> {
     noDataMsg: string,
 
     /** see this.[[filterOptions]] */
-    filters?: {objectField: string, options: {value: string, text: string}[]};
+    filters?: FilterSettings;
 
     /** see this.[[elementIsDisabled]] */
     elementIsDisabled?: ((obj: T) => boolean),
@@ -269,6 +279,9 @@ export class GenericTableComponent<T> {
 
     if (params.filters) {
       this.filterOptions = params.filters.options;
+      if (this.filterOptions.length === 1) {
+        this.filterValue = this.filterOptions[0].value;
+      }
       this.filterColumnName = params.filters.objectField;
     }
     this.noDataMessage = params.noDataMsg;

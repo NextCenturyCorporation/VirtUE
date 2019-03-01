@@ -70,6 +70,10 @@ export abstract class GenericPageComponent {
    * Navigates to the form page for this item.
    */
   viewItem(item: Item): void {
+    if (!item || !item.getViewURL) {
+      console.log("Cannot view item:", item);
+      return;
+    }
     this.routerService.goToPage(item.getViewURL());
   }
 

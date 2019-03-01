@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, NgModule, ViewEncapsulation, Renderer2 } from '@angular/core';
 
 import { AuthenticationService } from '../shared/services/authentication.service';
 
@@ -21,6 +21,10 @@ import { AuthenticationService } from '../shared/services/authentication.service
 })
 export class HeaderComponent implements OnInit {
 
+   enteredButton: boolean = false;
+   isMatMenuOpen: boolean = false;
+   prevButtonTrigger: any;
+
   /** The list of items to appear in the header, with their urls. */
   private navigation = [
     {label: 'Dashboard', link: '/dashboard'},
@@ -41,7 +45,8 @@ export class HeaderComponent implements OnInit {
     {label: 'Applications    ', link: '/applications'}
   ];
   constructor(
-      public authService: AuthenticationService
+      public authService: AuthenticationService,
+      private ren: Renderer2
     ) {
 
   }
@@ -58,4 +63,63 @@ export class HeaderComponent implements OnInit {
     }
     return [];
   }
+
+  /**
+   * Copied from stackoverflow - trust only with caution
+   * https://stackoverflow.com/questions/53618333/how-to-open-and-close-angular-mat-menu-on-hover/53618962#53618962
+   * Makes menu tabs open and close on mouse-over and mouse-leave.
+   */
+
+   menuenter() {
+     this.isMatMenuOpen = true;
+   }
+
+   menuLeave(trigger, button) {
+     setTimeout(() => {
+       if (!this.enteredButton) {
+         this.isMatMenuOpen = false;
+         trigger.closeMenu();
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-focused');
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-program-focused');
+       } else {
+         this.isMatMenuOpen = false;
+       }
+     }, 200);
+   }
+
+
+   buttonEnter(trigger) {
+     setTimeout(() => {
+       if (this.prevButtonTrigger && this.prevButtonTrigger !== trigger) {
+         this.prevButtonTrigger.closeMenu();
+         this.prevButtonTrigger = trigger;
+         trigger.openMenu();
+       }
+       else if (!this.isMatMenuOpen) {
+         this.enteredButton = true;
+         this.prevButtonTrigger = trigger;
+         trigger.openMenu();
+       }
+       else {
+         this.enteredButton = true;
+         this.prevButtonTrigger = trigger;
+       }
+     });
+   }
+
+   buttonLeave(trigger, button) {
+     setTimeout(() => {
+       if (this.enteredButton && !this.isMatMenuOpen) {
+         trigger.closeMenu();
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-focused');
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-program-focused');
+       } if (!this.isMatMenuOpen) {
+         trigger.closeMenu();
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-focused');
+         this.ren.removeClass(button['_elementRef'].nativeElement, 'cdk-program-focused');
+       } else {
+         this.enteredButton = false;
+       }
+     }, 100);
+   }
 }

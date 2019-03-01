@@ -4,6 +4,7 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { RouterService } from '../shared/services/router.service';
+import { AuthenticationService } from '../shared/services/authentication.service';
 
 import { Breadcrumb } from '../shared/models/breadcrumb.model';
 
@@ -45,7 +46,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   constructor(
     /** Handles the navigation to/from different pages. Injected, and so is constant across components. */
-    private routerService: RouterService
+    private routerService: RouterService,
+    public authService: AuthenticationService
   ) { }
 
   ngOnInit() {

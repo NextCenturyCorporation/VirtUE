@@ -7,7 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
-import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
+import { GenericTableComponent, FilterSettings } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import { SelectionMode } from '../../shared/abstracts/gen-table/selectionMode.enum';
 import { IndexedObj } from '../../shared/models/indexedObj.model';
@@ -45,6 +45,9 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    */
   selectedIDs: string[] = [];
 
+
+  filters: FilterSettings;
+
   /**
    * The standard SelectionMode to set up this modal's table in. Most modals want multiple selection.
    */
@@ -68,17 +71,25 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
       super(routerService, dataRequestService, dialog);
-      if (data && data['selectedIDs']) {
-        this.selectedIDs = data['selectedIDs'];
-      }
-      else {
-        console.log("No field 'selectedIDs' in data input to modal");
-        this.selectedIDs = [];
+      if (data) {
+        if (data['filters']) {
+          this.filters = data['filters'];
+        }
+
+        if (data['selectedIDs']) {
+          this.selectedIDs = data['selectedIDs'];
+        }
+        else {
+          console.log("No field 'selectedIDs' in data input to modal");
+          this.selectedIDs = [];
+        }
+
+        if (data['selectionMode']) {
+          this.defaultSelectionMode = data.selectionMode;
+        }
+
       }
 
-      if (data && data['selectionMode']) {
-        this.defaultSelectionMode = data.selectionMode;
-      }
 
       // TODO should we not allow addition of disabled items?
       // if so, note that select-all button will not act how user expects.
@@ -103,6 +114,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
       editingEnabled: () => true,
+      filters: this.filters,
       selectionOptions: {
         selectionMode: this.getSelectionMode(),
         equals: (obj1: IndexedObj, obj2: IndexedObj) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
