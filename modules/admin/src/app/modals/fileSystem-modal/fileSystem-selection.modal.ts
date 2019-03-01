@@ -54,7 +54,7 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
     return [
       new TextColumn('Name',   3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
       new TextColumn('Address',   2, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
-      new TextColumn('Default perms',      1, (fs: FileSystem) => fs.formatPerms(), SORT_DIR.ASC)
+      new TextColumn('Permissions (R/W/X)',      1, (fs: FileSystem) => fs.formatPerms(), SORT_DIR.ASC)
     ];
   }
 

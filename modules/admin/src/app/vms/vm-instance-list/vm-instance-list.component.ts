@@ -84,8 +84,17 @@ export class VmInstanceListComponent extends ItemListComponent {
                                                 (v: VirtualMachineInstance) => this.toDetailsPage(v), () => this.getSubMenu()),
       new TextColumn('State',           1,  (v: VirtualMachineInstance) => String(v.state), SORT_DIR.ASC),
       new TextColumn('os',              1,  (v: VirtualMachineInstance) => v.os,       SORT_DIR.ASC),
-      new TextColumn('Hostname',           3,  (v: VirtualMachineInstance) => String(v.hostname), SORT_DIR.ASC)
+      new TextColumn('Hostname',           3,  (v: VirtualMachineInstance) => this.getHostname(v), SORT_DIR.ASC)
     ];
+  }
+
+  getHostname(v: VirtualMachineInstance): string {
+    if (v.hostname === null) {
+      return "";
+    }
+    else {
+      return String(v.hostname);
+    }
   }
 
   /**

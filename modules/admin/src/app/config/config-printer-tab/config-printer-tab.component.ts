@@ -80,12 +80,12 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
   getColumns(): Column[] {
     return [
-      new BlankColumn(1),
       new TextColumn("Description", 4, (p: Printer) => p.name),
       new TextColumn("Printer address", 2, (p: Printer) => p.address),
       new TextColumn("Printer status", 2, (p: Printer) => p.status),
       new CheckboxColumn("Enable", 1, "enabled", undefined,
               (p: Printer, checked: boolean) => this.setItemAvailability(p, checked)),
+      new BlankColumn(1),
       new IconColumn("Options", 1, "settings", (p: Printer) => this.editPrinter(p)),
       new IconColumn("Remove Printer", 1, "delete", (p: Printer) => this.deleteItem(p))
     ];

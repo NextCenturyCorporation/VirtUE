@@ -30,9 +30,6 @@ import { Mode } from '../../gen-form/mode.enum';
 })
 export class SimpleTableComponent extends GenericTableComponent<{key: string, value: string}> implements OnInit {
 
-  public noDataMsg: string = "Nothing to display."
-
-
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
@@ -57,7 +54,7 @@ export class SimpleTableComponent extends GenericTableComponent<{key: string, va
     return {
       cols: this.getColumns(),
       tableWidth: 12,
-      noDataMsg: this.noDataMsg
+      noDataMsg: "Nothing to display."
     };
   }
 
