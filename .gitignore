@@ -66,3 +66,5 @@ modules/ecosystem/netplan/netplan.io_0.95-2_amd64.*
 /modules/ecosystem/netplan/netplan.io_0.95-2.debian.tar.xz
 /modules/ecosystem/netplan/netplan.io_0.95-2.dsc
 /modules/ecosystem/netplan/netplan.io_0.95.orig.tar.gz
+**/Thumbs.db
+**/Thumbs.db:encryptable
