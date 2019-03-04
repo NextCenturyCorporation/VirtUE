@@ -78,12 +78,18 @@ EOF
 	destination = "/tmp/post-deploy-config.sh"
   }
 
+  provisioner "file" {
+	source = "${var.netplan_deb}"
+	destination = "/tmp/${basename(var.netplan_deb)}"
+  }
+
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
 	  "sudo systemctl enable smbd nmbd",
 	  "sudo systemctl start smbd nmbd",
 	  "sudo touch /etc/samba/virtue.conf",
+	  "sudo dpkg -i /tmp/${basename(var.netplan_deb)}",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/post-deploy-config.sh",
 	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.psname} --dcip ${local.ds_private_ip} --service cifs --security ads --keep-keytab --verbose",
