@@ -22,7 +22,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 
-import com.ncc.savior.virtueadmin.template.FreeMakerTemplateService;
+import com.ncc.savior.virtueadmin.template.FreeMarkerTemplateService;
 import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
@@ -49,7 +49,7 @@ public class PrinterService {
 	private VirtueService virtueService;
 
 	@Autowired
-	private FreeMakerTemplateService templateService;
+	private FreeMarkerTemplateService templateService;
 	
 	private Map<String, Printer> printers;
 

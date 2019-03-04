@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import com.ncc.savior.virtueadmin.template.FreeMakerTemplateService;
+import com.ncc.savior.virtueadmin.template.FreeMarkerTemplateService;
 
 /**
  * Startup file for the CIFS Proxy. It proxies a CIFS/SMB filesystem
@@ -32,7 +32,7 @@ public class CifsProxy {
 	}
 
 	@Bean
-	public FreeMakerTemplateService templateService() {
-		return new FreeMakerTemplateService(templateDir);
+	public FreeMarkerTemplateService templateService() {
+		return new FreeMarkerTemplateService(templateDir);
 	}
 }
