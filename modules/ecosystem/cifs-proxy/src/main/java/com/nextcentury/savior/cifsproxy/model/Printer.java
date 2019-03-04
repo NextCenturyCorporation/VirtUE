@@ -9,6 +9,8 @@ import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.lang.NonNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Represents a network printer.
  * 
@@ -55,15 +57,21 @@ public class Printer implements Exportable {
 		LOGGER.exit(exportedName);
 		return exportedName;
 	}
-	
+
 	public void initExportedName(Collection<? extends Printer> existingPrinters) throws IllegalStateException {
 		LOGGER.entry(name);
 		if (exportedName != null && exportedName.length() != 0) {
-			IllegalStateException e = new IllegalStateException("cannot init already-set exportedName '" + exportedName + "'");
+			IllegalStateException e = new IllegalStateException(
+					"cannot init already-set exportedName '" + exportedName + "'");
 			LOGGER.throwing(e);
 			throw e;
 		}
 		exportedName = FileShare.createExportName(name, existingPrinters);
 		LOGGER.exit();
+	}
+
+	@JsonIgnore
+	public String getServiceName() {
+		return "//" + server + "/" + name;
 	}
 }

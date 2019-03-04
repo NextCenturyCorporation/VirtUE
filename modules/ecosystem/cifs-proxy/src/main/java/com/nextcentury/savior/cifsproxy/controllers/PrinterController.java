@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.nextcentury.savior.cifsproxy.model.Printer;
 import com.nextcentury.savior.cifsproxy.services.PrinterService;
 
@@ -56,8 +57,8 @@ public class PrinterController {
 		Printer newPrinter;
 		try {
 			newPrinter = service.newPrinter(session, printer);
-		} catch (IllegalArgumentException e) {
-			WebServerException wse = new WebServerException("exception mounting a share", e);
+		} catch (IllegalArgumentException | TemplateException e) {
+			WebServerException wse = new WebServerException("exception adding a printer", e);
 			LOGGER.throwing(wse);
 			throw wse;
 		}
@@ -71,7 +72,7 @@ public class PrinterController {
 		try {
 			service.removePrinter(name);
 		} catch (IllegalArgumentException e) {
-			WebServerException wse = new WebServerException("exception unmounting a share", e);
+			WebServerException wse = new WebServerException("exception removing a printer", e);
 			LOGGER.throwing(wse);
 			throw wse;
 		}
