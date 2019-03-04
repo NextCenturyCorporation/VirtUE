@@ -98,23 +98,23 @@ class KerberosUtils {
 	 * and in the default credential cache of some (local) user (not some arbitrary
 	 * file like we've been using up to this point in the process). This method
 	 * switches principals and copies the credential into the default credential
-	 * cache for <code>mountUser</code>. Currently uses a helper program
+	 * cache for <code>localUser</code>. Currently uses a helper program
 	 * (<code>switchprincipal</code>), but ideally would use {@link GssApi}.
 	 * 
-	 * @param ccacheFilename
+	 * @param inputCcacheFilename
 	 *                           where our credentials are
-	 * @param mountUser
+	 * @param localUser
 	 *                           the user to copy credentials to (specifically to
 	 *                           this user's default cache)
-	 * @param username
+	 * @param serviceUser
 	 *                           the new principal (the user whose credentials will
 	 *                           be used to mount the files)
 	 */
-	static void switchPrincipal(String ccacheFilename, String mountUser, String username) {
-		LOGGER.entry(ccacheFilename, mountUser, username);
-		String simpleUsername = username.split("@")[0];
+	static void switchPrincipal(String inputCcacheFilename, String localUser, String serviceUser) {
+		LOGGER.entry(inputCcacheFilename, localUser, serviceUser);
+		String simpleUsername = serviceUser.split("@")[0];
 		ProcessBuilder processBuilder = createProcessBuilder(null);
-		processBuilder.command("sudo", "-u", mountUser, "switchprincipal", "-i", ccacheFilename, simpleUsername);
+		processBuilder.command("sudo", "-u", localUser, "switchprincipal", "-i", inputCcacheFilename, simpleUsername);
 		runProcess(processBuilder, "switchprincipal");
 		LOGGER.exit();
 	}
@@ -146,10 +146,10 @@ class KerberosUtils {
 		ProcessBuilder pb = new ProcessBuilder();
 		Map<String, String> environment = pb.environment();
 		if (ccacheFilename != null) {
-			environment.put(KerberosUtils.KERBEROS_CCACHE_ENV_VAR, "FILE:" + ccacheFilename);
+			environment.put(KERBEROS_CCACHE_ENV_VAR, "FILE:" + ccacheFilename);
 		}
 		if (LOGGER.isTraceEnabled()) {
-			LOGGER.trace(KerberosUtils.KERBEROS_CCACHE_ENV_VAR + "=" + environment.get(KerberosUtils.KERBEROS_CCACHE_ENV_VAR));
+			LOGGER.trace(KERBEROS_CCACHE_ENV_VAR + "=" + environment.get(KERBEROS_CCACHE_ENV_VAR));
 			if (!environment.containsKey("KRB5_TRACE")) {
 				environment.put("KRB5_TRACE", "/dev/stdout");
 			}
@@ -176,11 +176,11 @@ class KerberosUtils {
 		if (LOGGER.isDebugEnabled()) {
 			StringBuilder envString = new StringBuilder();
 			Map<String, String> environment = processBuilder.environment();
-			if (environment.containsKey(KerberosUtils.KERBEROS_CCACHE_ENV_VAR)) {
+			if (environment.containsKey(KERBEROS_CCACHE_ENV_VAR)) {
 				envString.append("env ");
-				envString.append(KerberosUtils.KERBEROS_CCACHE_ENV_VAR);
+				envString.append(KERBEROS_CCACHE_ENV_VAR);
 				envString.append('=');
-				envString.append(environment.get(KerberosUtils.KERBEROS_CCACHE_ENV_VAR));
+				envString.append(environment.get(KERBEROS_CCACHE_ENV_VAR));
 				envString.append(' ');
 			}
 			LOGGER.debug("Starting process: " + name + ": " + envString + String.join(" ", processBuilder.command()));
@@ -193,7 +193,7 @@ class KerberosUtils {
 			throw wse;
 		}
 		try {
-			process.waitFor(KerberosUtils.MOUNT_TIMEOUT, TimeUnit.SECONDS);
+			process.waitFor(MOUNT_TIMEOUT, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			WebServiceException wse = new WebServiceException("interrupted while waiting for " + name + " process", e);
 			LOGGER.throwing(wse);
