@@ -145,13 +145,14 @@ public class VirtueService {
 		LOGGER.trace("starting smbpassword");
 		Process process = processBuilder.start();
 		OutputStream outputStream = process.getOutputStream();
-		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream);
-		LOGGER.trace("sending password to smbpassword");
-		outputWriter.write(virtue.getPassword());
-		outputWriter.write('\n');
-		outputWriter.write(virtue.getPassword());
-		outputWriter.write('\n');
-		outputWriter.flush();
+		try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream)) {
+			LOGGER.trace("sending password to smbpassword");
+			outputWriter.write(virtue.getPassword());
+			outputWriter.write('\n');
+			outputWriter.write(virtue.getPassword());
+			outputWriter.write('\n');
+			outputWriter.flush();
+		}
 
 		LOGGER.trace("waiting for smbpassword...");
 		boolean processDone;

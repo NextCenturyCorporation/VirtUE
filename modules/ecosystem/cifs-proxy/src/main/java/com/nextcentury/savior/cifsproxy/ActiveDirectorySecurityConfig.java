@@ -133,7 +133,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	 * Location of the temporary credential cache that will be used to stage creds
 	 * for mounting filesystems.
 	 */
-	static public Path serviceTicketFile;
+	static Path serviceTicketFile;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,

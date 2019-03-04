@@ -590,9 +590,10 @@ public class ShareService {
 		}
 		Process queryProcess = processBuilder.start();
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(queryProcess.getInputStream()));
 		StringJoiner sj = new StringJoiner("\n");
-		reader.lines().iterator().forEachRemaining(sj::add);
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(queryProcess.getInputStream()))) {
+			reader.lines().iterator().forEachRemaining(sj::add);
+		}
 		String queryOutput = sj.toString();
 		LOGGER.debug("query output: " + queryOutput);
 
@@ -608,7 +609,7 @@ public class ShareService {
 						if (target.target.startsWith(prefix)) {
 							// we've got a filesystem we should manage
 							String relativePath = target.target.substring(MOUNT_ROOT.length() + 1);
-							String[] targetPath = relativePath.split(File.separator);
+							String[] targetPath = relativePath.split(Pattern.quote(File.separator));
 							String virtue = targetPath[0];
 							if (!virtue.isEmpty()) {
 								Matcher sourceMatcher = sourcePattern.matcher(target.source);
