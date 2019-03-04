@@ -1,12 +1,12 @@
 #
-# User-facing service
+# CIFS Proxy
 #
 
 locals {
-  myname = "webserver"
+  myname = "cifs-proxy"
 }
 
-resource "aws_instance" "user_facing_server" {
+resource "aws_instance" "cifs_proxy" {
   ami           = "${var.linux_ami}"
   instance_type = "${var.linux_instance_type}"
   key_name      = "vrtu"
@@ -17,7 +17,7 @@ resource "aws_instance" "user_facing_server" {
   tags {
 	Name = "${local.myname}"
 	Owner = "${data.external.local_user.result.user}"
-	class = "webserver"
+	class = "cifs proxy"
 	automated = "terraform"
   }
   lifecycle {

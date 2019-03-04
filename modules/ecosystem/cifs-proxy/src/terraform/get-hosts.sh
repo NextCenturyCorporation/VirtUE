@@ -11,6 +11,6 @@ echo -ne "file server: \t"
 terraform state show aws_instance.file_server | sed -n 's/public_dns *= \(.*\)/\1/p'
 echo -ne "print server: \t"
 terraform state show aws_instance.print_server | sed -n 's/public_dns *= \(.*\)/\1/p'
-echo -ne "user server: \t"
-terraform state show aws_instance.user_facing_server | sed -n 's/public_dns *= \(.*\)/\1/p'
+echo -ne "cifs proxy: \t"
+terraform state show aws_instance.cifs_proxy | sed -n 's/public_dns *= \(.*\)/\1/p'
 echo

@@ -87,31 +87,31 @@ bootJar {
 	mainClassName = "com.nextcentury.savior.cifsproxy.CifsProxy"
 }
 
-ext.webhost = null
-def getWebhost() {
-    if (ext.webhost == null) {
+ext.cifsProxy = null
+def getCifsProxy() {
+    if (ext.cifsProxy == null) {
         new ByteArrayOutputStream().withStream { output ->
             def result = exec {
                 workingDir 'src/terraform'
-                commandLine 'terraform', 'state', 'show', 'aws_instance.user_facing_server'
+                commandLine 'terraform', 'state', 'show', 'aws_instance.cifs_proxy'
                 standardOutput = output
             }
             def stringOutput = output.toString()
             def hostMatch = stringOutput =~ /public_dns *= (.*)/
             if (hostMatch.find()) {
-                ext.webhost = hostMatch[0][1]
+                ext.cifsProxy = hostMatch[0][1]
             }
             else {
-                println "warning: terraform did not return host information for the user-facing server. Will not be able to deploy"
+                println "warning: terraform did not return host information for the cifs proxy. Will not be able to deploy"
             }
         }
     }
-    return ext.webhost
+    return ext.cifsProxy
 }
 
 remotes {
-	webserver {
-	    host = project.getWebhost()
+	cifsProxy {
+	    host = project.getCifsProxy()
 		user = 'fedora'
         // root of git tree
         identity = file('../../../vrtu.pem')
