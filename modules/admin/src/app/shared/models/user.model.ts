@@ -1,6 +1,7 @@
 
 import { Item } from './item.model';
 import { Virtue } from './virtue.model';
+import { VirtualMachine } from './vm.model';
 import { VirtueInstance } from './virtue-instance.model';
 
 import { DictList } from './dictionary.model';
@@ -106,16 +107,16 @@ export class User extends Item {
     return [];
   }
 
-  getActiveVirtues(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VIRTUES);
+  getActiveVirtues(): VirtueInstance[] {
+    return this.getChildren(DatasetNames.VIRTUES) as VirtueInstance[];
   }
 
-  getVirtues(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VIRTUE_TS);
+  getVirtues(): Virtue[] {
+    return this.getChildren(DatasetNames.VIRTUE_TS) as Virtue[];
   }
 
-  getVirtueVms(): IndexedObj[] {
-    return this.getGrandChildren(DatasetNames.VIRTUE_TS, DatasetNames.VM_TS);
+  getVirtueVms(): VirtualMachine[] {
+    return this.getGrandChildren(DatasetNames.VIRTUE_TS, DatasetNames.VM_TS) as VirtualMachine[];
   }
 
   removeUnspecifiedChild(childObj: IndexedObj): void {

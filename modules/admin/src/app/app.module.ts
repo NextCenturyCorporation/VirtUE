@@ -62,6 +62,7 @@ import { BasicObjectDetailsComponent } from './basic-object-details/basic-object
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
 import { UserMainTabComponent} from './users/form/main-tab/main-user-tab.component';
+import { ActivityTabComponent} from './users/form/activity-tab/activity-tab.component';
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
@@ -138,6 +139,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     UserListComponent,
     UserComponent,
     UserMainTabComponent,
+    ActivityTabComponent,
 
     VirtueListComponent,
     VirtueInstanceListComponent,

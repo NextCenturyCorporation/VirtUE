@@ -465,12 +465,31 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       });
   }
 
-  stopVirtue(virtue: VirtueInstance): void {
-    this.dataRequestService.flexiblePost(this.getRemoteSubdomain(virtue), ['stop', virtue.getID()], "")
+  /**
+   * #TODO This is where I left off on VRTU-629-add-virtue-controls-to-workbench
+   * see also: UserComponent and ActivityTabComponent
+   * First, test this and make sure virtues stop correctly called normally.
+   * Then go into the user activityTab and make them be able to be stopped and terminated and whatnot.
+   */
+  stopVirtue(virtue: VirtueInstance, terminate: boolean = false): void {
+    let domain = this.getRemoteSubdomain(virtue);
+    let params = ['stop', virtue.getID()];
+
+    // this endpoint is different than all the others.
+    // ::     admin/deletevirtue/instance/{instanceId}
+    //   instead of
+    // ::     admin/virtues/{id} or admin/virtues/stop/{id}
+    if (terminate) {
+      let domain = 'admin/deletevirtue/instance'
+      let params = [virtue.getID()];
+    }
+
+    this.dataRequestService.flexiblePost(domain, params, "")
     .toPromise().then(() => {
       this.refreshPage();
     });
   }
+
 
   setClipboardPermission(clipPerm: ClipboardPermission): void {
     this.dataRequestService.flexiblePost(Subdomains.CLIP, [clipPerm.source, clipPerm.dest], clipPerm.permission)

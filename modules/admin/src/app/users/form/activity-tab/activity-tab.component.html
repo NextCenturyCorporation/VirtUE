@@ -1,0 +1,25 @@
+<div class="mui-container-fluid">
+
+
+  <div class="mui-row titlebar">
+    <div class="mui-col-md-12">
+      <h5 class="titlebar-title">Stop user's virtues</h5>
+      <button class="titlebar-button" [disabled]="!inViewMode() || !hasActiveVirtues()" (click)="stopActive()">Stop All</button>
+    </div>
+  </div>
+  <div class="mui-row titlebar">
+    <div class="mui-col-md-12">
+      <h5 class="titlebar-title">Terminate user's virtues</h5>
+      <button class="titlebar-button" [disabled]="!inViewMode()" (click)="terminateActive()">Terminate All</button>
+    </div>
+  </div>
+
+  <div class="mui-row">
+    <div class="mui-row titlebar">
+      <div class="mui-col-md-12">
+        <h3 class="titlebar-title">Virtue Instances</h3>
+      </div>
+    </div>
+    <app-table #table></app-table>
+  </div>
+</div>

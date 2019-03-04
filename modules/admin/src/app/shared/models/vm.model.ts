@@ -103,8 +103,8 @@ export class VirtualMachine extends Item {
     return [];
   }
 
-  getApps(): IndexedObj[] {
-    return this.getChildren(DatasetNames.APPS);
+  getApps(): Application[] {
+    return this.getChildren(DatasetNames.APPS) as Application[];
   }
 
   removeUnspecifiedChild(childItem: IndexedObj): void {

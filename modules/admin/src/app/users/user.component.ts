@@ -16,10 +16,12 @@ import { Item } from '../shared/models/item.model';
 import { User } from '../shared/models/user.model';
 import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
+import { VirtueInstance } from '../shared/models/virtue-instance.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
+import { ActivityTabComponent } from './form/activity-tab/activity-tab.component';
 
 import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
@@ -60,6 +62,9 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
           <mat-tab label= {{mainTab.tabName}}>
             <app-main-user-tab #mainTab></app-main-user-tab>
           </mat-tab>
+          <mat-tab label= {{activityTab.tabName}}>
+            <app-activity-tab #activityTab></app-activity-tab>
+          </mat-tab>
         </mat-tab-group>
       </div>
       <div class="mui-row">
@@ -85,6 +90,9 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
   /** A tab for displaying the User's attached virtues, status, and assigned roles. */
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
+  /** A tab for displaying the User's attached virtues, status, and assigned roles. */
+  @ViewChild('activityTab') activityTab: ActivityTabComponent;
+
   /** reclassing */
   item: User;
   /** see [[ItemFormComponent.constructor]] for notes on parameters */
@@ -103,6 +111,26 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     this.childDatasetName = DatasetNames.VIRTUE_TS;
   }
 
+  /*
+   * #TODO This is where I left off on VRTU-629-add-virtue-controls-to-workbench
+   * see also: GenericDataPageComponent and ActivityTabComponent
+   */
+  stopAllUserVirtues(): void {
+    for (let v of this.item.getActiveVirtues() as VirtueInstance[]) {
+      if (! v.isStopped()) {
+        this.stopVirtue(v);
+      }
+    }
+  }
+
+  terminateAllUserVirtues(): void {
+    for (let v of this.item.getActiveVirtues() as VirtueInstance[]) {
+      if (! v.isStopped()) {
+        this.stopVirtue(v, true);
+      }
+    }
+  }
+
   /**
    * calls an init() method in each of the form's tabs, to pass in any data needed/available at render time to that tab from the parent
    * called in [[ngOnInit]]
@@ -111,7 +139,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
 
     this.mainTab.init(this.mode);
     // These tabs don't exist yet
-    // this.activityTab.init(this.mode);
+    this.activityTab.init(this.mode);
     // this.historyTab.init(this.mode);
 
     // Must unsubscribe from all these when the UserComponent is destroyed
@@ -161,7 +189,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
     // some sort of custom filter.
     // at least one of these.
-    // this.activityTab.setUp(this.item);
+    this.activityTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
@@ -176,6 +204,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
   updateTabs(): void {
 
     this.mainTab.update({mode: this.mode});
+    this.activityTab.update({mode: this.mode, stopVirtueFunc: this.stopVirtue});
   }
 
   /**
@@ -184,7 +213,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
    * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
   getNeededDatasets(): DatasetNames[] {
-    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VIRTUE_TS, DatasetNames.USERS];
+    return [DatasetNames.APPS, DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES, DatasetNames.USERS];
   }
 
   /**

@@ -164,12 +164,12 @@ export class Virtue extends Item {
   }
 
 
-  getVms(): IndexedObj[] {
-    return this.getChildren(DatasetNames.VM_TS);
+  getVms(): VirtualMachine[] {
+    return this.getChildren(DatasetNames.VM_TS) as VirtualMachine[];
   }
 
-  getVmApps(): IndexedObj[] {
-    return this.getGrandChildren(DatasetNames.VM_TS, DatasetNames.APPS);
+  getVmApps(): Application[] {
+    return this.getGrandChildren(DatasetNames.VM_TS, DatasetNames.APPS) as Application[];
   }
 
 
