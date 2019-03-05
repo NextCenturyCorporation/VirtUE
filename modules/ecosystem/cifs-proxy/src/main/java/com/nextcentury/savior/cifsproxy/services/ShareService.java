@@ -242,7 +242,7 @@ public class ShareService {
 		if (share.getPath() == null || share.getPath().isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("path cannot be empty");
 			LOGGER.throwing(e);
-			throw e; 
+			throw e;
 		}
 		if (permissions.isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("permissions cannot be empty");
@@ -344,9 +344,9 @@ public class ShareService {
 				+ "\n" + "valid users = " + virtue.getUsername() + "\n");
 		// TODO someday add "hosts allow = " when we can get info about which hosts will
 		// be connecting
-		if (!share.getPermissions().contains(FileShare.SharePermissions.WRITE)) {
-			config.append("read only = yes\n");
-		}
+		String readOnly = share.getPermissions().contains(FileShare.SharePermissions.WRITE) ? "no" : "yes";
+		config.append("read only = " + readOnly + "\n");
+
 		LOGGER.exit(config.toString());
 		return config.toString();
 	}
@@ -684,7 +684,7 @@ public class ShareService {
 		// Setting a non-root user (uid) and file_mode and dir_mode both to 0777 seems
 		// to be required for remounts to be writable.
 		String options = "username=" + simpleUsername + (readOnly ? ",ro" : "") + ",sec=krb5,vers=3.0,cruid="
-				+ mountUser + "uid=" + localUser + ",file_mode=0777,dir_mode=0777";
+				+ mountUser + ",uid=" + localUser + ",file_mode=0777,dir_mode=0777";
 		String[] args = { "sudo", MOUNT_COMMAND, "-t", "cifs", "//" + share.getServer() + sourcePath, canonicalDest,
 				"-v", "-o", options };
 		LOGGER.debug("mount command: " + Arrays.toString(args));
