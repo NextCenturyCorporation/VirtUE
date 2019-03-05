@@ -92,7 +92,7 @@ public class VirtueService {
 		LOGGER.entry();
 		Random random = new Random();
 		int length = 12 + random.nextInt(4);
-		String password = new Random().ints(length, 33, 122)
+		String password = new Random().ints(length, 97, 122)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
 		LOGGER.exit(password);
 		return password;
