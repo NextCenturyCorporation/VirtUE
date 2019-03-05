@@ -115,6 +115,10 @@ export class VirtueInstance extends IndexedObj {
     return this.id;
   }
 
+  getLabel(): string {
+    return this.getName() + "   (" + this.readableState + ")";
+  }
+
   getDatasetName(): string {
     return DatasetNames.VIRTUES;
   }

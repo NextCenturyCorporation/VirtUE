@@ -148,7 +148,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.setUpPasteableVirtuesTable();
     this.setUpNetworkPermsTable();
     this.setUpFileSysPermsTable();
-    // this.setUpPrinterTable();
+    this.setUpPrinterTable();
     // this.setUpSensorTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
@@ -195,11 +195,11 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.updatePasteableVirtuesTable();
     this.updateNetworkPermsTable();
     this.updateFileSysPermsTable();
+    this.updatePrinterTable();
 
-    // if (changes.printers) {
+    // if (changes.printers) { // up-to-date data on printer status ould be cool
     //   // TODO update something
     // }
-    // this.updatePrinterTable();
 
   }
 
@@ -250,7 +250,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Name',    6, (p: Printer) => p.name),
+      new TextColumn('Printer Description',    4, (p: Printer) => p.name),
+      new TextColumn('Address',    2, (p: Printer) => p.address),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status),
       new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
@@ -583,7 +584,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   getPasteColumns(): Column[] {
     let cols: Column[] = [
       new TextColumn('Destination Template',  5, (clip: ClipboardPermission) => this.getVirtName(clip.dest), SORT_DIR.ASC,
-                                                                              (v: Virtue) => this.viewItem(v)),
+                                                    (clip: ClipboardPermission) => this.viewItem(this.getVirt(clip.dest))),
       new ListColumn('Contained Apps', 4, (clip: ClipboardPermission) => this.getVirtApps(clip.dest),  this.formatName),
     ];
     if (this.mode !== Mode.VIEW) {
@@ -686,78 +687,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 
 
 /************************************************************************************/
-
-
-  /**
-   * this brings up a modal
-   * Note that the virtue selection modal will
-   * May want to define a filter so as to only show Virtues with browser applications?
-   * Perhaps they'd want to set a virtue as default that doesn't have a browser at the moment, but they're about to set one on it.
-   * Is it even possible to filter on virtues that have a browser? Unless browser applications can be flagged as a "browser" upon creation,
-   * probably not.
-   */
-  activateDefaultBrowserVirtueModal(): void {
-    this.activateVirtueSelectionModal(
-        [this.item.defaultBrowserVirtueId],
-        (selectedVirtueIds: string[]) => { this.item.defaultBrowserVirtueId = selectedVirtueIds[0]; },
-        SelectionMode.SINGLE
-      );
-  }
-
-  /**
-   * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
-   * caller-defined function when the user hits 'Submit'.
-   *
-   * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
-   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
-   * @param selectionMode Optional. Can be either SelectionMode.MULTI or SelectionMode.SINGLE, but defaults to MULTI
-   *                      if not given.
-   *
-   * When implementing filters, the genericModal should take in arbitray filters (which means this function needs to take them in as well)
-   * which are passed to the table as default filters, which can't be removed or edited. Other filters can be defined in the table, which
-   * stack on top of those defaults.
-   *
-   */
-  activateVirtueSelectionModal(
-        currentSelection: string[],
-        onComplete: ((selectedVirtues: string[]) => void),
-        selectionMode?: SelectionMode
-  ): void {
-
-    if (selectionMode === undefined) {
-      selectionMode = SelectionMode.MULTI;
-    }
-
-    let dialogRef = this.dialog.open( VirtueModalComponent,  {
-      height: '70%',
-      width: '70%',
-      data: {
-        selectedIDs: currentSelection,
-        selectionMode: selectionMode
-      }
-    });
-
-    // This is hacky, and should be fixed eventually. This makes the Virtue being edited not show up in the list of
-    // Virtues which this one can paste data into.
-    dialogRef.componentInstance.table.filterColumnName = "id";
-
-    dialogRef.componentInstance.table.filterCondition = (attribute: any) => {
-      return String(attribute) !== this.item.getID();
-    };
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      onComplete(selectedVirtues);
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      sub.unsubscribe();
-    });
-
-    dialogRef.updatePosition({ top: '5%'});
-
-  }
 
   /**
    * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.

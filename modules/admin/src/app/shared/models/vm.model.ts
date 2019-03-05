@@ -24,8 +24,9 @@ export class VirtualMachine extends Item {
 
   applicationIds: string[] = [];
 
-  // /** #uncommented what is this? (templatePath)*/
-  // templatePath: string;
+  pathToAmiTemplate: string;
+
+  securityTag: string;
 
   // /** #uncommented what is this? how should it be set or used? (loginUser)*/
   // loginUser: string;
@@ -52,6 +53,8 @@ export class VirtualMachine extends Item {
       this.applicationIds = vmObj.applicationIds;
       this.version = vmObj.version; // currently doesn't exist, figure out later
       this.lastEditor = vmObj.lastEditor;
+      this.pathToAmiTemplate = vmObj.templatePath;
+      this.securityTag = vmObj.securityTag;
       this.modificationDate = vmObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
     }
@@ -125,6 +128,8 @@ export class VirtualMachine extends Item {
       applicationIds: this.applicationIds,
       version: this.version,
       lastModification: this.modificationDate,
+      templatePath: this.pathToAmiTemplate,
+      securityTag: this.securityTag,
       os: this.os,
       lastEditor: 'administrator',
       loginUser: 'system' // TODO does this still exist on the backend?

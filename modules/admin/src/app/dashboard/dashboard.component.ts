@@ -31,8 +31,6 @@ import { ItemListComponent } from '../shared/abstracts/item-list/item-list.compo
 })
 export class DashboardComponent extends ItemListComponent {
 
-  // sensorData = [];
-
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
@@ -43,7 +41,6 @@ export class DashboardComponent extends ItemListComponent {
     private sensingService: SensingService,
   ) {
     super(routerService, dataRequestService, dialog);
-
   }
 
   /**
@@ -52,13 +49,14 @@ export class DashboardComponent extends ItemListComponent {
   getColumns(): Column[] {
     return [
       new TextColumn('Sensor ID',   2, (sensor) => sensor.sensor_id, SORT_DIR.ASC, (sensor) => this.toDetailsPage(sensor)),
-      new TextColumn('Virtue ID',   2, (sensor) => this.getVirtName(sensor), SORT_DIR.ASC),
-      new TextColumn('Username',    1, (sensor) => sensor.username, SORT_DIR.ASC),
-      new TextColumn('Port',        1, (sensor) => sensor.port, SORT_DIR.ASC),
-      new TextColumn('Kafka Topic', 3, (sensor) => sensor.kafka_topic, SORT_DIR.ASC),
-      new TextColumn('Certificate', 1, (sensor) => this.hasCertificates(sensor),  SORT_DIR.ASC),
-      new TextColumn('Last Update', 2, (sensor) => sensor.updated_at, SORT_DIR.ASC),
-      // new TextColumn('Tim',   2, (sensor) => sensor.timestamp, SORT_DIR.ASC)
+      new TextColumn('Virtue ID',   2, (sensor) => this.getVirtName(sensor)),
+      // new TextColumn('Username',    1, (sensor) => sensor.username),
+      // new TextColumn('Port',        1, (sensor) => sensor.port),
+      new TextColumn('address',        2, (sensor) => sensor.address),
+      new TextColumn('Kafka Topic', 3, (sensor) => sensor.kafka_topic),
+      new TextColumn('Certificate', 1, (sensor) => this.hasCertificates(sensor)),
+      new TextColumn('Last Update', 2, (sensor) => sensor.updated_at)
+      // new TextColumn('Time created',   2, (sensor) => sensor.inserted_at)
     ];
   }
 
@@ -66,23 +64,11 @@ export class DashboardComponent extends ItemListComponent {
     delete paramsObject.elementIsDisabled;
   }
 
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
   getVirtName(d: any): string {
     return d.virtue_id;
     // return this.datasets[DatasetNames.VIRTUES].get(d.virtue_id).getName();
   }
 
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
   hasCertificates(d): string {
     if (d.has_certificates) {
       return 'Yes';
@@ -90,12 +76,6 @@ export class DashboardComponent extends ItemListComponent {
     return 'No';
   }
 
-  /**
-   * #uncommented
-   *
-   * @override [[GenericDataPageComponent.getNeededDatasets]]()
-   * @return
-   */
   getNeededDatasets(): DatasetNames[] {
     return [DatasetNames.VM_TS, DatasetNames.VMS, DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES, DatasetNames.SENSORS];
   }
@@ -104,12 +84,6 @@ export class DashboardComponent extends ItemListComponent {
     return DatasetNames.SENSORS;
   }
 
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -123,16 +97,13 @@ export class DashboardComponent extends ItemListComponent {
   }
 
   /**
-   * @return a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   * @return a string to be displayed in the table when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
     return "No sensor information is available at this time";
 
   }
 
-  /**
-   * @return an empty list; Apps can't be disabled, so nothing to filter
-   */
   getTableFilters(): {objectField: string, options: {value: string, text: string}[] } {
     return undefined;
   }

@@ -144,11 +144,20 @@
 	<!-- <constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
 	<!-- <constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
 	<!-- </bean> -->
+	
+	<bean name="networkAclManager" class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.NetworkAclManager" init-method="init">
+		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg value="${virtue.aws.server.vpc.name}" />
+		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
+		<constructor-arg value="${virtue.aws.server.subnet.cidrEnd}" />
+	</bean>
 
 	<bean name="vpcSubnetProvider"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.DynamicVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg ref="networkAclManager" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrEnd}" />

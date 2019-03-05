@@ -141,7 +141,12 @@ export class RouterService {
   }
 
   toTopDomainPage(): void {
-    this.goToPage(this.getRouterUrlPieces()[0]);
+    if (this.getRouterUrlPieces()[0] === 'view') {
+      this.goToPage('');
+    }
+    else {
+      this.goToPage(this.getRouterUrlPieces()[0]);
+    }
   }
 
 

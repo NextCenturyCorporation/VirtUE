@@ -3,13 +3,13 @@ import { FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 
 import { RouterService } from '../../shared/services/router.service';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 import { GenericPageComponent } from '../../shared/abstracts/gen-page/gen-page.component';
 
 import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { FileSystem } from '../../shared/models/fileSystem.model';
 
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 
 @Component({
@@ -17,7 +17,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   templateUrl: './fileSystem.modal.html',
   styleUrls: ['./fileSystem.modal.css']
 })
-export class FileSystemModalComponent extends GenericPageComponent implements OnInit {
+export class FileSystemModalComponent implements OnInit {
 
   title: string = "";
 
@@ -31,15 +31,9 @@ export class FileSystemModalComponent extends GenericPageComponent implements On
    * @param dialogRef injected, is a reference to the modal dialog box itself.
    */
   constructor(
-      routerService: RouterService,
-      dialog: MatDialog,
-
-      /** injected, is a reference to the modal dialog box itself. */
       public dialogRef: MatDialogRef<FileSystemModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
-      super(routerService, dialog);
-      console.log(data);
       if (data && data['fileSystem']) {
         this.fileSystem = data.fileSystem;
         this.title = "Edit File System: " + data.fileSystem.name;

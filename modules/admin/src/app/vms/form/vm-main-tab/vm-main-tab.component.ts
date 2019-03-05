@@ -138,7 +138,6 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
     return true;
   }
 
-
   /**
    * Loads an AppsModalComponent
    * @param parameters to be passed into the modal
@@ -148,9 +147,16 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
                           height: string,
                           /** the width of the modal, in pixels */
                           width: string,
-                          /** some type of data object to be passed into the modal - a container */
                           data: any
                         }) {
+    params.data['filters'] = {
+      objectField: "os",
+      options: [{
+        value: this.item.os,
+        text: ""
+      }]
+    };
+
     return this.dialog.open( AppsModalComponent, params);
   }
 }

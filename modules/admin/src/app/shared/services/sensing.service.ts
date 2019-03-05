@@ -46,7 +46,7 @@ export class SensingService {
    * method, and just use relative urls to make requests. If the baseUrl is just the virtue-admin server, then you don't need
    * to set anything, because it's already been set in the main body of the code. If it isn't though, you'll need to define
    * a provider for HttpClient for just this class, so this class can use a different instance of httpclient and therefore be
-   * able to set a different baseUrl without screwing other thigns up.
+   * able to set a different baseUrl without screwing other things up.
    * @param
    *
    * @return

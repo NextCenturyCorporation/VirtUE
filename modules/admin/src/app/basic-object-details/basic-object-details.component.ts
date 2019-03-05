@@ -79,18 +79,19 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    */
   onPullComplete(): void {
     if ((this.neededDataset === undefined) || !(this.datasets[this.neededDataset].has(this.objectID))) {
+      this.table.setItems([]);
       return;
     }
+
     let objects = this.datasets[this.neededDataset];
     this.objectBeingExamined = objects.get(this.objectID);
-
 
     let attributeList = [];
 
     for (let attribute in this.objectBeingExamined) {
       if (this.objectBeingExamined.hasOwnProperty(attribute)) {
-        if (this.isEmptyDict(this.objectBeingExamined[attribute])) {
-          attributeList.push( {[attribute]: "Dynamically instatiated, can't be built here."} );
+        if (this.isDynamicallyBuilt(this.objectBeingExamined[attribute])) {
+          attributeList.push( {[attribute]: "Dynamically instantiated, can't be built here."} );
         }
         else {
           attributeList.push( {[attribute]: this.objectBeingExamined[attribute]} );
@@ -113,6 +114,10 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
     this.routerService.submitPageTitle(this.prettyTitle);
   }
 
+  isDynamicallyBuilt(obj) {
+    return this.isEmptyDict(obj) || (obj instanceof IndexedObj);
+  }
+
   isEmptyDict(obj) {
     return (obj && obj instanceof DictList && (obj.asList().length === 0));
   }
@@ -121,7 +126,7 @@ export class BasicObjectDetailsComponent extends GenericDataPageComponent implem
    * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
-    return "";
+    return "The requested record was not found.";
   }
 
   getRouteParam(paramName: string): string {

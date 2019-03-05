@@ -54,8 +54,8 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Printer',   3, (p: Printer) => p.name, SORT_DIR.ASC),
-      new TextColumn('Status',    1, (p: Printer) => String(p.status), SORT_DIR.ASC),
+      new TextColumn('Printer',   4, (p: Printer) => p.name, SORT_DIR.ASC),
+      new TextColumn('Status',    3, (p: Printer) => String(p.status), SORT_DIR.ASC),
       new TextColumn('Address',   2, (p: Printer) => p.address, SORT_DIR.DESC)
     ];
   }

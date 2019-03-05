@@ -1,3 +1,56 @@
-<div>
-  <!-- skeleton -->
+<div class="">
+  <h2 mat-dialog-title>Add New Printer</h2>
+  <br>
+
+  <div class="mui-container-fluid container">
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        Name
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        <input matInput type="text" placeholder="Name" [(ngModel)]="printer.name" name="name"/>
+      </div>
+    </div>
+    <br>&nbsp;
+
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        Address
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-12 padding-left-0">
+        <input matInput type="text" placeholder="Address" [(ngModel)]="printer.address" name="address"/>
+      </div>
+    </div>
+    <br>&nbsp;
+
+    <div class="mui-row">
+      <div class="mui-col-md-10 padding-left-0">
+        Enable this printer:
+      </div>
+    </div>
+    <div class="mui-row">
+      <div class="mui-col-md-3 padding-left-0">
+        <mat-checkbox [(ngModel)]="printer.enabled"> </mat-checkbox>
+      </div>
+    </div>
+    <br>&nbsp;
+
+
+  </div>
+
+  <!-- <div style="align-self: flex-end;">
+    <div mat-dialog-actions style="display: flex; flex: row; align-self: center;"> -->
+  <div mat-dialog-actions style="vertical-align: middle">
+      <button class="button" type="submit" (click)="submit()">
+        Submit
+      </button>
+      <button type="button" (click)="cancel()" mat-dialog-close>
+        Cancel
+      </button>
+  </div>
+  <!-- </div> -->
 </div>

@@ -88,7 +88,7 @@ export class DatasetsMeta {
       class: User,
       datasetName: DatasetNames.USERS,
       subdomain: Subdomains.USERS,
-      depends: [DatasetNames.VIRTUE_TS]
+      depends: [DatasetNames.VIRTUE_TS, DatasetNames.VIRTUES]
     };
     this.dict[DatasetNames.VMS] = {
       class: VirtualMachineInstance,

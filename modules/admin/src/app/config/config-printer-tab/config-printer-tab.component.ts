@@ -19,11 +19,14 @@ import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
+import { PrinterModalComponent } from '../../modals/printer-modal/printer.modal';
+
 import {
   Column,
   TextColumn,
   CheckboxColumn,
   IconColumn,
+  BlankColumn,
   SORT_DIR
 } from '../../shared/models/column.model';
 
@@ -77,25 +80,14 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
   getColumns(): Column[] {
     return [
-      new TextColumn("Printer", 4, (p: Printer) => p.name, SORT_DIR.ASC, undefined, () => this.getSubMenu()),
-      new TextColumn("Printer address", 3, (p: Printer) => p.address, SORT_DIR.ASC),
-      new TextColumn("Printer status", 2, (p: Printer) => p.status, SORT_DIR.ASC),
+      new BlankColumn(1),
+      new TextColumn("Description", 4, (p: Printer) => p.name),
+      new TextColumn("Printer address", 2, (p: Printer) => p.address),
+      new TextColumn("Printer status", 2, (p: Printer) => p.status),
       new CheckboxColumn("Enable", 1, "enabled", undefined,
               (p: Printer, checked: boolean) => this.setItemAvailability(p, checked)),
-      new IconColumn("Options", 1, "settings", (p: Printer) => this.printPrinter(p)),
+      new IconColumn("Options", 1, "settings", (p: Printer) => this.editPrinter(p)),
       new IconColumn("Remove Printer", 1, "delete", (p: Printer) => this.deleteItem(p))
-    ];
-  }
-
-
-  /**
-   * @return a list of links to show up as a submenu on each printer.
-   */
-  getSubMenu(): SubMenuOptions[] {
-    return [
-      new SubMenuOptions("Enable", (p: Printer) => !p.enabled, (p: Printer) => this.togglePrinter(p)),
-      new SubMenuOptions("Disable", (p: Printer) => p.enabled, (p: Printer) => this.togglePrinter(p)),
-      new SubMenuOptions("Delete", (p: Printer) => true, (p: Printer) => this.deleteItem(p)),
     ];
   }
 
@@ -111,17 +103,53 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
   }
 
   addPrinter() {
-    this.createItem(new Printer({id: "2", name: "Brother HL", info: "b/w", address: "127.0.0.1", status: "on", enabled: true}));
+    this.activatePrinterModal();
   }
 
-  printPrinter(p: Printer) {
-    console.log(p);
+  editPrinter(p: Printer) {
+    this.activatePrinterModal(p);
   }
 
-  addName(p: Printer) {
-    p.name = "Epson 5480";
-    this.updateItem(p);
-  }
+  activatePrinterModal(printerToEdit?: Printer): void {
+    let params: {height: string, width: string, data?: {printer: Printer}};
+    let creatingNew: boolean = (printerToEdit === undefined);
 
+    if (creatingNew) {
+      params = {
+        height: '70%',
+        width: '40%'
+      };
+    }
+    else {
+      params = {
+        height: '70%',
+        width: '40%',
+        data: {
+          printer: printerToEdit
+        }
+      };
+    }
+
+
+    let dialogRef = this.dialog.open( PrinterModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getPrinter.subscribe((printer) => {
+      if (creatingNew) {
+        this.createItem(printer);
+      }
+      else {
+        this.updateItem(printer);
+      }
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
+  }
 
 }
