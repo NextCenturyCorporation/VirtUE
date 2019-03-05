@@ -86,7 +86,7 @@ public class ShareService {
 	/**
 	 * The user whose credentials will be set and used to do the mount (because
 	 * mount.cifs(8) can only use default user credentials and ignores
-	 * {@value KerberosUtils#KERBEROS_CCACHE_ENV_VAR}.
+	 * {@value KerberosUtils#KERBEROS_CCACHE_ENV_VAR}).
 	 */
 	@Value("${savior.cifsproxy.mountUser:mounter}")
 	public String mountUser;
@@ -329,9 +329,9 @@ public class ShareService {
 				+ "\n" + "valid users = " + virtue.getUsername() + "\n");
 		// TODO someday add "hosts allow = " when we can get info about which hosts will
 		// be connecting
-		if (!share.getPermissions().contains(FileShare.SharePermissions.WRITE)) {
-			config.append("read only = yes\n");
-		}
+		String readOnly = share.getPermissions().contains(FileShare.SharePermissions.WRITE) ? "no" : "yes";
+		config.append("read only = " + readOnly + "\n");
+
 		LOGGER.exit(config.toString());
 		return config.toString();
 	}
@@ -481,10 +481,13 @@ public class ShareService {
 		String simpleUsername = username.split("@")[0];
 
 		boolean readOnly = !share.getPermissions().contains(SharePermissions.WRITE);
+		String localUser = virtueService.getVirtue(share.getVirtueId()).getUsername();
 		// The "vers=3.0" may help avoid hangs that sometimes occur with mount.cifs. See
 		// https://askubuntu.com/questions/752398/mount-cifs-hangs-and-becomes-unresponsive
+		// Setting a non-root user (uid) and file_mode and dir_mode both to 0777 seems
+		// to be required for remounts to be writable.
 		String options = "username=" + simpleUsername + (readOnly ? ",ro" : "") + ",sec=krb5,vers=3.0,cruid="
-				+ mountUser;
+				+ mountUser + ",uid=" + localUser + ",file_mode=0777,dir_mode=0777";
 		String[] args = { "sudo", MOUNT_COMMAND, "-t", "cifs", "//" + share.getServer() + sourcePath, canonicalDest,
 				"-v", "-o", options };
 		LOGGER.debug("mount command: " + Arrays.toString(args));
