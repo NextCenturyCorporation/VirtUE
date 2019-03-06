@@ -126,13 +126,10 @@ EOF
 	  "sudo touch /etc/samba/virtue-shares.conf",
 	  "sudo systemctl enable smbd nmbd",
 	  "sudo systemctl start smbd nmbd",
-	  "sudo cp --target-directory=/usr/local/lib /tmp/${basename(var.proxy_jar)}",
+	  "sudo cp --target-directory=${var.proxy_jar_dest} /tmp/${basename(var.proxy_jar)}",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
 	  "sudo dpkg -i /tmp/${basename(var.netplan_deb)}",
-#	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
-#	  "sleep 5",
-#	  "sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname} --verbose"
 	]
   }  
 
