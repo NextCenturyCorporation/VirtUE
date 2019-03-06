@@ -38,10 +38,11 @@ public class SambaConfigManager {
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(SambaConfigManager.class);
 
 	/**
-	 * It's not safe to run the {@link #SAMBA_CONFIG_HELPER} multiple times
-	 * simultaneously, so use this object to serialize runs.
+	 * Serializes modifications to the samba config tree.
+	 *
+	 * @see #sambaConfigDir
 	 */
-	protected static final Object SAMBA_CONFIG_HELPER_LOCK = new Object();
+	protected static final Object SAMBA_CONFIG_TREE_LOCK = new Object();
 
 	/**
 	 * A regular expression for a valid character in a POSIX filename (for POSIX
@@ -88,13 +89,15 @@ public class SambaConfigManager {
 	@PostConstruct
 	protected void createConfigDirectory() throws UncheckedIOException {
 		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
-		if (!configDir.exists()) {
-			LOGGER.trace("making directory " + configDir);
-			if (!configDir.mkdirs()) {
-				UncheckedIOException wse = new UncheckedIOException("could not create mount directory: " + configDir,
-						new IOException());
-				LOGGER.throwing(wse);
-				throw wse;
+		synchronized (SAMBA_CONFIG_TREE_LOCK) {
+			if (!configDir.exists()) {
+				LOGGER.trace("making directory " + configDir);
+				if (!configDir.mkdirs()) {
+					UncheckedIOException wse = new UncheckedIOException(
+							"could not create mount directory: " + configDir, new IOException());
+					LOGGER.throwing(wse);
+					throw wse;
+				}
 			}
 		}
 	}
@@ -126,6 +129,15 @@ public class SambaConfigManager {
 		return filename.toString();
 	}
 
+	/**
+	 * Compute the config file for a service
+	 * 
+	 * @param name
+	 *                     name of the service
+	 * @param virtueId
+	 *                     virtue to which it belongs
+	 * @return where its config should be stored
+	 */
 	private File getSambaConfigFile(String name, String virtueId) {
 		LOGGER.entry(name, virtueId);
 		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
@@ -146,24 +158,34 @@ public class SambaConfigManager {
 		LOGGER.entry(name, virtueId, config);
 		File configFile = getSambaConfigFile(name, virtueId);
 		File virtueConfigDir = configFile.getParentFile();
-		LOGGER.debug("creating config directory '" + virtueConfigDir.getAbsolutePath() + "'");
-		if (!virtueConfigDir.exists() && !virtueConfigDir.mkdirs()) {
-			throw new IOException("could not create config dir: " + virtueConfigDir);
-		}
-		LOGGER.debug("writing config file '" + configFile.getAbsolutePath() + "'");
-		try (FileWriter configWriter = new FileWriter(configFile)) {
-			configWriter.write(config);
+		synchronized (SAMBA_CONFIG_TREE_LOCK) {
+			LOGGER.debug("creating config directory '" + virtueConfigDir.getAbsolutePath() + "'");
+			if (!virtueConfigDir.exists() && !virtueConfigDir.mkdirs()) {
+				throw new IOException("could not create config dir: " + virtueConfigDir);
+			}
+			LOGGER.debug("writing config file '" + configFile.getAbsolutePath() + "'");
+			try (FileWriter configWriter = new FileWriter(configFile)) {
+				configWriter.write(config);
+			}
 		}
 		updateSambaConfig();
 		LOGGER.exit();
 	}
 
+	/**
+	 * Update the master samba config to include the existing config files. This
+	 * method will block if invoked simulaneously by more than one thread.
+	 * 
+	 * @throws IOException
+	 *                         if there was a problem running the helper script
+	 * @see #SAMBA_CONFIG_HELPER
+	 */
 	private void updateSambaConfig() throws IOException {
 		LOGGER.entry();
 		ProcessBuilder processBuilder = new ProcessBuilder(SAMBA_CONFIG_HELPER);
 		processBuilder.directory(new File(sambaConfigDir));
 		int retval;
-		synchronized (SAMBA_CONFIG_HELPER_LOCK) {
+		synchronized (SAMBA_CONFIG_TREE_LOCK) {
 			Process process = processBuilder.start();
 			try {
 				retval = process.waitFor();
@@ -181,9 +203,28 @@ public class SambaConfigManager {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Remove the config file associated with a service.
+	 * 
+	 * @param name
+	 *                     service name
+	 * @param virtueId
+	 *                     virtue the service belongs to
+	 * @throws IOException
+	 *                         if there was an error updating the configuration
+	 */
 	void removeConfigFile(String name, String virtueId) throws IOException {
 		File sambaConfigFile = getSambaConfigFile(name, virtueId);
-		Files.deleteIfExists(sambaConfigFile.toPath());
+		synchronized (SAMBA_CONFIG_TREE_LOCK) {
+			Files.deleteIfExists(sambaConfigFile.toPath());
+			// clean up the directory if it's empty
+			File parent = sambaConfigFile.getParentFile();
+			String[] siblings = parent.list();
+			if (siblings.length == 0) {
+				parent.delete();
+			}
+		}
+		updateSambaConfig();
 	}
 
 	void initExportedName(SambaService service) {

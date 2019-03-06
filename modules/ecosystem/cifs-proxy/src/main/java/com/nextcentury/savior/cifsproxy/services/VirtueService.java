@@ -299,4 +299,58 @@ public class VirtueService {
 		}
 		return users;
 	}
+
+	public void removeVirtue(String id) throws IOException {
+		Virtue virtue = virtuesById.get(id);
+		if (virtue == null) {
+			IllegalStateException ise = new IllegalStateException("virtue does not exist: " + id);
+			LOGGER.throwing(ise);
+			throw ise;
+		}
+		deleteSambaUser(virtue);
+		deleteLinuxUser(virtue);
+		virtuesById.remove(id);
+	}
+
+	private void deleteSambaUser(Virtue virtue) throws IOException {
+		ProcessBuilder pb = new ProcessBuilder("sudo", "smbpasswd", "-x", virtue.getUsername());
+		Process process = pb.start();
+		LOGGER.trace("waiting for smbpassword...");
+		boolean processDone;
+		try {
+			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			InterruptedIOException ioe = new InterruptedIOException("smbpasswd process was interrupted");
+			ioe.initCause(e);
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+		LOGGER.trace("...done waiting for smbpassword");
+		if (!processDone) {
+			IOException ioe = new IOException("smbpasswd took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+	}
+
+	private void deleteLinuxUser(Virtue virtue) throws IOException {
+		ProcessBuilder pb = new ProcessBuilder("sudo", "deluser", virtue.getUsername());
+		Process process = pb.start();
+		LOGGER.trace("waiting for deluser...");
+		boolean processDone;
+		try {
+			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			InterruptedIOException ioe = new InterruptedIOException("deluser process was interrupted");
+			ioe.initCause(e);
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+		LOGGER.trace("...done waiting for deluser");
+		if (!processDone) {
+			IOException ioe = new IOException("deluser took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+	}
 }

@@ -9,6 +9,8 @@ import javax.xml.ws.WebServiceException;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.WebServerException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,5 +55,18 @@ public class VirtueController {
 		Virtue virtue = service.getVirtue(id);
 		LOGGER.exit(virtue);
 		return virtue;
-	}	
+	}
+
+	@DeleteMapping("/virtue/{id}")
+	void removeVirtue(@PathVariable String id) {
+		LOGGER.entry();
+		try {
+			service.removeVirtue(id);
+		} catch (IllegalArgumentException | IOException e) {
+			WebServerException wse = new WebServerException("exception removing a Virtue", e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
+		LOGGER.exit();
+	}
 }
