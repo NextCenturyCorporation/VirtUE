@@ -2,7 +2,6 @@ package com.nextcentury.savior.cifsproxy.services;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
@@ -68,17 +67,6 @@ public class ShareService {
 	private static final String[] MOUNT_QUERY_COMMAND_ARGS = { "--json", "--canonicalize", "--types", "cifs",
 			"--nofsroot" };
 
-	/**
-	 * A regular expression for a valid character in a POSIX filename (for POSIX
-	 * "fully portable filenames").
-	 */
-	private static final String POSIX_FILENAME_CHAR_REGEX = "[0-9A-Za-z._-]";
-
-	/**
-	 * Maximum length of a POSIX-compliant filename.
-	 */
-	private static final int POSIX_FILENAME_MAX_LEN = 14;
-
 	/** where to mount files for the Virtue */
 	@Value("${savior.cifsproxy.mountRoot:/mnt/cifs-proxy}")
 	public String MOUNT_ROOT;
@@ -92,37 +80,14 @@ public class ShareService {
 	public String mountUser;
 
 	/**
-	 * The directory where the Samba config files live (e.g., smb.conf).
-	 */
-	@Value("${savior.cifsproxy.sambaConfigDir:/etc/samba}")
-	protected String sambaConfigDir;
-
-	/**
-	 * The relative path under {@link #sambaConfigDir} where individual share config
-	 * files live.
-	 */
-	@Value("${savior.cifsproxy.virtueSharesConfigDir:virtue-shares}")
-	protected String virtueSharesConfigDir;
-
-	/**
-	 * The helper shell program that creates the "virtue-shares.conf" file used as
-	 * part of the samba config.
-	 */
-	@Value("${savior.cifsproxy.sambaConfigHelper:make-virtue-shares.sh}")
-	protected String SAMBA_CONFIG_HELPER;
-
-	/**
 	 * Required: Active Directory security domain.
 	 */
 	@Value("${savior.security.ad.domain}")
 	private String adDomain;
 
-	/**
-	 * It's not safe to run the {@link #SAMBA_CONFIG_HELPER} multiple times
-	 * simultaneously, so use this object to serialize runs.
-	 */
-	protected static final Object SAMBA_CONFIG_HELPER_LOCK = new Object();
-
+	@Autowired
+	private SambaConfigManager sambaConfigManager;
+	
 	@Autowired
 	private VirtueService virtueService;
 
@@ -151,23 +116,13 @@ public class ShareService {
 	 * @see #MOUNT_ROOT
 	 */
 	@PostConstruct
-	private void createRequiredDirectories() {
+	private void createMountDirectory() {
 		LOGGER.entry();
 		File mountRoot = new File(MOUNT_ROOT);
 		if (!mountRoot.exists()) {
 			LOGGER.trace("making directory: " + MOUNT_ROOT);
 			if (!mountRoot.mkdirs()) {
 				UncheckedIOException wse = new UncheckedIOException("could not create mount directory: " + MOUNT_ROOT,
-						new IOException());
-				LOGGER.throwing(wse);
-				throw wse;
-			}
-		}
-		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
-		if (!configDir.exists()) {
-			LOGGER.trace("making directory " + configDir);
-			if (!configDir.mkdirs()) {
-				UncheckedIOException wse = new UncheckedIOException("could not create mount directory: " + configDir,
 						new IOException());
 				LOGGER.throwing(wse);
 				throw wse;
@@ -248,7 +203,7 @@ public class ShareService {
 		}
 		try {
 			mountShare(session, share);
-			exportShare(share);
+			sambaConfigManager.writeShareConfig(share.getName(), share.getVirtueId(), makeShareConfig(share));
 		} catch (IOException | RuntimeException e) {
 			// undo the mount and clean up
 			try {
@@ -262,61 +217,6 @@ public class ShareService {
 			throw e;
 		}
 		LOGGER.exit();
-	}
-
-	/**
-	 * Configure Samba to export the file share.
-	 * 
-	 * @param share
-	 *                  file share to export
-	 * @throws IOException
-	 */
-	private void exportShare(FileShare share) throws IOException {
-		LOGGER.entry(share);
-		File configFile = getSambaConfigFile(share);
-		File virtueConfigDir = configFile.getParentFile();
-		LOGGER.debug("creating config directory '" + virtueConfigDir.getAbsolutePath() + "'");
-		if (!virtueConfigDir.exists() && !virtueConfigDir.mkdirs()) {
-			throw new IOException("could not create config dir: " + virtueConfigDir);
-		}
-		LOGGER.debug("writing config file '" + share.getName() + ".conf" + "'");
-		try (FileWriter configWriter = new FileWriter(configFile)) {
-			configWriter.write(makeShareConfig(share));
-		}
-		updateSambaConfig();
-		LOGGER.exit();
-	}
-
-	private void updateSambaConfig() throws IOException {
-		LOGGER.entry();
-		ProcessBuilder processBuilder = new ProcessBuilder(SAMBA_CONFIG_HELPER);
-		processBuilder.directory(new File(sambaConfigDir));
-		int retval;
-		synchronized (SAMBA_CONFIG_HELPER_LOCK) {
-			Process process = processBuilder.start();
-			try {
-				retval = process.waitFor();
-			} catch (InterruptedException e) {
-				LOGGER.warn("Samba configuration helper was interrupted. Samba configuration may not be correct.");
-				retval = 0;
-			}
-		}
-		if (retval != 0) {
-			IOException e = new IOException(
-					"error result from Samba configuration helper '" + SAMBA_CONFIG_HELPER + "': " + retval);
-			LOGGER.throwing(e);
-			throw e;
-		}
-		LOGGER.exit();
-	}
-
-	private File getSambaConfigFile(FileShare share) {
-		LOGGER.entry(share);
-		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
-		File virtueConfigDir = new File(configDir, sanitizeFilename(share.getVirtueId()));
-		File configFile = new File(virtueConfigDir, sanitizeFilename(share.getName()) + ".conf");
-		LOGGER.exit(configFile);
-		return configFile;
 	}
 
 	private String makeShareConfig(FileShare share) {
@@ -394,38 +294,11 @@ public class ShareService {
 		LOGGER.entry(fs);
 		String mountPoint = mountPoints.get(fs);
 		if (mountPoint == null) {
-			mountPoint = sanitizeFilename(fs.getVirtueId()) + File.separator + fs.getExportedName();
+			mountPoint = SambaConfigManager.sanitizeFilename(fs.getVirtueId()) + File.separator + fs.getExportedName();
 			mountPoints.put(fs, mountPoint);
 		}
 		LOGGER.exit(mountPoint);
 		return mountPoint;
-	}
-
-	/**
-	 * Make sure a name is suitable as a file name. Nearly all *nix filesystems
-	 * allow any character except '/' (and null), but our filenames are only used
-	 * internally so we can afford to be conservative and go with POSIX compliance
-	 * (see {@link #POSIX_FILENAME_CHAR_REGEX}).
-	 * 
-	 * @param name
-	 *                 original name
-	 * @return a version of <code>name</code> that is a suitable (POSIX) filename
-	 */
-	private static String sanitizeFilename(String name) {
-		LOGGER.entry(name);
-		StringBuilder filename = new StringBuilder();
-		Pattern charRegex = Pattern.compile(POSIX_FILENAME_CHAR_REGEX);
-		int maxLen = Math.min(name.length(), POSIX_FILENAME_MAX_LEN);
-		for (int i = 0; i < maxLen; i++) {
-			char c = name.charAt(i);
-			if (charRegex.matcher(String.valueOf(c)).matches()) {
-				filename.append(c);
-			} else {
-				filename.append("_");
-			}
-		}
-		LOGGER.exit(filename.toString());
-		return filename.toString();
 	}
 
 	/**
@@ -560,8 +433,7 @@ public class ShareService {
 		processBuilder.command(command);
 		LOGGER.trace("Running unmount: " + String.join(" ", command));
 		KerberosUtils.runProcess(processBuilder, "unmount " + share.getName());
-		File sambaConfigFile = getSambaConfigFile(share);
-		Files.deleteIfExists(sambaConfigFile.toPath());
+		sambaConfigManager.removeConfigFile(share.getName(), share.getVirtueId());
 		LOGGER.exit();
 	}
 

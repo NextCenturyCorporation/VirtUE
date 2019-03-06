@@ -3,6 +3,7 @@
  */
 package com.nextcentury.savior.cifsproxy.controllers;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
@@ -57,7 +58,7 @@ public class PrinterController {
 		Printer newPrinter;
 		try {
 			newPrinter = service.newPrinter(session, printer);
-		} catch (IllegalArgumentException | TemplateException e) {
+		} catch (IllegalArgumentException | TemplateException | IOException e) {
 			WebServerException wse = new WebServerException("exception adding a printer", e);
 			LOGGER.throwing(wse);
 			throw wse;
@@ -71,7 +72,7 @@ public class PrinterController {
 		LOGGER.entry();
 		try {
 			service.removePrinter(name);
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | IOException e) {
 			WebServerException wse = new WebServerException("exception removing a printer", e);
 			LOGGER.throwing(wse);
 			throw wse;

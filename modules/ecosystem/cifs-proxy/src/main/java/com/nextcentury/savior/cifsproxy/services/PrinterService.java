@@ -49,6 +49,9 @@ public class PrinterService {
 	private VirtueService virtueService;
 
 	@Autowired
+	private SambaConfigManager sambaConfigManager;
+	
+	@Autowired
 	private FreeMarkerTemplateService templateService;
 	
 	private Map<String, Printer> printers;
@@ -69,7 +72,7 @@ public class PrinterService {
 		return printer;
 	}
 
-	public Printer newPrinter(HttpSession session, Printer printer) throws IllegalArgumentException, TemplateException {
+	public Printer newPrinter(HttpSession session, Printer printer) throws IllegalArgumentException, TemplateException, IOException {
 		LOGGER.entry(session, printer);
 		if (printer.getName() == null || printer.getName().isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("name cannot be empty");
@@ -161,7 +164,7 @@ public class PrinterService {
 		LOGGER.exit(processBuilder);
 	}
 
-	private void addPrinterConfiguration(Printer printer, String domainUser) throws TemplateException {
+	private void addPrinterConfiguration(Printer printer, String domainUser) throws TemplateException, IOException {
 		StringWriter stringWriter = new StringWriter();
 		Map<String, Object> printerConfigParams = new HashMap<>();
 		printerConfigParams.put("domainUser", domainUser);
@@ -171,12 +174,19 @@ public class PrinterService {
 		printerConfigParams.put("serviceName", printer.getServiceName());
 		templateService.processTemplate(printerConfigTemplate, stringWriter, printerConfigParams);
 		String configContents = stringWriter.toString();
-		// TODO: write configContents to a samba .conf file
+		sambaConfigManager.writeShareConfig(printer.getName(), printer.getVirtueId(), configContents);
 	}
 	
-	public void removePrinter(String name) throws IllegalArgumentException {
+	public void removePrinter(String name) throws IllegalArgumentException, IOException {
 		LOGGER.entry(name);
-		// TODO
+		Printer printer = printers.get(name);
+		if (printer == null) {
+			IllegalArgumentException ise = new IllegalArgumentException("unknown printer '" + name + "'");
+			LOGGER.throwing(ise);
+			throw ise;
+		}
+		sambaConfigManager.removeConfigFile(name, printer.getVirtueId());
+		printers.remove(name);
 		LOGGER.exit();
 	}
 

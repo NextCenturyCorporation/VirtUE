@@ -13,7 +13,7 @@ class FileShareTest {
 
 	@Test
 	void testInitExportedName_reinit() {
-		FileShare share = new FileShare("aname", "ID", "server", "/path",
+		SambaService share = new FileShare("aname", "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
 		share.initExportedName(Collections.emptySet());
 		assertThrows(IllegalStateException.class, () -> share.initExportedName(Collections.emptySet()));
@@ -22,7 +22,7 @@ class FileShareTest {
 	@Test
 	void testInitExportedName_simple() throws Exception {
 		String simpleName = "MyPrinter";
-		FileShare share = new FileShare(simpleName, "ID", "server", "/path",
+		SambaService share = new FileShare(simpleName, "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
 		share.initExportedName(Collections.emptySet());
 		assertEquals(simpleName, share.getExportedName());
@@ -34,7 +34,7 @@ class FileShareTest {
 		FileShare share = new FileShare(simpleName, "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
 		share.initExportedName(Collections.emptySet());
-		FileShare share2 = new FileShare(simpleName, "ID", "server", "/path",
+		SambaService share2 = new FileShare(simpleName, "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
 		share2.initExportedName(Collections.singleton(share));
 		assertEquals(simpleName + "2", share2.getExportedName());
@@ -43,10 +43,10 @@ class FileShareTest {
 	@Test
 	void testInitExportedName_tooLong() throws Exception {
 		String longName = "APrinterNameThatIsWayTooLong9012345678901234567890123456789012345678901234567890PastTheEnd";
-		assertThat(longName.length(), greaterThan(FileShare.MAX_SHARE_NAME_LENGTH));
-		FileShare share = new FileShare(longName, "ID", "server", "/path",
+		assertThat(longName.length(), greaterThan(SambaService.MAX_SHARE_NAME_LENGTH));
+		SambaService share = new FileShare(longName, "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
 		share.initExportedName(Collections.emptySet());
-		assertEquals(longName.substring(0, FileShare.MAX_SHARE_NAME_LENGTH), share.getExportedName());
+		assertEquals(longName.substring(0, SambaService.MAX_SHARE_NAME_LENGTH), share.getExportedName());
 	}
 }
