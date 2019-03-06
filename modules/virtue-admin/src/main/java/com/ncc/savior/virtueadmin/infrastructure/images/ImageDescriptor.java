@@ -12,4 +12,9 @@ public class ImageDescriptor {
 		return templatePath;
 	}
 
+	@Override
+	public String toString() {
+		return "ImageDescriptor [templatePath=" + templatePath + "]";
+	}
+
 }

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,12 +287,21 @@ public class SshUtil {
 		return output;
 	}
 
-	public static List<String> runScriptFromFile(ITemplateService templateService, Session session,
-			String templateName, Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
+	public static List<String> runScriptFromFile(ITemplateService templateService, Session session, String templateName,
+			Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
-		String line = String.join("\n", lines);
-		List<String> o = SshUtil.sendCommandFromSession(session, line);
-		return o;
+		String cmd = Arrays.stream(lines).filter((line) -> {
+			return (!line.trim().isEmpty());
+		}).collect(Collectors.joining("\n"));
+		// String line = String.join("\n", lines);
+		if (cmd.isEmpty()) {
+			ArrayList<String> list = new ArrayList<String>();
+			list.add("#No command sent.");
+			return list;
+		} else {
+			List<String> o = SshUtil.sendCommandFromSession(session, cmd);
+			return o;
+		}
 	}
 
 	public static List<String> runCommandsFromFileWithTimeout(ITemplateService templateService, Session session,

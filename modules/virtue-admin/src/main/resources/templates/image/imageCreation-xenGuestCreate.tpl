@@ -1,0 +1,1 @@
+cd ./app-domains; sudo ./create.sh ${templatePath} ${xenVm.name} ${securityRole}

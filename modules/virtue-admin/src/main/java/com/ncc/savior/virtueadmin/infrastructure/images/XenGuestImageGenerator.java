@@ -49,7 +49,7 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class XenGuestImageGenerator {
-	private static final String S3_UPLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
+	private static final String S3_UPLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Upload";
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestImageGenerator.class);
 	private Collection<String> securityGroupIds;
 	private String systemUser = "System";
@@ -93,20 +93,24 @@ public class XenGuestImageGenerator {
 		this.xenKeyName = xenKeyName;
 		this.xenInstanceType = InstanceType.fromValue(xenInstanceTypeStr);
 		this.iamRoleName = iamRoleName;
+		this.region = region;
+		this.bucket = bucket;
+		this.kmsKey = kmsKey;
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate-ImageCreation",
 				OS.LINUX, xenAmi, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), systemUser);
 	}
 
 	public void init() {
 		sync();
+	}
 
-		// TODO remove this thread this is only for easy testing
-		// TODO still remove this thread
+	private void startTestThread() {
 		new Thread(() -> {
 			while (true) {
 				try {
 					String templatePath = "test-" + System.currentTimeMillis();
 					ImageResult image = createNewDomUImage(new ImageDescriptor(templatePath)).get();
+					logger.debug(image.toString());
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -160,14 +164,28 @@ public class XenGuestImageGenerator {
 					Session sshDom0Session = SshUtil.getConnectedSession(xenVm, privateKeyFile);
 					Map<String, Object> dataModel = new HashMap<String, Object>();
 					dataModel.put("xenVm", xenVm);
+					dataModel.put("basePath", "base-image");
 					// run pre-dom0 scripts
 					List<String> lines = SshUtil.runScriptFromFile(templateService, sshDom0Session,
 							"image/imageCreation-Dom0Before.tpl", dataModel);
 					// start base DomU
 					VirtualMachine xenGuestVm = startDomU(xenVm, imageLoginUser, sshDom0Session);
 					dataModel.put("guestVm", xenGuestVm);
-					JavaUtil.sleepAndLogInterruption(4000);
-					Session sshDomUSession = SshUtil.getConnectedSessionWithRetries(xenGuestVm, privateKeyFile, 5, 500);
+					Session sshDomUSession;
+					// for some reason, the domU session isn't stable at first. This gets stable
+					// session.
+					while (true) {
+						try {
+							logger.debug("trying to create domU session");
+							sshDomUSession = SshUtil.getConnectedSessionWithRetries(xenGuestVm, privateKeyFile, 5, 500);
+							SshUtil.sendCommandFromSession(sshDomUSession, "echo 'session test' > session.log");
+							break;
+						} catch (Exception e) {
+							JavaUtil.sleepAndLogInterruption(500);
+							continue;
+						}
+					}
+					
 					// run pre-domU scripts
 					lines = SshUtil.runScriptFromFile(templateService, sshDomUSession,
 							"image/imageCreation-DomUBefore.tpl", dataModel);
@@ -180,9 +198,11 @@ public class XenGuestImageGenerator {
 					lines = SshUtil.runScriptFromFile(templateService, sshDom0Session,
 							"image/imageCreation-Dom0After.tpl", dataModel);
 					// shutdown domU
-					dataModel.put("vm", xenGuestVm);
-					lines = SshUtil.runCommandsFromFile(templateService, sshDom0Session, "xen-guest-stop.tpl",
-							dataModel);
+					lines = SshUtil.runCommandsFromFile(templateService, sshDom0Session,
+							"image/imageCreation-xenGuestStop.tpl", dataModel);
+
+					// wait for shutdown
+					// ????
 
 					// push files
 					String templatePath = imageDescriptor.getTemplatePath();
@@ -225,10 +245,11 @@ public class XenGuestImageGenerator {
 		SshUtil.sendCommandFromSession(dom0Session,
 				"mv ~/app-domains/master-orig/swap.qcow2 ~/app-domains/base-image/; mv ~/app-domains/master-orig/*generic* ~/app-domains/base-image/;");
 		HashMap<String, Object> model = new HashMap<String, Object>();
-		model.put("vm", xenVm);
+		model.put("xenVm", xenVm);
 		model.put("templatePath", "base-image");
 		model.put("securityRole", "god");
-		List<String> lines = SshUtil.runCommandsFromFile(templateService, dom0Session, "xen-guest-create.tpl", model);
+		List<String> lines = SshUtil.runCommandsFromFile(templateService, dom0Session,
+				"image/imageCreation-xenGuestCreate.tpl", model);
 		logger.debug("provision guest output: " + lines);
 		ipAddress = XenGuestManager.getGuestVmIpAddress(dom0Session, xenVm.getName());
 

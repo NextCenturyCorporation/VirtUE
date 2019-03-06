@@ -292,7 +292,7 @@
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+		<constructor-arg value="${virtue.imageCreation.xen.iamRole}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>

@@ -12,4 +12,9 @@ public class ImageResult {
 		return templatePath;
 	}
 
+	@Override
+	public String toString() {
+		return "ImageResult [templatePath=" + templatePath + "]";
+	}
+
 }
