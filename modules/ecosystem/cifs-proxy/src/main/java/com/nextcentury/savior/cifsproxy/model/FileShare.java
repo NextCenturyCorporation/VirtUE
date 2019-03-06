@@ -12,7 +12,7 @@ import org.springframework.lang.NonNull;
  * @author clong
  *
  */
-public class FileShare extends SambaService implements Comparable<FileShare>, Exportable {
+public class FileShare extends SambaService implements Comparable<FileShare> {
 
 	static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
 

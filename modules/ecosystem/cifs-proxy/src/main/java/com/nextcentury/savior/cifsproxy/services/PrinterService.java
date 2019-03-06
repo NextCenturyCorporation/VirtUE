@@ -175,6 +175,7 @@ public class PrinterService {
 	}
 
 	private void addPrinterConfiguration(Printer printer, String domainUser) throws TemplateException, IOException {
+		LOGGER.entry(printer, domainUser);
 		StringWriter stringWriter = new StringWriter();
 		Map<String, Object> printerConfigParams = new HashMap<>();
 		printerConfigParams.put("domainUser", domainUser);
@@ -185,6 +186,7 @@ public class PrinterService {
 		templateService.processTemplate(printerConfigTemplate, stringWriter, printerConfigParams);
 		String configContents = stringWriter.toString();
 		sambaConfigManager.writeShareConfig(printer.getName(), printer.getVirtueId(), configContents);
+		LOGGER.exit();
 	}
 
 	public void removePrinter(String name) throws IllegalArgumentException, IOException {

@@ -88,6 +88,7 @@ public class SambaConfigManager {
 	 */
 	@PostConstruct
 	protected void createConfigDirectory() throws UncheckedIOException {
+		LOGGER.entry();
 		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
 		synchronized (SAMBA_CONFIG_TREE_LOCK) {
 			if (!configDir.exists()) {
@@ -100,6 +101,7 @@ public class SambaConfigManager {
 				}
 			}
 		}
+		LOGGER.exit();
 	}
 
 	/**
@@ -214,6 +216,7 @@ public class SambaConfigManager {
 	 *                         if there was an error updating the configuration
 	 */
 	void removeConfigFile(String name, String virtueId) throws IOException {
+		LOGGER.entry(name, virtueId);
 		File sambaConfigFile = getSambaConfigFile(name, virtueId);
 		synchronized (SAMBA_CONFIG_TREE_LOCK) {
 			Files.deleteIfExists(sambaConfigFile.toPath());
@@ -225,19 +228,24 @@ public class SambaConfigManager {
 			}
 		}
 		updateSambaConfig();
+		LOGGER.exit();
 	}
 
 	void initExportedName(SambaService service) {
+		LOGGER.entry(service);
 		synchronized (exportedServiceNames) {
 			service.initExportedName(exportedServiceNames);
 			exportedServiceNames.add(service.getExportedName());
 		}
+		LOGGER.exit();
 	}
 
 	void unregisterExportedName(String exportedName) {
+		LOGGER.entry(exportedName);
 		synchronized (exportedServiceNames) {
 			exportedServiceNames.remove(exportedName);
 		}
+		LOGGER.exit();
 	}
 
 }

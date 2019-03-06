@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author clong
  *
  */
-public class Printer extends SambaService implements Exportable {
+public class Printer extends SambaService {
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(Printer.class);
 
 	public Printer(@NonNull String name, @NonNull String virtueId, @NonNull String server) {

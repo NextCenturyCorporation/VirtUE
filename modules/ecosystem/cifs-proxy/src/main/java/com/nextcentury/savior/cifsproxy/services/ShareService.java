@@ -35,7 +35,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
-import com.nextcentury.savior.cifsproxy.model.Exportable;
 import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.model.FileShare.SharePermissions;
 import com.nextcentury.savior.cifsproxy.model.FileShare.ShareType;
@@ -520,7 +519,7 @@ public class ShareService {
 		shareService.scan();
 		Set<FileShare> shares = shareService.getShares();
 		System.out.println("Found " + shares.size() + " shares:");
-		for (Exportable fileShare : shares) {
+		for (FileShare fileShare : shares) {
 			System.out.println(fileShare);
 		}
 	}

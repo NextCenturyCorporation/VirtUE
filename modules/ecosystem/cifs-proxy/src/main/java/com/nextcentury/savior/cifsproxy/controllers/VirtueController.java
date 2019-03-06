@@ -59,7 +59,7 @@ public class VirtueController {
 
 	@DeleteMapping("/virtue/{id}")
 	void removeVirtue(@PathVariable String id) {
-		LOGGER.entry();
+		LOGGER.entry(id);
 		try {
 			service.removeVirtue(id);
 		} catch (IllegalArgumentException | IOException e) {

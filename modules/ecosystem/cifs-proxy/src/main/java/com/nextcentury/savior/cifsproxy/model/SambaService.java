@@ -42,6 +42,7 @@ public abstract class SambaService {
 	 * @return
 	 */
 	protected static String createExportName(String shareName, Collection<String> existingNames) {
+		LOGGER.entry(shareName, existingNames);
 		String startingName = shareName.trim();
 		StringBuilder exportName = new StringBuilder();
 		// replace invalid characters
@@ -68,6 +69,7 @@ public abstract class SambaService {
 			exportName.replace(newBaseLength, exportName.length(), suffixAsString);
 		}
 
+		LOGGER.exit(exportName.toString());
 		return exportName.toString();
 	}
 
@@ -100,6 +102,7 @@ public abstract class SambaService {
 	}
 
 	public void initExportedName(Collection<String> existingExportedNames) throws IllegalStateException {
+		LOGGER.entry(existingExportedNames);
 		if (exportedName != null && exportedName.length() != 0) {
 			IllegalStateException e = new IllegalStateException(
 					"cannot init already-set exportedName '" + exportedName + "'");
@@ -107,6 +110,7 @@ public abstract class SambaService {
 			throw e;
 		}
 		exportedName = createExportName(name, existingExportedNames);
+		LOGGER.exit();
 	}
 
 }
