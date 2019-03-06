@@ -103,14 +103,6 @@ public class ShareService {
 	protected Map<String, FileShare> sharesByName = new ConcurrentHashMap<>();
 
 	/**
-	 * Locked while coming up with an export name that doesn't conflict.
-	 * 
-	 * @see #sharesByName
-	 * @see FileShare#createExportName(FileShare)
-	 */
-	final protected Object sharesByNameAddLock = new Object();
-
-	/**
 	 * Ensure that the root mountpoint exists.
 	 * 
 	 * @see #MOUNT_ROOT
@@ -197,10 +189,8 @@ public class ShareService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		synchronized (sharesByNameAddLock) {
-			share.initExportedName(sharesByName.values());
-			sharesByName.put(share.getName(), share);
-		}
+		sambaConfigManager.initExportedName(share);
+		sharesByName.put(share.getName(), share);
 		try {
 			mountShare(session, share);
 			sambaConfigManager.writeShareConfig(share.getName(), share.getVirtueId(), makeShareConfig(share));

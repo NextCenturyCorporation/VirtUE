@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +22,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
+import com.nextcentury.savior.cifsproxy.model.SambaService;
 
 /**
  * Manages configuration files for Samba. Prevents multiple services from
@@ -70,6 +73,8 @@ public class SambaConfigManager {
 	 */
 	@Value("${savior.cifsproxy.sambaConfigHelper:make-virtue-shares.sh}")
 	protected String SAMBA_CONFIG_HELPER;
+
+	private Set<String> exportedServiceNames = new HashSet<>();
 
 	/**
 	 * Make our Samba config directory, if necessary.
@@ -179,6 +184,19 @@ public class SambaConfigManager {
 	void removeConfigFile(String name, String virtueId) throws IOException {
 		File sambaConfigFile = getSambaConfigFile(name, virtueId);
 		Files.deleteIfExists(sambaConfigFile.toPath());
+	}
+
+	void initExportedName(SambaService service) {
+		synchronized (exportedServiceNames) {
+			service.initExportedName(exportedServiceNames);
+			exportedServiceNames.add(service.getExportedName());
+		}
+	}
+
+	void unregisterExportedName(String exportedName) {
+		synchronized (exportedServiceNames) {
+			exportedServiceNames.remove(exportedName);
+		}
 	}
 
 }

@@ -50,11 +50,11 @@ public class PrinterService {
 
 	@Autowired
 	private SambaConfigManager sambaConfigManager;
-	
+
 	@Autowired
 	private FreeMarkerTemplateService templateService;
-	
-	private Map<String, Printer> printers;
+
+	private Map<String, Printer> printers = new HashMap<>();
 
 	@Value("${savior.cifsproxy.printerconfig:printer-config.tpl}")
 	private String printerConfigTemplate;
@@ -72,7 +72,8 @@ public class PrinterService {
 		return printer;
 	}
 
-	public Printer newPrinter(HttpSession session, Printer printer) throws IllegalArgumentException, TemplateException, IOException {
+	public Printer newPrinter(HttpSession session, Printer printer)
+			throws IllegalArgumentException, TemplateException, IOException {
 		LOGGER.entry(session, printer);
 		if (printer.getName() == null || printer.getName().isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("name cannot be empty");
@@ -101,12 +102,21 @@ public class PrinterService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		printer.initExportedName(printers.values());
 		cacheCredentials(session, printer);
 		validatePrinter(printer);
-		String domainUser = (String) session.getAttribute(ActiveDirectorySecurityConfig.USERNAME_ATTRIBUTE);
-		addPrinterConfiguration(printer, domainUser);
-		printers.put(printer.getName(), printer);
+		boolean unregisterName = true;
+		try {
+			sambaConfigManager.initExportedName(printer);
+
+			String domainUser = (String) session.getAttribute(ActiveDirectorySecurityConfig.USERNAME_ATTRIBUTE);
+			addPrinterConfiguration(printer, domainUser);
+			printers.put(printer.getName(), printer);
+			unregisterName = false;
+		} finally {
+			if (unregisterName) {
+				sambaConfigManager.unregisterExportedName(printer.getExportedName());
+			}
+		}
 
 		LOGGER.exit(printer);
 		return printer;
@@ -169,14 +179,14 @@ public class PrinterService {
 		Map<String, Object> printerConfigParams = new HashMap<>();
 		printerConfigParams.put("domainUser", domainUser);
 		printerConfigParams.put("exportedName", printer.getExportedName());
-		printerConfigParams.put("localUser", virtueService.getVirtue(printer.getVirtueId()).getUsername());		
+		printerConfigParams.put("localUser", virtueService.getVirtue(printer.getVirtueId()).getUsername());
 		printerConfigParams.put("name", printer.getName());
 		printerConfigParams.put("serviceName", printer.getServiceName());
 		templateService.processTemplate(printerConfigTemplate, stringWriter, printerConfigParams);
 		String configContents = stringWriter.toString();
 		sambaConfigManager.writeShareConfig(printer.getName(), printer.getVirtueId(), configContents);
 	}
-	
+
 	public void removePrinter(String name) throws IllegalArgumentException, IOException {
 		LOGGER.entry(name);
 		Printer printer = printers.get(name);

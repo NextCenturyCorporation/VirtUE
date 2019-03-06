@@ -1,8 +1,6 @@
 package com.nextcentury.savior.cifsproxy.model;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -38,12 +36,12 @@ public abstract class SambaService {
 	 * It also must be different from any export names currently in use, where case
 	 * is not significant.
 	 * 
-	 * @param existingExportables
+	 * @param existingNames
 	 * 
 	 * @param share
 	 * @return
 	 */
-	protected static String createExportName(String shareName, Collection<? extends Exportable> existingExportables) {
+	protected static String createExportName(String shareName, Collection<String> existingNames) {
 		String startingName = shareName.trim();
 		StringBuilder exportName = new StringBuilder();
 		// replace invalid characters
@@ -60,8 +58,6 @@ public abstract class SambaService {
 		}
 
 		// ensure there are no duplicates
-		List<String> existingNames = existingExportables.stream().map(Exportable::getExportedName)
-				.map(String::toLowerCase).collect(Collectors.toList());
 		int suffix = 1;
 		int baseLength = exportName.length();
 		while (existingNames.contains(exportName.toString().toLowerCase())) {
@@ -103,14 +99,14 @@ public abstract class SambaService {
 		return exportedName;
 	}
 
-	public void initExportedName(Collection<? extends Exportable> existingExportables) throws IllegalStateException {
+	public void initExportedName(Collection<String> existingExportedNames) throws IllegalStateException {
 		if (exportedName != null && exportedName.length() != 0) {
 			IllegalStateException e = new IllegalStateException(
 					"cannot init already-set exportedName '" + exportedName + "'");
 			LOGGER.throwing(e);
 			throw e;
 		}
-		exportedName = createExportName(name, existingExportables);
+		exportedName = createExportName(name, existingExportedNames);
 	}
 
 }

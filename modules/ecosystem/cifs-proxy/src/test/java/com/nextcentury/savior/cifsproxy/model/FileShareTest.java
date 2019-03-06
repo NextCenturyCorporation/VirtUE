@@ -36,7 +36,7 @@ class FileShareTest {
 		share.initExportedName(Collections.emptySet());
 		SambaService share2 = new FileShare(simpleName, "ID", "server", "/path",
 				Collections.singleton(FileShare.SharePermissions.READ), FileShare.ShareType.CIFS);
-		share2.initExportedName(Collections.singleton(share));
+		share2.initExportedName(Collections.singleton(share.getExportedName()));
 		assertEquals(simpleName + "2", share2.getExportedName());
 	}
 
