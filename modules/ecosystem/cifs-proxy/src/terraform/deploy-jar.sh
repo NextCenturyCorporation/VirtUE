@@ -17,4 +17,4 @@ jarDest=$(getValue var.proxy_jar_dest)
 make -j2 proxy-jar
 scp -i "${privateKey}" "${jar}" ${user}@${cifsHost}:/tmp
 ssh -i "${privateKey}" ${user}@${cifsHost} sudo mv "/tmp/$(basename ${jar})" "${jarDest}"
-echo deployed to ${cifsHost} at ${remoteJar}
+echo deployed to ${cifsHost} at ${jarDest}

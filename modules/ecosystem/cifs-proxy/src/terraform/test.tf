@@ -9,9 +9,9 @@ resource "local_file" "test_remote_setup_sh" {
 #
 sudo apt-get install -y jq
 
-sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password '${var.admin_password}' --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose
+sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password '${var.admin_password}' --hostname ${local.myname} --dcip ${local.ds_private_ip}
 sleep 5
-sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password '${var.admin_password}' --delegater ${local.myname} --target ${local.fsname} --verbose
+sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password '${var.admin_password}' --delegater ${local.myname} --target ${local.fsname}
 EOF
   filename = "${path.module}/test-remote-setup.sh"
 }
