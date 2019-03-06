@@ -68,3 +68,6 @@ modules/ecosystem/netplan/netplan.io_0.95-2_amd64.*
 /modules/ecosystem/netplan/netplan.io_0.95.orig.tar.gz
 **/Thumbs.db
 **/Thumbs.db:encryptable
+/modules/ecosystem/cifs-proxy/src/terraform/*.log
+/modules/ecosystem/cifs-proxy/src/terraform/terraform.tfstate*.backup
+/modules/ecosystem/cifs-proxy/src/terraform/test-remote-setup.sh
