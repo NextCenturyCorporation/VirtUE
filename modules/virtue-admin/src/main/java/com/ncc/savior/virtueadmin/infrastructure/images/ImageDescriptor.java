@@ -8,6 +8,10 @@ public class ImageDescriptor {
 		this.templatePath = templatePath;
 	}
 
+	public ImageDescriptor() {
+
+	}
+
 	public String getTemplatePath() {
 		return templatePath;
 	}
@@ -16,5 +20,4 @@ public class ImageDescriptor {
 	public String toString() {
 		return "ImageDescriptor [templatePath=" + templatePath + "]";
 	}
-
 }
