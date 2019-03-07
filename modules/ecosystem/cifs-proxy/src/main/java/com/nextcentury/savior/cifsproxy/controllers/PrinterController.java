@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.nextcentury.savior.cifsproxy.model.Printer;
@@ -29,6 +30,7 @@ import com.nextcentury.savior.cifsproxy.services.PrinterService;
  * @author clong
  *
  */
+@RestController
 public class PrinterController {
 
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(PrinterController.class);
@@ -36,7 +38,7 @@ public class PrinterController {
 	@Autowired
 	private PrinterService service;
 	
-	@GetMapping("printer")
+	@GetMapping("/printer")
 	Collection<Printer> getPrinters() {
 		LOGGER.entry();
 		Collection<Printer> printers = service.getPrinters();
@@ -44,7 +46,7 @@ public class PrinterController {
 		return printers;
 	}
 	
-	@GetMapping("/share/{name}")
+	@GetMapping("/printer/{name}")
 	Printer getPrinter(@PathVariable String name) {
 		LOGGER.entry(name);
 		Printer printer = service.getPrinter(name);
@@ -68,7 +70,7 @@ public class PrinterController {
 	}
 
 	@DeleteMapping("/printer/{name}")
-	void removeShare(@PathVariable String name) {
+	void removePrinter(@PathVariable String name) {
 		LOGGER.entry();
 		try {
 			service.removePrinter(name);
