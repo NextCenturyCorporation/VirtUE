@@ -126,12 +126,11 @@ cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
 echo security = ${security}
 echo realm = ${domain}
 echo workgroup = "${domainPrefix}"
-echo kerberos method = secrets and keytab
-echo include = /etc/samba/virtue.conf
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
 	-e '/ *printing *=/,$d' \
     /etc/samba/smb.conf
+echo include = /etc/samba/virtue.conf >> /etc/samba/smb.conf
 if [ "${keepKeytab}" -eq 0 -a -n "${service}" ]; then
 	echo "${domainAdminPassword}" | net -k ads keytab flush -U ${domainAdmin}
 	echo "${domainAdminPassword}" | net -k ads keytab add ${service} -U ${domainAdmin}
