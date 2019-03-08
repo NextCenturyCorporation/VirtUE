@@ -126,6 +126,11 @@ cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
 echo security = ${security}
 echo realm = ${domain}
 echo workgroup = "${domainPrefix}"
+# It seems like we should be able to put the kerberos method in
+# virtue.conf, but then the net ads keytab operations fail. Might be
+# related to https://bugzilla.samba.org/show_bug.cgi?id=9734 or
+# https://bugzilla.samba.org/show_bug.cgi?id=12949
+echo kerberos method = secrets and keytab
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
 	-e '/ *printing *=/,$d' \
