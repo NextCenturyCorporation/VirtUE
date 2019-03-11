@@ -282,6 +282,11 @@
 		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
+	<bean name="packageInstaller"
+		class="com.ncc.savior.virtueadmin.infrastructure.images.AnsiblePackageInstaller"
+		init-method="init">
+	</bean>
+
 	<bean name="xenGuestImageGenerator"
 		class="com.ncc.savior.virtueadmin.infrastructure.images.XenGuestImageGenerator"
 		init-method="init">
@@ -289,6 +294,7 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
+		<constructor-arg ref="packageInstaller"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>

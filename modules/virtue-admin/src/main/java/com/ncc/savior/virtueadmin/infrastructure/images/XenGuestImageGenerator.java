@@ -90,13 +90,15 @@ public class XenGuestImageGenerator {
 	private String xenWithBaseDomUAmi;
 	private String baseLinuxAmi;
 	private String xenDomUAmi;
+	private IPackageInstaller packageInstaller;
 
 	public XenGuestImageGenerator(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, CompletableFutureServiceProvider serviceProvider,
-			String xenWithBaseDomUAmi, String xenInstanceTypeStr, String securityGroupsCommaSeparated,
-			String iamRoleName, String xenKeyName, String xenLoginUser, String subnetName, String region, String bucket,
-			String kmsKey) {
+			IPackageInstaller packageInstaller, String xenWithBaseDomUAmi, String xenInstanceTypeStr,
+			String securityGroupsCommaSeparated, String iamRoleName, String xenKeyName, String xenLoginUser,
+			String subnetName, String region, String bucket, String kmsKey) {
 		super();
+		this.packageInstaller = packageInstaller;
 		serverId = serverIdProvider.getServerId();
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.subnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, ec2Wrapper);
@@ -114,13 +116,14 @@ public class XenGuestImageGenerator {
 		this.kmsKey = kmsKey;
 		this.xenLoginUser = xenLoginUser;
 		this.xenWithBaseDomUAmi = xenWithBaseDomUAmi;
-		this.baseLinuxAmi = "ami-02da3a138888ced85";
+		//TODO remove hard code and make property
+		this.baseLinuxAmi = "ami-ae8ba4d1";
 
 	}
 
 	public void init() {
 		sync();
-
+		startDom0TestThread();
 	}
 
 	private void startDom0TestThread() {
@@ -196,7 +199,7 @@ public class XenGuestImageGenerator {
 					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
 							ImageBuildModifer.prior.toString());
 					// run ansible
-					// TODO ANSIBLE
+					packageInstaller.installPackages(stage, imageDescriptor, dataModel);
 
 					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
 							ImageBuildModifer.prior.toString());
@@ -249,7 +252,7 @@ public class XenGuestImageGenerator {
 							ImageBuildModifer.prior.toString());
 
 					// run ansible
-					// TODO ANSIBLE
+					packageInstaller.installPackages(stage, imageDescriptor, dataModel);
 
 					// runScript(sshDomuSession, dataModel, stage,
 					// ImageBuildTarget.domu,
@@ -304,7 +307,7 @@ public class XenGuestImageGenerator {
 					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
 							ImageBuildModifer.prior.toString());
 					// run ansible
-					// TODO ANSIBLE
+					packageInstaller.installPackages(stage, imageDescriptor, dataModel);
 					// run post-domU scripts
 					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
 							ImageBuildModifer.post.toString());
