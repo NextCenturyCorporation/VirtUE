@@ -98,6 +98,11 @@ variable "proxy_jar" {
   default = "../../build/libs/cifs-proxy-server-0.0.1.jar"
 }
 
+variable "proxy_jar_dest" {
+  description = "Destination for the proxy jar file (on the cifs proxy)"
+  default = "/usr/local/lib"
+}
+
 variable "helper_program_location" {
   default = "../.."
 }

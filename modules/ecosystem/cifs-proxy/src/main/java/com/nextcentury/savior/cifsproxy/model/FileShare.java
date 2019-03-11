@@ -12,9 +12,9 @@ import org.springframework.lang.NonNull;
  * @author clong
  *
  */
-public class FileShare implements Comparable<FileShare> {
+public class FileShare extends SambaService implements Comparable<FileShare> {
 
-	private static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
+	static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
 
 	/**
 	 * In the future we may support other types.
@@ -23,7 +23,7 @@ public class FileShare implements Comparable<FileShare> {
 	 *
 	 */
 	public enum ShareType {
-	CIFS
+		CIFS
 	};
 
 	/**
@@ -36,14 +36,9 @@ public class FileShare implements Comparable<FileShare> {
 		READ, WRITE
 	}
 
-	private String name;
-	private String virtueId;
-	private String server;
 	private String path;
 	private Set<SharePermissions> permissions;
 	private ShareType type;
-	private String exportedName;
-
 	/**
 	 * 
 	 * @param name
@@ -68,30 +63,6 @@ public class FileShare implements Comparable<FileShare> {
 		this.path = path;
 		this.permissions = permissions;
 		this.type = type;
-	}
-
-	/**
-	 * 
-	 * @return name of the share
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * 
-	 * @return the name of the Virtue
-	 */
-	public String getVirtueId() {
-		return virtueId;
-	}
-
-	/**
-	 * 
-	 * @return the server where this share lives
-	 */
-	public String getServer() {
-		return server;
 	}
 
 	/**
@@ -141,18 +112,5 @@ public class FileShare implements Comparable<FileShare> {
 	public String toString() {
 		return "name: " + name + ", path: " + path + ", permissions: " + permissions + ", server: " + server
 				+ ", type: " + type;
-	}
-
-	public String getExportedName() {
-		return exportedName;
-	}
-	
-	public void initExportedName(String name) {
-		if (exportedName != null && exportedName.length() != 0) {
-			IllegalStateException e = new IllegalStateException("cannot init already-set exportedName '" + exportedName + "'");
-			LOGGER.throwing(e);
-			throw e;
-		}
-		exportedName = name;
 	}
 }

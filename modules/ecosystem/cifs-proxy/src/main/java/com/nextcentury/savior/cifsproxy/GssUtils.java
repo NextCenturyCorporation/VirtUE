@@ -326,6 +326,8 @@ public class GssUtils {
 			case GssApi.GSS_S_DEFECTIVE_CREDENTIAL:
 				result.append("<GSS_S_DEFECTIVE_CREDENTIAL>");
 				break;
+			default:
+				result.append("<UNKNOWN RESULT " + retval + ">");
 			}
 		} finally {
 			if (credName.getValue() != null) {

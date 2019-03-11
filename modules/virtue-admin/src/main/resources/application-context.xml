@@ -213,7 +213,7 @@
 	</bean>
 
 	<bean name="templateService"
-		class="com.ncc.savior.virtueadmin.template.FreeMakerTemplateService">
+		class="com.ncc.savior.virtueadmin.template.FreeMarkerTemplateService">
 		<constructor-arg value="templates"></constructor-arg>
 	</bean>
 

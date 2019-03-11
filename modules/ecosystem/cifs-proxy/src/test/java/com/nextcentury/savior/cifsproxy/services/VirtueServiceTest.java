@@ -30,7 +30,7 @@ class VirtueServiceTest {
 	@Test
 	void testCreateUsername_numbers() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
-		Virtue virtue = new Virtue("13thing42", "test");
+		Virtue virtue = new Virtue("13_thing42", "test");
 		String username = virtueService.createUsername(virtue);
 		assertEquals("thing42", username);
 	}

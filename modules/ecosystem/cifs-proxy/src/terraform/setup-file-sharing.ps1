@@ -11,6 +11,6 @@ Import-Module ActiveDirectory
 $password = ConvertTo-SecureString -AsPlainText -Force "${admin_password}"
 $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist Admin, $password
 $fileserver = Get-ADComputer -Identity fileserver -Credential $cred
-$webserver = Get-ADComputer -Identity webserver -Credential $cred
-Set-ADComputer -Identity $fileserver -PrincipalsAllowedToDelegateToAccount $webserver -Credential $cred
-Set-ADComputer $webserver -add @{"msDS-AllowedToDelegateTo"="cifs/fileserver.test.savior"} -Credential $cred
+$cifsProxy = Get-ADComputer -Identity cifs-proxy -Credential $cred
+Set-ADComputer -Identity $fileserver -PrincipalsAllowedToDelegateToAccount $cifsProxy -Credential $cred
+Set-ADComputer $cifsProxy -add @{"msDS-AllowedToDelegateTo"="cifs/fileserver.test.savior"} -Credential $cred

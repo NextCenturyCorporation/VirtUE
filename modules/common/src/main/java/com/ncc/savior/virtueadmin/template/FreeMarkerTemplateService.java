@@ -19,7 +19,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateNotFoundException;
 
 /**
- * Implementation of {@link ITemplateService} which uses FreeMaker as the
+ * Implementation of {@link ITemplateService} which uses FreeMarker as the
  * implementation. This implementation utilizes a default/override system for
  * templates. With a given templatePath (constructor arg), the service searchs
  * for templates first in that path on the working directory. If a template
@@ -29,12 +29,12 @@ import freemarker.template.TemplateNotFoundException;
  * 
  *
  */
-public class FreeMakerTemplateService implements ITemplateService {
-	private static final Logger logger = LoggerFactory.getLogger(FreeMakerTemplateService.class);
+public class FreeMarkerTemplateService implements ITemplateService {
+	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerTemplateService.class);
 	private Configuration workingCfg;
 	private Configuration classpathCfg;
 
-	public FreeMakerTemplateService(String templatePath) {
+	public FreeMarkerTemplateService(String templatePath) {
 		File workingDirTemplates = new File(templatePath);
 		// if (workingDirTemplates.exists()) {
 		workingCfg = new Configuration(Configuration.VERSION_2_3_27);
@@ -47,11 +47,11 @@ public class FreeMakerTemplateService implements ITemplateService {
 		} catch (FileNotFoundException e) {
 			logger.warn("local template directory "+workingDirTemplates.getAbsolutePath()+" not found.  Using default templates only!");
 		} catch (IOException e) {
-			logger.error("error setting up FreeMaker", e);
+			logger.error("error setting up FreeMarker", e);
 		}
 		// }
 		classpathCfg = new Configuration(Configuration.VERSION_2_3_27);
-		classpathCfg.setClassForTemplateLoading(FreeMakerTemplateService.class, "/templates");
+		classpathCfg.setClassForTemplateLoading(FreeMarkerTemplateService.class, "/templates");
 		classpathCfg.setDefaultEncoding("UTF-8");
 		classpathCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 		classpathCfg.setLogTemplateExceptions(false);
@@ -95,7 +95,7 @@ public class FreeMakerTemplateService implements ITemplateService {
 
 	public static void main(String[] args)
 			throws MalformedTemplateNameException, ParseException, IOException, TemplateException {
-		ITemplateService ts = new FreeMakerTemplateService("templates");
+		ITemplateService ts = new FreeMarkerTemplateService("templates");
 		Map<String, Object> dataModel = new HashMap<String, Object>();
 		HashMap<String, String> nfs = new HashMap<String, String>();
 		nfs.put("internalIpAddress", "1.1.1.1");

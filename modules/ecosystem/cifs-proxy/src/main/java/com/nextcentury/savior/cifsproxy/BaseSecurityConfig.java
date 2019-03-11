@@ -39,7 +39,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * @author clong
 	 *
 	 */
-	protected class FakeUserDetailsService implements UserDetailsService {
+	protected static class FakeUserDetailsService implements UserDetailsService {
 
 		@Override
 		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

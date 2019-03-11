@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nextcentury.savior.cifsproxy.model.FileShare;
+import com.nextcentury.savior.cifsproxy.model.SambaService;
 import com.nextcentury.savior.cifsproxy.services.ShareService;
 
 /**
@@ -39,13 +40,13 @@ public class ShareController {
 	@GetMapping("/share")
 	List<FileShare> getShares() {
 		LOGGER.entry();
-		ArrayList<FileShare> shares = new ArrayList<>(service.getShares());
+		List<FileShare> shares = new ArrayList<>(service.getShares());
 		LOGGER.exit(shares);
 		return shares;
 	}
 
 	@GetMapping("/share/{name}")
-	FileShare getShare(@PathVariable String name) {
+	SambaService getShare(@PathVariable String name) {
 		LOGGER.entry(name);
 		FileShare share = service.getShare(name);
 		LOGGER.exit(share);
@@ -53,7 +54,7 @@ public class ShareController {
 	}
 
 	@PostMapping("/share")
-	FileShare newShare(HttpSession session, @RequestBody FileShare share) {
+	SambaService newShare(HttpSession session, @RequestBody FileShare share) {
 		LOGGER.entry(session, share);
 		try {
 			service.newShare(session, share);

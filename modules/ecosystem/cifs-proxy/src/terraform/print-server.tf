@@ -3,10 +3,10 @@
 #
 
 locals {
-  myname = "webserver"
+  psname = "printserver"
 }
 
-resource "aws_instance" "user_facing_server" {
+resource "aws_instance" "print_server" {
   ami           = "${var.linux_ami}"
   instance_type = "${var.linux_instance_type}"
   key_name      = "vrtu"
@@ -15,9 +15,9 @@ resource "aws_instance" "user_facing_server" {
   subnet_id = "${data.aws_subnet.public_subnet.id}"
 
   tags {
-	Name = "${local.myname}"
+	Name = "${local.psname}"
 	Owner = "${data.external.local_user.result.user}"
-	class = "webserver"
+	class = "printserver"
 	automated = "terraform"
   }
   lifecycle {
@@ -26,24 +26,26 @@ resource "aws_instance" "user_facing_server" {
 
   user_data = <<EOF
 #!/bin/bash
-set -x
+set -x -e
 exec > /var/log/user_data.log 2>&1
 date
 # prevent questions about kerberos configuration (it'll get set by post-deploy-config.sh)
 export DEBIAN_FRONTEND=noninteractive
 apt-get update && \
+apt-get -y --with-new-pkgs upgrade && \
 apt-get -y install \
 	adcli \
 	auth-client-config \
-	cifs-utils \
+	cups \
+	ghostscript \
 	keyutils \
 	krb5-user \
 	libnss-sss \
 	libpam-ccreds \
 	libpam-krb5 \
 	libpam-sss \
-	openjdk-8-jdk-headless \
 	packagekit \
+	printer-driver-cups-pdf \
 	realmd \
 	samba \
 	samba-dsdb-modules \
@@ -51,9 +53,6 @@ apt-get -y install \
 	sssd-tools
 
 sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
-
-# create user that will mount files
-useradd --shell /bin/false --no-create-home mounter
 
 date
 touch /tmp/user_data-finished
@@ -71,46 +70,14 @@ EOF
 	private_key = "${file(var.user_private_key_file)}"
   }
   
-  # custom config file for samba
-  provisioner "file" {
-	source = "virtue.conf"
-	destination = "/tmp/virtue.conf"
-  }
-
-  # the CIFS Proxy jar file
-  provisioner "file" {
-	source = "${var.proxy_jar}"
-	destination = "/tmp/${basename(var.proxy_jar)}"
-  }
-
   #
   # Helper programs
   #
   provisioner "file" {
-	source = "${var.helper_program_location}/${var.import_creds_program}"
-	destination = "/tmp/${var.import_creds_program}"
-  }
-
-  provisioner "file" {
-	source = "${var.helper_program_location}/${var.switch_principal_program}"
-	destination = "/tmp/${var.switch_principal_program}"
-  }
-
-  provisioner "file" {
-	source = "make-virtue-shares.sh"
-	destination = "/tmp/make-virtue-shares.sh"
-  }
-  
-  provisioner "file" {
 	source = "post-deploy-config.sh"
 	destination = "/tmp/post-deploy-config.sh"
   }
-  
-  provisioner "file" {
-	source = "allow-delegation.sh"
-	destination = "/tmp/allow-delegation.sh"
-  }
-  
+
   provisioner "file" {
 	source = "${var.netplan_deb}"
 	destination = "/tmp/${basename(var.netplan_deb)}"
@@ -119,17 +86,13 @@ EOF
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
-	  "sudo cp /tmp/virtue.conf /etc/samba/",
-	  "sudo touch /etc/samba/virtue-shares.conf",
 	  "sudo systemctl enable smbd nmbd",
 	  "sudo systemctl start smbd nmbd",
-	  "sudo cp --target-directory=/usr/local/lib /tmp/${basename(var.proxy_jar)}",
+	  "sudo touch /etc/samba/virtue.conf",
+	  "sudo dpkg -i /tmp/${basename(var.netplan_deb)}",
 	  # install will make them executable by default
-	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
-	  "dpkg -i /tmp/${basename(var.netplan_deb)}",
-	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
-	  "sleep 5",
-	  "sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname} --verbose"
+	  "sudo install --target-directory=/usr/local/bin /tmp/post-deploy-config.sh",
+	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.psname} --dcip ${local.ds_private_ip} --service cifs --security ads --keep-keytab --verbose",
 	]
   }  
 
