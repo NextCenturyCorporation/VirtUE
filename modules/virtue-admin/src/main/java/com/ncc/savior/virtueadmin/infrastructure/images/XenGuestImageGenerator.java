@@ -88,9 +88,15 @@ public class XenGuestImageGenerator {
 	private String bucket;
 	private String xenLoginUser;
 	private String xenWithBaseDomUAmi;
-	private String baseLinuxAmi;
-	private String xenDomUAmi;
+
 	private IPackageInstaller packageInstaller;
+
+	@Value("${virtue.imageCreation.initialAmi.linux}")
+	private String baseLinuxAmi;
+	@Value("${virtue.imageCreation.initialAmi.dom0}")
+	private String linuxWithDom0Ami;
+	// @Value("${virtue.imageCreation.initialAmi.baseDomU}")
+	// private String linuxWithBaseDomUAmi;
 
 	public XenGuestImageGenerator(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, CompletableFutureServiceProvider serviceProvider,
@@ -116,14 +122,12 @@ public class XenGuestImageGenerator {
 		this.kmsKey = kmsKey;
 		this.xenLoginUser = xenLoginUser;
 		this.xenWithBaseDomUAmi = xenWithBaseDomUAmi;
-		//TODO remove hard code and make property
-		this.baseLinuxAmi = "ami-ae8ba4d1";
 
 	}
 
 	public void init() {
 		sync();
-		startDom0TestThread();
+		startDom0AndTestThread();
 	}
 
 	private void startDom0TestThread() {
@@ -131,6 +135,20 @@ public class XenGuestImageGenerator {
 			try {
 				ImageDescriptor desc = new ImageDescriptor("XenDom0-" + System.currentTimeMillis());
 				CompletableFuture<Dom0ImageResult> future = createNewDom0Ami(desc);
+				future.get();
+				logger.debug("test done");
+			} catch (InterruptedException | ExecutionException e) {
+				logger.debug("test failed", e);
+			}
+		}).start();
+	}
+
+	private void startDom0AndTestThread() {
+		new Thread(() -> {
+			try {
+				ImageDescriptor desc = new ImageDescriptor("XenDomUBase-" + System.currentTimeMillis());
+				desc.setDom0Ami("ami-057aa501f6499629b");
+				CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(desc);
 				future.get();
 				logger.debug("test done");
 			} catch (InterruptedException | ExecutionException e) {
@@ -183,7 +201,9 @@ public class XenGuestImageGenerator {
 
 	public CompletableFuture<Dom0ImageResult> createNewDom0Ami(ImageDescriptor imageDescriptor) {
 		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(baseLinuxAmi, "Xen-Dom0");
+		String linuxAmi = (imageDescriptor.getBaseLinuxAmi() != null ? imageDescriptor.getBaseLinuxAmi()
+				: baseLinuxAmi);
+		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(linuxAmi, "Xen-Dom0");
 		vmFuture.handle((xenVm, ex) -> {
 			if (ex != null) {
 				logger.error("Error creating Dom0!", ex);
@@ -233,9 +253,35 @@ public class XenGuestImageGenerator {
 				+ template + "\n  " + output);
 	}
 
-	public CompletableFuture<Dom0ImageResult> createnewDomUBaseImage(ImageDescriptor imageDescriptor) {
+	public CompletableFuture<Dom0ImageResult> createNewDomUBaseImage(ImageDescriptor imageDescriptor) {
+		if (!JavaUtil.isNotEmpty(imageDescriptor.getDom0Ami())) {
+			imageDescriptor.setDom0Ami(linuxWithDom0Ami);
+		}
+		if (JavaUtil.isNotEmpty(imageDescriptor.getDom0Ami())) {
+			return createNewDomUBaseImageDirect(imageDescriptor);
+		} else {
+			// We don't have a Dom0 image yet, we need to create it!
+			// TODO this image descriptor isn't quite right.
+			CompletableFuture<Dom0ImageResult> future = createNewDom0Ami(imageDescriptor);
+
+			return future.thenApply((ret) -> {
+				Dom0ImageResult result;
+				try {
+					result = future.get();
+					imageDescriptor.setDom0Ami(result.getAmi());
+					return createNewDomUBaseImageDirect(imageDescriptor).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new SaviorException(SaviorErrorCode.AWS_ERROR,
+							"Error creating Dom0 image with DomU base image");
+				}
+			});
+		}
+	}
+
+	private CompletableFuture<Dom0ImageResult> createNewDomUBaseImageDirect(ImageDescriptor imageDescriptor) {
 		ImageBuildStage stage = ImageBuildStage.domuBase;
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(this.xenDomUAmi, "DomUBase");
+		String dom0Ami = imageDescriptor.getDom0Ami() != null ? imageDescriptor.getDom0Ami() : linuxWithDom0Ami;
+		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(dom0Ami, "DomUBase");
 		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
 		vmFuture.handle((xenVm, ex) -> {
 			if (ex != null) {
@@ -277,12 +323,40 @@ public class XenGuestImageGenerator {
 		});
 		return imageResultFuture;
 	}
-
+	
+	
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
+		if (!JavaUtil.isNotEmpty(imageDescriptor.getBaseDomUAmi())) {
+			imageDescriptor.setBaseDomUAmi(xenWithBaseDomUAmi);
+		}
+		if (JavaUtil.isNotEmpty(imageDescriptor.getDom0Ami())) {
+			return createNewDomUSnapshotImageDirect(imageDescriptor);
+		} else {
+			// We don't have a DomUbase image yet, we need to create it!
+			// TODO this image descriptor isn't quite right.
+			CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(imageDescriptor);
+
+			return future.thenApply((ret) -> {
+				Dom0ImageResult result;
+				try {
+					result = future.get();
+					imageDescriptor.setDom0Ami(result.getAmi());
+					return createNewDomUSnapshotImageDirect(imageDescriptor).get();
+				} catch (InterruptedException | ExecutionException e) {
+					throw new SaviorException(SaviorErrorCode.AWS_ERROR,
+							"Error creating Dom0 image with DomU base image");
+				}
+			});
+		}
+	}
+
+	private CompletableFuture<ImageResult> createNewDomUSnapshotImageDirect(ImageDescriptor imageDescriptor) {
 		String imageLoginUser = "user";
 		ImageBuildStage stage = ImageBuildStage.domuSnapshot;
 		// get Dom0Vm
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(this.xenWithBaseDomUAmi, "DomUSnapshot");
+		String baseDomUAmi = imageDescriptor.getBaseDomUAmi() != null ? imageDescriptor.getBaseDomUAmi()
+				: this.xenWithBaseDomUAmi;
+		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(baseDomUAmi, "DomUSnapshot");
 		CompletableFuture<ImageResult> imageResultFuture = new CompletableFuture<ImageResult>();
 
 		vmFuture.handle((xenVm, ex) -> {
