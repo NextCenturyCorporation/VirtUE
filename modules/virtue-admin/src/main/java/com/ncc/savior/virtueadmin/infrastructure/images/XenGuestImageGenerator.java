@@ -48,6 +48,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurp
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.infrastructure.mixed.BaseXenTemplateProvider;
 import com.ncc.savior.virtueadmin.infrastructure.mixed.XenGuestManager;
 import com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -87,7 +88,6 @@ public class XenGuestImageGenerator {
 	private String kmsKey;
 	private String bucket;
 	private String xenLoginUser;
-	private String xenWithBaseDomUAmi;
 
 	private IPackageInstaller packageInstaller;
 
@@ -97,10 +97,11 @@ public class XenGuestImageGenerator {
 	private String linuxWithDom0Ami;
 	// @Value("${virtue.imageCreation.initialAmi.baseDomU}")
 	// private String linuxWithBaseDomUAmi;
+	private BaseXenTemplateProvider xenImageProvider;
 
 	public XenGuestImageGenerator(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, CompletableFutureServiceProvider serviceProvider,
-			IPackageInstaller packageInstaller, String xenWithBaseDomUAmi, String xenInstanceTypeStr,
+			BaseXenTemplateProvider xenImageProvider, IPackageInstaller packageInstaller, String xenInstanceTypeStr,
 			String securityGroupsCommaSeparated, String iamRoleName, String xenKeyName, String xenLoginUser,
 			String subnetName, String region, String bucket, String kmsKey) {
 		super();
@@ -121,13 +122,13 @@ public class XenGuestImageGenerator {
 		this.bucket = bucket;
 		this.kmsKey = kmsKey;
 		this.xenLoginUser = xenLoginUser;
-		this.xenWithBaseDomUAmi = xenWithBaseDomUAmi;
+		this.xenImageProvider = xenImageProvider;
 
 	}
 
 	public void init() {
 		sync();
-		startDom0AndTestThread();
+//		startDom0AndTestThread();
 	}
 
 	private void startDom0TestThread() {
@@ -149,7 +150,8 @@ public class XenGuestImageGenerator {
 				ImageDescriptor desc = new ImageDescriptor("XenDomUBase-" + System.currentTimeMillis());
 				desc.setDom0Ami("ami-057aa501f6499629b");
 				CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(desc);
-				future.get();
+				Dom0ImageResult result = future.get();
+				xenImageProvider.setXenVmTemplateFromAmi(result.getAmi());
 				logger.debug("test done");
 			} catch (InterruptedException | ExecutionException e) {
 				logger.debug("test failed", e);
@@ -269,7 +271,9 @@ public class XenGuestImageGenerator {
 				try {
 					result = future.get();
 					imageDescriptor.setDom0Ami(result.getAmi());
-					return createNewDomUBaseImageDirect(imageDescriptor).get();
+					Dom0ImageResult finalResult = createNewDomUBaseImageDirect(imageDescriptor).get();
+					xenImageProvider.setXenVmTemplateFromAmi(finalResult.getAmi());
+					return finalResult;
 				} catch (InterruptedException | ExecutionException e) {
 					throw new SaviorException(SaviorErrorCode.AWS_ERROR,
 							"Error creating Dom0 image with DomU base image");
@@ -323,11 +327,10 @@ public class XenGuestImageGenerator {
 		});
 		return imageResultFuture;
 	}
-	
-	
+
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
 		if (!JavaUtil.isNotEmpty(imageDescriptor.getBaseDomUAmi())) {
-			imageDescriptor.setBaseDomUAmi(xenWithBaseDomUAmi);
+			imageDescriptor.setBaseDomUAmi(xenImageProvider.getXenVmTemplate().getTemplatePath());
 		}
 		if (JavaUtil.isNotEmpty(imageDescriptor.getDom0Ami())) {
 			return createNewDomUSnapshotImageDirect(imageDescriptor);
@@ -355,7 +358,7 @@ public class XenGuestImageGenerator {
 		ImageBuildStage stage = ImageBuildStage.domuSnapshot;
 		// get Dom0Vm
 		String baseDomUAmi = imageDescriptor.getBaseDomUAmi() != null ? imageDescriptor.getBaseDomUAmi()
-				: this.xenWithBaseDomUAmi;
+				: this.xenImageProvider.getXenVmTemplate().getTemplatePath();
 		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(baseDomUAmi, "DomUSnapshot");
 		CompletableFuture<ImageResult> imageResultFuture = new CompletableFuture<ImageResult>();
 

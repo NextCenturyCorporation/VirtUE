@@ -38,6 +38,7 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
+import com.ncc.savior.virtueadmin.infrastructure.mixed.BaseXenTemplateProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.FileSystem;
@@ -74,6 +75,9 @@ public class AdminService {
 	@Autowired
 	private SecurityUserService securityService;
 
+	@Autowired
+	private BaseXenTemplateProvider xenTemplateProvider;
+
 	private PersistentStorageManager persistentStorageManager;
 
 	private String initialAdmin;
@@ -88,8 +92,8 @@ public class AdminService {
 	private IVpcSubnetProvider subnetProvider;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager, IResourceManager resourceManager,
-			IVpcSubnetProvider subnetProvider, String initialAdmin) {
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
+			IResourceManager resourceManager, IVpcSubnetProvider subnetProvider, String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
@@ -149,7 +153,7 @@ public class AdminService {
 		}
 	}
 
-	public AdminService( ITemplateManager templateManager) {
+	public AdminService(ITemplateManager templateManager) {
 		verifyAndReturnUser();
 		this.templateManager = templateManager;
 	}
@@ -285,7 +289,8 @@ public class AdminService {
 		return resourceManager.addPrinter(printer);
 	}
 
-// just try deleting something? Either pick out those, or just redo the repo. It's not that back. And then start saving it.
+	// just try deleting something? Either pick out those, or just redo the repo.
+	// It's not that back. And then start saving it.
 
 	public FileSystem createFileSystem(FileSystem fileSystem) {
 		verifyAndReturnUser();
@@ -318,14 +323,13 @@ public class AdminService {
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
 
-		if ( !templateId.equals(template.getId()) ) {
+		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
 			template.setUserCreatedBy(user.getUsername());
 			template.setTimeCreatedAt(new Date());
 		}
 
-
-		//below code just converts IDs from json to actual objects for database.
+		// below code just converts IDs from json to actual objects for database.
 		Collection<String> vmtIds = template.getVmTemplateIds();
 		Iterable<VirtualMachineTemplate> vmts;
 		if (vmtIds == null) {
@@ -339,12 +343,14 @@ public class AdminService {
 			vmTemplateSet.add(itr.next());
 		}
 
-		// create list of printers from the virtueTemplate's printer id list, ignoring duplicates.
+		// create list of printers from the virtueTemplate's printer id list, ignoring
+		// duplicates.
 		List<Printer> printerSet = new ArrayList<Printer>();
 		Collection<String> printerIds = template.getPrinterIds();
 		if (printerIds != null) {
 			Iterable<Printer> itrPrinters = resourceManager.getPrinters(new HashSet<String>(printerIds));
-			itrPrinters.forEach(printerSet::add); // go through the iterator and add each item to the printers ArrayList.
+			itrPrinters.forEach(printerSet::add); // go through the iterator and add each item to the printers
+													// ArrayList.
 		}
 
 		List<FileSystem> fileSystems = new ArrayList<FileSystem>();
@@ -359,7 +365,6 @@ public class AdminService {
 		template.setFileSystems(fileSystems);
 		template.setLastEditor(user.getUsername());
 		template.setLastModification(new Date());
-
 
 		VirtueTemplate savedTemplate = templateManager.addVirtueTemplate(template);
 
@@ -396,8 +401,8 @@ public class AdminService {
 	public void stopVirtue(String virtueId) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance v = virtueManager.getActiveVirtue(virtueId);
-		if( v.getState().equals(VirtueState.RUNNING) || v.getState().equals(VirtueState.CREATING)
-					|| v.getState().equals(VirtueState.LAUNCHING) || v.getState().equals(VirtueState.RESUMING)) {
+		if (v.getState().equals(VirtueState.RUNNING) || v.getState().equals(VirtueState.CREATING)
+				|| v.getState().equals(VirtueState.LAUNCHING) || v.getState().equals(VirtueState.RESUMING)) {
 			virtueManager.stopVirtue(user, v.getId());
 		}
 	}
@@ -719,26 +724,41 @@ public class AdminService {
 	// return securityGroupManager.getAllSecurityGroupPermissions();
 	// }
 
- 	public Iterable<Printer> getAllPrinters() {
- 		verifyAndReturnUser();
- 		return resourceManager.getAllPrinters();
- 	}
+	public Iterable<Printer> getAllPrinters() {
+		verifyAndReturnUser();
+		return resourceManager.getAllPrinters();
+	}
 
- 	public Iterable<FileSystem> getAllFileSystems() {
- 		verifyAndReturnUser();
+	public Iterable<FileSystem> getAllFileSystems() {
+		verifyAndReturnUser();
 		return resourceManager.getAllFileSystems();
- 	}
+	}
 
- 	public Iterable<Printer> getPrintersForVirtueTemplate(String virtueTemplateId) {
- 		verifyAndReturnUser();
+	public Iterable<Printer> getPrintersForVirtueTemplate(String virtueTemplateId) {
+		verifyAndReturnUser();
 		VirtueTemplate virtueTemplate = templateManager.getVirtueTemplate(virtueTemplateId);
 		Map<String, Printer> printers = resourceManager.getPrintersForVirtueTemplate(virtueTemplate);
 		return printers.values();
- 	}
+	}
 
- 	public void clearPrinters() {
- 		verifyAndReturnUser();
- 		resourceManager.clear();
- 	}
+	public void clearPrinters() {
+		verifyAndReturnUser();
+		resourceManager.clear();
+	}
+
+	public VirtualMachineTemplate getXenTemplate() {
+		verifyAndReturnUser();
+		return xenTemplateProvider.getXenVmTemplate();
+	}
+
+	public void setXenTemplate(VirtualMachineTemplate xenVmt) {
+		verifyAndReturnUser();
+		xenTemplateProvider.setXenVmTemplate(xenVmt);
+	}
+
+	public void deleteXenTemplate() {
+		xenTemplateProvider.deleteXenVmTemplate();
+		
+	}
 
 }

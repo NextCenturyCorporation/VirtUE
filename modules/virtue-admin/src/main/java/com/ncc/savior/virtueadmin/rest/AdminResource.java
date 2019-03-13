@@ -1003,4 +1003,22 @@ public class AdminResource {
 		adminService.sync();
 	}
 
+	@GET
+	@Path("xen")
+	public VirtualMachineTemplate getXenVmTemplate() {
+		return adminService.getXenTemplate();
+	}
+
+	@POST
+	@Path("xen")
+	public void setXenVmTemplate(VirtualMachineTemplate xenTemplate) {
+		adminService.setXenTemplate(xenTemplate);
+	}
+	
+	@DELETE
+	@Path("xen")
+	public void deleteXenVmTemplate() {
+		adminService.deleteXenTemplate();
+	}
+
 }
