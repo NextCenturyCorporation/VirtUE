@@ -32,6 +32,9 @@ public class LoggingAlertService implements IUserAlertService {
 	public void displayAlert(BaseAlertMessage alertMessage) {
 		StringBuilder sb = new StringBuilder();
 		Date date = new Date(alertMessage.timeMillis);
+		if (locale==null) {
+			locale=Locale.getDefault();
+		}
 		String formattedDate = dateFormatter.print(date, locale);
 		sb.append("ALERT: ");
 		sb.append(formattedDate).append(" : ");
