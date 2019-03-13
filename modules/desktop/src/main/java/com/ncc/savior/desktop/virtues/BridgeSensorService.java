@@ -83,8 +83,10 @@ public class BridgeSensorService {
 
 	private void connectError(Exception e) throws IOException {
 		logger.error("Error trying to connect to Desktop Bridge Sensor", e);
-		BaseAlertMessage alertMessage = new PlainAlertMessage("Error connecting to Desktop Bridge Sensor",
-				e.getMessage());
+		BaseAlertMessage alertMessage = new PlainAlertMessage(
+				"Error connecting to Desktop Bridge Sensor.  Desktop sensor data will not be collected!",
+				"Error connecting to Desktop Bridge Sensor.  Desktop sensor data will not be collected!  Error message: "
+						+ e.getClass().toString() + " " + e.getMessage());
 		UserAlertingServiceHolder.sendAlert(alertMessage);
 	}
 
