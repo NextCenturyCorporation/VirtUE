@@ -67,7 +67,7 @@ public class SidebarApplication {
 				1000 * 60 * 15);
 
 		long alertPersistTimeMillis = props.getLong(PropertyManager.PROPERTY_ALERT_PERSIST_TIME, 3000);
-
+		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
 		BridgeSensorService bridgeSensorService = new BridgeSensorService(bridgeSensorTimeoutMillis, port, host,
@@ -90,7 +90,7 @@ public class SidebarApplication {
 		IDataGuardDialog dialog = new CopyPasteDialog();
 		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis, dialog);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
-		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
+
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		ColorManager colorManager = new ColorManager();
 		IIconService iconService = new IconResourceService(drs);
