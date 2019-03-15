@@ -2,7 +2,7 @@
     "name": "Microsoft Edge",
     "version": "1.0",
     "os": "WINDOWS",
-    "launchCommand": "microsoft-edge:",
+    "launchCommand": "c:\\windows\\system32\\cmd.exe /c start microsoft-edge:",
     "iconKey": "ms-edge",
     "tags": [
     	"BROWSER"
