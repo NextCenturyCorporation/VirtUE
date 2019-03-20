@@ -176,10 +176,10 @@ public class VirtueService {
 					logger.debug("needed new connection");
 					try {
 						connectionManager.createXpraServerAndAddDisplayToParams(params);
-						if (app.getOs().equals(OS.LINUX)) {
+						//if (app.getOs().equals(OS.LINUX)) {
 							logger.debug("connecting clipboard");
 							clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-						}
+						//}
 					} catch (IOException e) {
 						logger.error("clipboard manager connection failed!", e);
 						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
