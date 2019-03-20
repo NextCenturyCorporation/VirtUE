@@ -254,7 +254,7 @@ public class WindowsDisplayServerManager {
 			Runnable con = () -> {
 				try {
 					Session winSession = SshUtil.getConnectedSession(appVm, keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
-					List<String> out = SshUtil.sendCommandFromSession(winSession, "echo "+application.getLaunchCommand()+ " > c:\\temp\\virtue.txt");
+					List<String> out = SshUtil.sendCommandFromSession(winSession, "echo "+application.getLaunchCommand()+ " > c:\\virtue\\app.txt");
 					logger.debug("app out: "+out);
 					
 					List<String> line = SshUtil.runCommandsFromFileWithTimeout(templateService, session, templateName,

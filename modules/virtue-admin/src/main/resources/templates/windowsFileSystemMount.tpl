@@ -1,1 +1,2 @@
 echo net use ${drive}: \\${cifsVm.internalIpAddress}\${cifsShare.exportedName} ${cifsVirtueParams.password} /USER:${cifsVirtueParams.username} /PERSISTENT:YES > "c:\\Users\\All Users\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\cifs-${drive}.bat"
+echo net use ${drive}: \\${cifsVm.internalIpAddress}\${cifsShare.exportedName} ${cifsVirtueParams.password} /USER:${cifsVirtueParams.username} /PERSISTENT:YES >> "c:\\virtue\\mount.txt"
