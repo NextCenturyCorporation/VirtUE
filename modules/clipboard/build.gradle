@@ -21,6 +21,11 @@ repositories {
 mainClassName = "com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient"
 
 task fatJar(type: Jar) {
+	manifest {
+        attributes(
+                'Main-Class': 'com.ncc.savior.desktop.windows.WindowsApplicationLauncher'
+        )
+    }
     classifier = 'all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

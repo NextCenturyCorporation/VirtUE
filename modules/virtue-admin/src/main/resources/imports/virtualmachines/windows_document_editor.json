@@ -1,7 +1,7 @@
 {
     "name": "Document Editor VM",
     "os": "WINDOWS",
-    "templatePath": "ami-0abf68501390ca26f",
+    "templatePath": "ami-037091d793565d6e3",
     "loginUser": "virtue-admin",
     "enabled": true,
     "applicationIds": [
