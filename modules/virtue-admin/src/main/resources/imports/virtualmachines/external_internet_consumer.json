@@ -1,7 +1,7 @@
 {
     "name": "External Internet Consumer VM",
     "os": "WINDOWS",
-    "templatePath": "ami-037091d793565d6e3",
+    "templatePath": "ami-06cd0ce8eecb66095",
     "loginUser": "virtue-admin",
     "enabled": true,
     "applicationIds": [
