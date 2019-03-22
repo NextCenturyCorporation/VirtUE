@@ -144,8 +144,10 @@
 	<!-- <constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
 	<!-- <constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
 	<!-- </bean> -->
-	
-	<bean name="networkAclManager" class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.NetworkAclManager" init-method="init">
+
+	<bean name="networkAclManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.NetworkAclManager"
+		init-method="init">
 		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
@@ -236,6 +238,17 @@
 		<constructor-arg value="${virtue.aws.persistentStorage.snapshotId}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
 	</bean>
+	<bean name="xenVmProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.StandardXenProvider">
+		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+	</bean>
 
 	<bean name="xenManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager">
@@ -248,13 +261,9 @@
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg ref="templateService"></constructor-arg>
+		<constructor-arg ref="xenVmProvider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.s3.image.bucketName}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
