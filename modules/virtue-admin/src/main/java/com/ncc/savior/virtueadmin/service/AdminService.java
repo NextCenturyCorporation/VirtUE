@@ -38,6 +38,7 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
+import com.ncc.savior.virtueadmin.infrastructure.mixed.PooledXenVmProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.FileSystem;
@@ -110,6 +111,13 @@ public class AdminService {
 					Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
 					for (VirtueInstance virtueId : virtueIds) {
 						existingVirtueIds.add(virtueId.getId());
+					}
+					//find pooled xen instances and their subnets
+					Iterable<VirtualMachine> vms = virtueManager.getAllVirtualMachines();
+					for (VirtualMachine vm:vms) {
+						if (vm.getName().startsWith(PooledXenVmProvider.VM_NAME_POOL_PREFIX)) {
+							existingVirtueIds.add(vm.getId());
+						}
 					}
 					subnetProvider.sync(existingVirtueIds);
 

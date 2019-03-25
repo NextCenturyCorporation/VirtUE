@@ -59,9 +59,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private String serverId;
 	private NetworkAclManager networkAclManager;
 
-	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, NetworkAclManager networkAclManager,String vpcName,
-			String firstCidrBlock, String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId,
-			String availabilityZone) {
+	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider,
+			NetworkAclManager networkAclManager, String vpcName, String firstCidrBlock, String endNonInclusiveCidrBlock,
+			boolean usePublicIp, String routeTableId, String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
 		this.serverId = serverIdProvider.getServerId();
 		this.availabilityZone = availabilityZone;
@@ -107,6 +107,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				cidrRepo.deleteAll(col);
 				try {
 					cidrRepo.save(assignment);
+					logger.debug("resave successful", assignment);
 				} catch (Exception e1) {
 					String msg = "Error attempting to create subnet and store in database";
 					logger.error(msg, e1);
@@ -241,6 +242,26 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	public CidrBlockAssignment getExistingSubnetId(String subnetKey) {
 		Optional<CidrBlockAssignment> opt = cidrRepo.findById(subnetKey);
 		return opt.isPresent() ? opt.get() : null;
+	}
+
+	@Override
+	public void reassignSubnet(String oldId, String newId, List<Tag> tags) {
+		logger.debug(cidrRepo.findAll().toString());
+		Optional<CidrBlockAssignment> opt = cidrRepo.findById(oldId);
+		if (opt.isPresent()) {
+			CidrBlockAssignment cba = opt.get();
+			if (tags != null && !tags.isEmpty()) {
+				CreateTagsRequest createTagsRequest = new CreateTagsRequest(
+						Collections.singletonList(cba.getInfrastructureId()), tags);
+				ec2.createTags(createTagsRequest);
+			}
+			cba.setAssignmentId(newId);
+			cidrRepo.deleteById(oldId);
+			cidrRepo.save(cba);
+		} else {
+
+			logger.error("ERROR Cannot reassign subnet.  oldId="+oldId);
+		}
 	}
 
 	@Override

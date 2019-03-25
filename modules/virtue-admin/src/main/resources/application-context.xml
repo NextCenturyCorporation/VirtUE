@@ -238,16 +238,34 @@
 		<constructor-arg value="${virtue.aws.persistentStorage.snapshotId}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
 	</bean>
+	<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.StandardXenProvider"> -->
+	<!-- class="com.ncc.savior.virtueadmin.infrastructure.mixed.PooledXenVmProvider"> -->
+	
+<!-- 	<bean name="xenVmProvider" -->
+<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.StandardXenProvider"> -->
+<!-- 		<constructor-arg ref="serverIdProvider" /> -->
+<!-- 		<constructor-arg ref="ec2Wrapper"></constructor-arg> -->
+<!-- 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg> -->
+<!-- 	</bean> -->
+	
 	<bean name="xenVmProvider"
-		class="com.ncc.savior.virtueadmin.infrastructure.mixed.StandardXenProvider">
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.PooledXenVmProvider">
 		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.poolSize}"></constructor-arg>
 	</bean>
 
 	<bean name="xenManager"

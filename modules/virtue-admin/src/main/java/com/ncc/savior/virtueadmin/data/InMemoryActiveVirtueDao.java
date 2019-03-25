@@ -180,4 +180,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<VirtualMachine> getVmWithNameStartsWith(String startsWith) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
