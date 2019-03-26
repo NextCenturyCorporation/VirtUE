@@ -76,10 +76,9 @@ def emit_notice(out, template, notice_lines):
 
 def process_file(templates, filename, notice_lines, replace, copyright_regex):
     template = lookup_template(templates, filename)
-    print('Processing "{}" with template "{}"'.format(filename, template['_filename']))
     if template is not None:
         contents = io.open(filename, mode='r').readlines()
-        new_filename = filename + '-new'
+        new_filename = str(filename) + '-new'
         new_file = io.open(new_filename, mode='w')
         line_number = 0
         head_skip = template.get('head_skip')
