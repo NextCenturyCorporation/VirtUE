@@ -259,8 +259,8 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			cidrRepo.deleteById(oldId);
 			cidrRepo.save(cba);
 		} else {
-
-			logger.error("ERROR Cannot reassign subnet.  oldId="+oldId);
+			logger.error("ERROR Cannot reassign subnet key.  oldId="+oldId);
+			throw new SaviorException(SaviorErrorCode.DATABASE_ERROR, "Unable to reassign subnet key!");
 		}
 	}
 
