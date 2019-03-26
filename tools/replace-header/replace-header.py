@@ -9,7 +9,7 @@ import re
 import os
 
 DEFAULT_COPYRIGHT_REGEX = r'.*Copyright \([Cc]\) [0-9]*.'
-TEMPLATES_DIR = 'templates'
+TEMPLATES_DIRNAME = 'templates'
 REQUIRED_TEMPLATE_PROPERTIES = ['match', 'body']
 COPYRIGHT_LINES = 50
 
@@ -23,10 +23,10 @@ def warn(message):
 
 
 def read_templates():
-    global TEMPLATES_DIR
+    global TEMPLATES_DIRNAME, progname
+    templates_dir = Path(progname).parent.joinpath(TEMPLATES_DIRNAME)
     templates = {}
-    template_dir = Path(TEMPLATES_DIR)
-    template_files = template_dir.glob('*.py')
+    template_files = templates_dir.glob('*.py')
     for template_file in template_files:
         template_dict = {}
         exec(io.open(template_file, mode='r').read(), None, template_dict)
@@ -38,6 +38,8 @@ def read_templates():
         if template_ok:
             template_dict['_filename'] = template_file
             templates[template_file.stem] = template_dict
+    if len(templates) == 0:
+        warn('no templates found in template directory "{}"'.format(templates_dir))
     return templates
 
 
