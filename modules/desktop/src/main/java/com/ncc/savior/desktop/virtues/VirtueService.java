@@ -49,7 +49,6 @@ import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -196,10 +195,10 @@ public class VirtueService {
 					logger.debug("needed new connection");
 					try {
 						connectionManager.createXpraServerAndAddDisplayToParams(params);
-						if (app.getOs().equals(OS.LINUX)) {
+						//if (app.getOs().equals(OS.LINUX)) {
 							logger.debug("connecting clipboard");
 							clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-						}
+						//}
 					} catch (IOException e) {
 						logger.error("clipboard manager connection failed!", e);
 						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,

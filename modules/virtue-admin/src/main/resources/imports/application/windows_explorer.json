@@ -1,0 +1,7 @@
+{
+    "name": "Windows Explorer",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "C:\\windows\\explorer.exe",
+    "iconKey": "explorer"
+  }
