@@ -66,6 +66,7 @@
 		<constructor-arg ref="securityGroupManager" />
 		<constructor-arg ref="resourceManager" />
 		<constructor-arg ref="vpcSubnetProvider" />
+		<constructor-arg ref="xenVmProvider"/>
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
@@ -259,6 +260,7 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>

@@ -7,9 +7,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +36,16 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpos
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class PooledXenVmProvider implements IXenVmProvider {
-	public static final String VM_NAME_POOL_PREFIX = "XEN_POOL-";
 	private static final Logger logger = LoggerFactory.getLogger(PooledXenVmProvider.class);
 	private IVpcSubnetProvider vpcSubnetProvider;
 	private AwsEc2Wrapper ec2Wrapper;
@@ -51,17 +54,18 @@ public class PooledXenVmProvider implements IXenVmProvider {
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
 	private String serverId;
-	private BlockingQueue<VirtualMachine> pool;
+	private BlockingDeque<VirtualMachine> pool;
 	private Collection<String> securityGroups;
 	protected IActiveVirtueDao xenVmDao;
 	private int poolSize;
 	private StandardXenProvider nonPool;
+	private CompletableFutureServiceProvider serviceProvider;
 
 	public PooledXenVmProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
-			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao, String xenAmi, String xenLoginUser,
-			String xenKeyName, InstanceType xenInstanceType, String iamRoleName, Collection<String> securityGroupsNames,
-			int poolSize) {
-		this.pool = new LinkedBlockingQueue<VirtualMachine>(poolSize * 2);
+			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao,
+			CompletableFutureServiceProvider serviceProvider, String xenAmi, String xenLoginUser, String xenKeyName,
+			InstanceType xenInstanceType, String iamRoleName, Collection<String> securityGroupsNames, int poolSize) {
+		this.pool = new LinkedBlockingDeque<VirtualMachine>(poolSize * 2);
 		this.serverId = serverIdProvider.getServerId();
 		this.ec2Wrapper = ec2Wrapper;
 		this.vpcSubnetProvider = vpcSubnetProvider;
@@ -70,39 +74,39 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		this.xenInstanceType = xenInstanceType;
 		this.poolSize = poolSize;
 		this.xenVmDao = xenVmDao;
+		this.serviceProvider = serviceProvider;
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.securityGroups = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
-		if (poolSize < 1) {
-			this.nonPool = new StandardXenProvider(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenAmi,
-					xenLoginUser, xenKeyName, xenInstanceType, iamRoleName);
-		} else {
-			initPool();
-		}
+		this.nonPool = new StandardXenProvider(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenAmi, xenLoginUser,
+				xenKeyName, xenInstanceType, iamRoleName);
+		initPool();
 	}
 
 	private void initPool() {
-		List<VirtualMachine> vms = xenVmDao.getVmWithNameStartsWith(VM_NAME_POOL_PREFIX);
-		pool.addAll(vms);
-		int xensNeeded = poolSize - pool.size();
-		if (xensNeeded > 0) {
-			new Thread(() -> {
-				JavaUtil.sleepAndLogInterruption(2000);
-				for (int i = 0; i < xensNeeded; i++) {
-					provisionToQueueAsync();
-				}
-			}).start();
+		if (poolSize > 0) {
+			List<VirtualMachine> vms = xenVmDao.getVmWithNameStartsWith(VM_NAME_POOL_PREFIX);
+			pool.addAll(vms);
+			int xensNeeded = poolSize - pool.size();
+			if (xensNeeded > 0) {
+				new Thread(() -> {
+					JavaUtil.sleepAndLogInterruption(2000);
+					for (int i = 0; i < xensNeeded; i++) {
+						provisionToQueue();
+					}
+				}).start();
+			}
 		}
 	}
 
 	public PooledXenVmProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
-			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao, String xenAmi, String xenLoginUser,
-			String xenKeyName, String xenInstanceType, String iamRoleName, String securityGroupsCommaSeparated,
-			int poolSize) {
-		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenVmDao, xenAmi, xenLoginUser, xenKeyName,
-				InstanceType.fromValue(xenInstanceType), iamRoleName, splitOnComma(securityGroupsCommaSeparated),
-				poolSize);
+			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao,
+			CompletableFutureServiceProvider serviceProvider, String xenAmi, String xenLoginUser, String xenKeyName,
+			String xenInstanceType, String iamRoleName, String securityGroupsCommaSeparated, int poolSize) {
+		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenVmDao, serviceProvider, xenAmi, xenLoginUser,
+				xenKeyName, InstanceType.fromValue(xenInstanceType), iamRoleName,
+				splitOnComma(securityGroupsCommaSeparated), poolSize);
 
 	}
 
@@ -202,14 +206,18 @@ public class PooledXenVmProvider implements IXenVmProvider {
 
 	protected void provisionToQueueAsync() {
 		Runnable run = () -> {
-			VirtualMachine xenVm = provisionNewXenVm();
-			pool.add(xenVm);
-			xenVmDao.updateVms(Collections.singletonList(xenVm));
-			logger.debug("added vm to pool.  Size=" + pool.size());
+			provisionToQueue();
 		};
 		Thread t = new Thread(run, "XenPoolInsertion");
 		t.setDaemon(true);
 		t.start();
+	}
+
+	private synchronized void provisionToQueue() {
+		VirtualMachine xenVm = provisionNewXenVm();
+		pool.add(xenVm);
+		xenVmDao.updateVms(Collections.singletonList(xenVm));
+		logger.debug("added vm to pool.  Size=" + pool.size());
 	}
 
 	protected VirtualMachine provisionNewXenVm() {
@@ -218,7 +226,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		Map<String, String> tags = new HashMap<String, String>();
 		tags.put(AwsUtil.TAG_NAME, "XEN_POOL");
 		tags.put(AwsUtil.TAG_VIRTUE_NAME, "XEN_POOL");
-		
+
 		String id = UUID.randomUUID().toString();
 		String subnetId = vpcSubnetProvider.getSubnetId(id, tags);
 
@@ -229,10 +237,51 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate, VM_NAME_POOL_PREFIX + serverId, securityGroups,
 				xenKeyName, xenInstanceType, virtueMods, iamRoleName);
 		vpcSubnetProvider.reassignSubnet(id, xenVm.getId(), null);
-		
-		CreateTagsRequest createTagsRequest=new CreateTagsRequest();
+
+		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
 		createTagsRequest.withResources(subnetId).withTags(new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, xenVm.getId()));
 		ec2Wrapper.getEc2().createTags(createTagsRequest);
 		return xenVm;
+	}
+
+	// Facilitates clearing the pool.
+	@Override
+	public void setXenPoolSize(int newPoolSize) {
+		if (newPoolSize < 0) {
+			throw new SaviorException(SaviorErrorCode.INVALID_INPUT,
+					"Invalid pool size.  Pool size cannot be set to " + newPoolSize);
+		}
+		int oldPoolSize = poolSize;
+		int instancesToBeAdded = newPoolSize - oldPoolSize;
+		if (instancesToBeAdded > 0) {
+			for (int i = 0; i < instancesToBeAdded; i++) {
+				provisionToQueueAsync();
+			}
+		} else if (instancesToBeAdded < 0) {
+			for (int i = 0; i < -instancesToBeAdded; i++) {
+				deleteInstanceFromQueue();
+			}
+		}
+		this.poolSize = newPoolSize;
+	}
+
+	private synchronized void deleteInstanceFromQueue() {
+		if (!pool.isEmpty()) {
+			VirtualMachine vm = pool.removeLast();
+			String subnetKey = vm.getId();
+			Set<VirtualMachine> vms = Collections.singleton(vm);
+			ec2Wrapper.deleteVirtualMachines(vms);
+			xenVmDao.deleteVm(vm);
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
+			cf.thenRun(() -> {
+				vpcSubnetProvider.releaseBySubnetKey(subnetKey);
+			});
+		}
+	}
+
+	@Override
+	public int getXenPoolSize() {
+		return poolSize;
 	}
 }

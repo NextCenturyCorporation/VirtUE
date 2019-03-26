@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
@@ -65,5 +67,16 @@ public class StandardXenProvider implements IXenVmProvider {
 				"VRTU-Xen-" + serverId + "-" + vi.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
 				xenInstanceType, virtueMods, iamRoleName);
 		return xenVm;
+	}
+
+	@Override
+	public void setXenPoolSize(int poolSize) {
+		throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
+				"Unable to change pool size of Standard Xen Provider.");
+	}
+
+	@Override
+	public int getXenPoolSize() {
+		return 0;
 	}
 }
