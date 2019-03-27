@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.xpra.application.swing;
@@ -25,6 +25,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -182,12 +183,10 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// + packet.getHeight());
 				int x = packet.getX();
 				int y = packet.getY();
-				if (x < insetWidth) {
-					x = insetWidth;
-				}
-				if (y < titleBarHeight) {
-					y = titleBarHeight;
-				}
+
+				Rectangle rect = fixOutOfBounds(x, y, packet.getWidth(), packet.getHeight());
+				x = rect.x;
+				y = rect.y;
 				frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
 				frame.getContentPane().setPreferredSize(new Dimension(packet.getWidth(), packet.getHeight()));
 
@@ -224,6 +223,32 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				}
 			}
 		});
+	}
+
+	protected Rectangle fixOutOfBounds(int x, int y, int width, int height) {
+		// make sure we slide for title bar and inset
+		if (x < insetWidth) {
+			x = insetWidth;
+		}
+		if (y < titleBarHeight) {
+			y = titleBarHeight;
+		}
+		Rectangle window = new Rectangle(x, y, width, height);
+		GraphicsDevice[] screens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		for (GraphicsDevice screen : screens) {
+			boolean contains = screen.getDefaultConfiguration().getBounds().contains(window);
+			if (contains) {
+				return window;
+			}
+		}
+		GraphicsDevice ds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		Rectangle bounds = ds.getDefaultConfiguration().getBounds();
+		// if we are out of bounds, lets just center the window in the center of the
+		// default display.
+		x = (int) (bounds.getCenterX() - width / 2);
+		y = (int) (bounds.getCenterY() - height / 2);
+		window.setLocation(x, y);
+		return window;
 	}
 
 	private void fullscreenWindow() {
