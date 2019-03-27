@@ -209,11 +209,13 @@ public class WindowsDisplayServerManager {
 		if (!enabled) {
 			return;
 		}
-		List<String> windowsApplicationVmIds = windowsAppVms.stream().map(VirtualMachine::getId)
-				.collect(Collectors.toList());
-		Collection<VirtualMachine> displayVms = wdsDao
-				.getDisplayServerVmsByWindowsApplicationVmIds(windowsApplicationVmIds);
-		wrapper.deleteVirtualMachines(displayVms);
+		if (!windowsAppVms.isEmpty()) {
+			List<String> windowsApplicationVmIds = windowsAppVms.stream().map(VirtualMachine::getId)
+					.collect(Collectors.toList());
+			Collection<VirtualMachine> displayVms = wdsDao
+					.getDisplayServerVmsByWindowsApplicationVmIds(windowsApplicationVmIds);
+			wrapper.deleteVirtualMachines(displayVms);
+		}
 	}
 
 	public VirtualMachine getWindowsDisplayVm(String windowsApplicationVmId) {
@@ -253,10 +255,12 @@ public class WindowsDisplayServerManager {
 			// create runnable because connection must remain open
 			Runnable con = () -> {
 				try {
-					Session winSession = SshUtil.getConnectedSession(appVm, keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
-					List<String> out = SshUtil.sendCommandFromSession(winSession, "echo "+application.getLaunchCommand()+ " > c:\\virtue\\app.txt");
-					logger.debug("app out: "+out);
-					
+					Session winSession = SshUtil.getConnectedSession(appVm,
+							keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
+					List<String> out = SshUtil.sendCommandFromSession(winSession,
+							"echo " + application.getLaunchCommand() + " > c:\\virtue\\app.txt");
+					logger.debug("app out: " + out);
+
 					List<String> line = SshUtil.runCommandsFromFileWithTimeout(templateService, session, templateName,
 							dataModelFinal, 3000);
 					logger.debug("returned!**" + line);

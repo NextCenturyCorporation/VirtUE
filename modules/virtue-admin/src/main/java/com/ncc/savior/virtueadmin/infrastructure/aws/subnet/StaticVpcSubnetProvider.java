@@ -1,11 +1,13 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 
@@ -55,6 +57,11 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 
 	@Override
 	public void sync(Collection<String> existingVirtueIds) {
+		//do nothing
+	}
+
+	@Override
+	public void reassignSubnet(String oldId, String newId, List<Tag> tags) {
 		//do nothing
 	}
 }
