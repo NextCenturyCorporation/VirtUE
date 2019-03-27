@@ -29,7 +29,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +42,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.AttachVolumeResult;
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -66,7 +64,6 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -93,28 +90,27 @@ public class XenHostManager {
 
 	@Value("${virtue.aws.persistentStorage.deviceName}")
 	private String persistentVolumeDeviceName;
-	private VirtualMachineTemplate xenVmTemplate;
+
 	private AwsEc2Wrapper ec2Wrapper;
-	private String xenKeyName;
-	private InstanceType xenInstanceType;
+
 	protected IActiveVirtueDao xenVmDao;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
-	private String iamRoleName;
+
 	private String serverId;
 	protected String region;
 	protected String bucket;
 	protected String kmsKey;
+	private IXenVmProvider xenVmProvider;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			ITemplateService templateService, Collection<String> securityGroupsNames, String xenAmi,
-			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
-			String iamRoleName, String region, String imageBucketName, String kmsKey) {
+			ITemplateService templateService, IXenVmProvider xenVmProvider, Collection<String> securityGroupsNames,
+			boolean usePublicDns, String region, String imageBucketName, String kmsKey) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -124,26 +120,22 @@ public class XenHostManager {
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.templateService = templateService;
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
-		this.xenKeyName = xenKeyName;
-		this.iamRoleName = iamRoleName;
-		this.xenInstanceType = xenInstanceType;
 		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
 		this.kmsKey = kmsKey;
+		this.xenVmProvider = xenVmProvider;
 		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53, templateService);
-		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
-				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
+
 	}
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			ITemplateService templateService, String securityGroupsCommaSeparated, String xenAmi, String xenUser,
-			String xenKeyName, String xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
-			String imageBucketName, String kmsKey) {
+			ITemplateService templateService, IXenVmProvider xenVmProvider, String securityGroupsCommaSeparated,
+			boolean usePublicDns, String region, String imageBucketName, String kmsKey) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
-				templateService, splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
-				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName, kmsKey);
+				templateService, xenVmProvider, splitOnComma(securityGroupsCommaSeparated), usePublicDns, region,
+				imageBucketName, kmsKey);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -188,9 +180,7 @@ public class XenHostManager {
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 		virtueMods.setUsername(virtue.getUsername());
-		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
-				xenInstanceType, virtueMods, iamRoleName);
+		VirtualMachine xenVm = xenVmProvider.getNewXenVm(virtue, virtueMods, virtueName, secGroupIds);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,

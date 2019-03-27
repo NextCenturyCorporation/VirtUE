@@ -224,7 +224,7 @@ public class PersistentStorageManager {
 	private String getNewVolumeId(String name, String virtueTemplateId, String username) {
 		AmazonEC2 ec2 = ec2Wrapper.getEc2();
 		CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest();
-		createVolumeRequest.setSnapshotId(snapshotIdForNewPersistentStorageDrive);
+		createVolumeRequest.setSnapshotId(snapshotIdForNewPersistentStorageDrive.trim());
 		createVolumeRequest.setAvailabilityZone(availabilityZone);
 		createVolumeRequest.setVolumeType(VolumeType.Gp2);
 		Collection<Tag> tags = new ArrayList<Tag>();
@@ -235,6 +235,9 @@ public class PersistentStorageManager {
 		tags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
 		tags.add(new Tag(AwsUtil.TAG_PRIMARY, AwsUtil.VirtuePrimaryPurpose.PERSISTENT_STORAGE.toString()));
 		tags.add(new Tag(AwsUtil.TAG_SECONDARY, AwsUtil.VirtueSecondaryPurpose.PERSISTENT_STORAGE.toString()));
+//		Collection<TagSpecification> tagSpecifications = new ArrayList<TagSpecification>();
+//		tagSpecifications.add(new TagSpecification().withTags(tags).withResourceType(ResourceType.Volume));
+//		createVolumeRequest.setTagSpecifications(tagSpecifications);
 		CreateVolumeResult result = ec2.createVolume(createVolumeRequest);
 
 		Volume volume = result.getVolume();
@@ -281,3 +284,4 @@ public class PersistentStorageManager {
 		return ps;
 	}
 }
+

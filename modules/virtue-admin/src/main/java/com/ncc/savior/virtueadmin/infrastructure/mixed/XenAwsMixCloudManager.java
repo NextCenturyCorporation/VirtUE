@@ -22,9 +22,7 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -37,7 +35,6 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
-import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
@@ -158,32 +155,31 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), null);
-		Map<String, String> tags = new HashMap<String, String>();
-		tags.put(AwsUtil.TAG_USERNAME, user.getUsername());
-		tags.put(AwsUtil.TAG_VIRTUE_NAME, vi.getName());
-		tags.put(AwsUtil.TAG_VIRTUE_INSTANCE_ID, vi.getId());
-		tags.put(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, vi.getTemplateId());
-		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
+
 		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(template.getName());
-		virtueMods.setSubnetId(subnetId);
+		// virtueMods.setSubnetId(subnetId);
 		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
 		virtueMods.setVirtueId(vi.getId());
 		virtueMods.setVirtueTemplateId(vi.getTemplateId());
-		Collection<VirtualMachine> windowsVms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
-				windowsFuture, virtueMods);
-		vi.setVms(windowsVms);
-
-		for (VirtualMachine windowsVm : windowsVms) {
-			windowsDisplayManager.setupWindowsDisplay(vi, windowsVm, subnetId);
-		}
-
-		// if (!linuxVmts.isEmpty()) {
 
 		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
+		// Xen must set subnet id
+		vi.setVms(new ArrayList<VirtualMachine>());
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
+
+		Collection<VirtualMachine> windowsVms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
+				windowsFuture, virtueMods);
+		vi.getVms().addAll(windowsVms);
+
+		for (VirtualMachine windowsVm : windowsVms) {
+			windowsDisplayManager.setupWindowsDisplay(vi, windowsVm, virtueMods.getSubnetId());
+		}
+
+		// if (!linuxVmts.isEmpty()) {
+
 		// Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
 		Collection<FileSystem> fileSystems = template.getFileSystems();

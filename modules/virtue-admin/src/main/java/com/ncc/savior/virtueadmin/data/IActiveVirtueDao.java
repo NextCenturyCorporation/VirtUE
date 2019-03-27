@@ -21,6 +21,7 @@
 package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -90,6 +91,8 @@ public interface IActiveVirtueDao {
 	void updateVirtue(VirtueInstance virtue);
 
 	Optional<VirtualMachine> getXenVm(String id);
+	
+	List<VirtualMachine> getVmWithNameStartsWith(String startsWith);
 
 	Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList);
 

@@ -182,4 +182,10 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public VirtueInstance getVirtueByVmId(String id) {
 		return virtueRepository.findByVms_Id(id);
 	}
+	
+	@Override
+	public List<VirtualMachine> getVmWithNameStartsWith(String startsWith) {
+		List<VirtualMachine> vms = vmRepository.findByNameStartingWith(startsWith);
+		return vms;
+	}
 }

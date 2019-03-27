@@ -21,7 +21,10 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+
+import com.amazonaws.services.ec2.model.Tag;
 
 /**
  * Implementations will provide subnetID and VPC ID for the system. Multiple
@@ -66,5 +69,7 @@ public interface IVpcSubnetProvider {
 	 * @param existingVirtueIds
 	 */
 	void sync(Collection<String> existingVirtueIds);
+
+	void reassignSubnet(String oldId, String newId, List<Tag> tags);
 
 }

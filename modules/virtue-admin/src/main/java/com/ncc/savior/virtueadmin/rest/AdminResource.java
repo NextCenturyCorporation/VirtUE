@@ -1015,6 +1015,20 @@ public class AdminResource {
 		boolean enable = Boolean.parseBoolean(enableString);
 		adminService.setFileSystemStatus(fileSystemId, enable);
 	}
+	
+	@GET
+	@Path("xenPoolSize")
+	@Operation(hidden = true)
+	public int getXenPoolSize() {
+		return adminService.getXenPoolSize();
+	}
+	
+	@GET
+	@Path("xenPoolSize/{poolSize}")
+	@Operation(hidden = true)
+	public void setXenPoolSize(@PathParam("poolSize") int poolSize) {
+		adminService.setXenPoolSize(poolSize);
+	}
 
 	@GET
 	@Path("sync")
@@ -1024,3 +1038,4 @@ public class AdminResource {
 	}
 
 }
+
