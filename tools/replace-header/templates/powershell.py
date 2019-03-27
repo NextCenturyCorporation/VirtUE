@@ -1,0 +1,6 @@
+match = '*.ps1'
+head = '#'
+body = '# {notice}'
+tail = '#'
+start_regex = r'^#$'
+end_regex = r'^#$'

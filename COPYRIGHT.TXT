@@ -1,0 +1,18 @@
+Copyright (C) 2019 Next Century Corporation
+All rights reserved
+
+Unless otherwise noted, the contents of the repository may be licensed
+under either the GNU Public License (GPL) 2.0 (not later version) or
+BSD 3 Clause. The details of these licenses are in COPYRIGHT-GPL-2.TXT
+and COPYRIGHT-BSD-3.TXT, respectively.
+
+In addition, the U.S. Government is granted government purpose rights,
+that is: The rights to use, modify, reproduce, release, perform,
+display, or disclose the contents of this repository ("the data")
+within the Government, without restrictions, and to disclose the data
+outside the Government and authorize persons to whom release or
+disclosure has been made, to use, modify, reproduce, release, perform,
+display, or disclose that data or software for any United States
+Government purpose, without the copyright owner's permission.
+
+SPDX-License-Identifier: (GPL-2.0 OR BSD-3-Clause)
