@@ -85,7 +85,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao,
 			CompletableFutureServiceProvider serviceProvider, String xenAmi, String xenLoginUser, String xenKeyName,
 			InstanceType xenInstanceType, String iamRoleName, Collection<String> securityGroupsNames, int poolSize) {
-		this.pool = new LinkedBlockingDeque<VirtualMachine>(poolSize * 2);
+		this.pool = new LinkedBlockingDeque<VirtualMachine>();
 		this.serverId = serverIdProvider.getServerId();
 		this.ec2Wrapper = ec2Wrapper;
 		this.vpcSubnetProvider = vpcSubnetProvider;
