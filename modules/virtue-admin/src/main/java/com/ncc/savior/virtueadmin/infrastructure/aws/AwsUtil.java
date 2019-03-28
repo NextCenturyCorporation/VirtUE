@@ -1,7 +1,28 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +43,7 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
@@ -348,6 +370,7 @@ public class AwsUtil {
 		ArrayList<String> securityGroupIds = new ArrayList<String>();
 		try {
 			DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest();
+			req.setFilters(Collections.singleton(new Filter(AwsUtil.FILTER_VPC_ID).withValues(vpcId)));
 			DescribeSecurityGroupsResult sgs = ec2Wrapper.getEc2().describeSecurityGroups(req);
 			for (SecurityGroup sg : sgs.getSecurityGroups()) {
 				if (logger.isTraceEnabled()) {
@@ -355,7 +378,7 @@ public class AwsUtil {
 							+ sg.getVpcId());
 				}
 				if (defaultSecurityGroups.contains(sg.getGroupName()) && sg.getVpcId().equals(vpcId)) {
-					logger.trace("matched "+sg.getGroupName());
+					logger.trace("matched " + sg.getGroupName());
 					securityGroupIds.add(sg.getGroupId());
 				}
 			}
@@ -429,7 +452,7 @@ public class AwsUtil {
 	}
 
 	public static enum VirtuePrimaryPurpose {
-		USER_VIRTUE, IMAGE_CREATION, CIFS_PROXY, PERSISTENT_STORAGE, WINDOWS_DISPLAY
+		USER_VIRTUE, IMAGE_CREATION, CIFS_PROXY, PERSISTENT_STORAGE, WINDOWS_DISPLAY, XEN_POOL
 	}
 
 	public static enum VirtueSecondaryPurpose {

@@ -1,5 +1,25 @@
 #!/bin/bash
 #
+# Copyright (C) 2019 Next Century Corporation
+# 
+# This file may be redistributed and/or modified under either the GPL
+# 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+# granted government purpose rights. For details, see the COPYRIGHT.TXT
+# file at the root of this project.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.
+# 
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+#
+#
 # Configure the computer to be part of a domain
 #
 
@@ -15,6 +35,9 @@ usage() {
 	echo -e	"\t--password ADMIN_PASSWORD"
 	echo -e "\t--hostname HOSTNAME"
 	echo -e "\t--dcip DOMAIN_CONTROLLER_IP"
+	echo -e "\t--service SERVICE [default=http]"
+	echo -e "\t--security SECURITY [default=user]"
+	echo -e "\t--keep-keytab"
 }
 
 domain=''
@@ -23,6 +46,9 @@ domainAdminPassword=''
 hostname=''
 # domain controller IP address
 dcip=''
+service=http
+keepKeytab=0
+security=user
 pretend=0
 verbose=0
 
@@ -43,6 +69,14 @@ while [ $# -gt 0 ]; do
 		--dcip) dcip="$2"
 				shift
 				;;
+		--service) service="$2"
+				   shift
+				   ;;
+		--security) security="$2"
+					shift
+					;;
+		--keep-keytab) keepKeytab=1
+					   ;;
 		--pretend) pretend=1
 				   ;;
 		--verbose) verbose=1
@@ -71,12 +105,15 @@ set -e
 
 [ $verbose -eq 1 ] && set -x
 
+# Detect the network device. Assumes there is just one.
+netDevice=$(systemd-resolve --status | sed -n 's/^Link .*(\(.*\))/\1/p')
+
 # set hostname and make DHCP resolve against the DC
 cat > /etc/netplan/99-virtue.yaml <<EOF
 network:
     version: 2
     ethernets:
-        eth0:
+        ${netDevice}:
           nameservers:
             addresses: [${dcip}]
             search: [${domain}]
@@ -90,29 +127,40 @@ hostnamectl set-hostname $hostname
 domainname $domain
 sed -i "s/\(^127\.0\.0\.1 *\)/\1${hostname}.${domain} ${hostname} /" /etc/hosts
 
+if [ -n "${service}" ]; then
+	upnFlag="--user-principal ${service}/${hostname}.${domain}@${domain^^}"
+else
+	upnFlag=''
+fi
 # join the domain
 echo "${domainAdminPassword}" | \
 	realm join \
 		  --membership-software=samba \
-		  --user-principal "http/${hostname}.${domain}@${domain^^}" \
+		  ${upnFlag} \
 		  --user ${domainAdmin} \
 		  ${domain}
 # Making minimal smb.conf so net ads keytab works
 domainPrefix=${domain/.*}
 cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
 (
-echo security = user
+echo security = ${security}
 echo realm = ${domain}
 echo workgroup = "${domainPrefix}"
+# It seems like we should be able to put the kerberos method in
+# virtue.conf, but then the net ads keytab operations fail. Might be
+# related to https://bugzilla.samba.org/show_bug.cgi?id=9734 or
+# https://bugzilla.samba.org/show_bug.cgi?id=12949
 echo kerberos method = secrets and keytab
-echo include = /etc/samba/virtue.conf
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
 	-e '/ *printing *=/,$d' \
     /etc/samba/smb.conf
-echo "${domainAdminPassword}" | net -k ads keytab flush -U ${domainAdmin}
-echo "${domainAdminPassword}" | net -k ads keytab add http -U ${domainAdmin}
-echo "${domainAdminPassword}" | net -k ads keytab add HTTP -U ${domainAdmin}
+echo include = /etc/samba/virtue.conf >> /etc/samba/smb.conf
+if [ "${keepKeytab}" -eq 0 -a -n "${service}" ]; then
+	echo "${domainAdminPassword}" | net -k ads keytab flush -U ${domainAdmin}
+	echo "${domainAdminPassword}" | net -k ads keytab add ${service} -U ${domainAdmin}
+	echo "${domainAdminPassword}" | net -k ads keytab add ${service^^} -U ${domainAdmin}
+fi
 
 # Configuring Kerberos for our domain
 mkdir --parents /etc/krb5.conf.d

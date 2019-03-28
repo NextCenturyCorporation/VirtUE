@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 /**
  * 
  */
@@ -92,7 +112,7 @@ public class VirtueService {
 		LOGGER.entry();
 		Random random = new Random();
 		int length = 12 + random.nextInt(4);
-		String password = new Random().ints(length, 33, 122)
+		String password = new Random().ints(length, 97, 122)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
 		LOGGER.exit(password);
 		return password;
@@ -145,13 +165,14 @@ public class VirtueService {
 		LOGGER.trace("starting smbpassword");
 		Process process = processBuilder.start();
 		OutputStream outputStream = process.getOutputStream();
-		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream);
-		LOGGER.trace("sending password to smbpassword");
-		outputWriter.write(virtue.getPassword());
-		outputWriter.write('\n');
-		outputWriter.write(virtue.getPassword());
-		outputWriter.write('\n');
-		outputWriter.flush();
+		try (OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream)) {
+			LOGGER.trace("sending password to smbpassword");
+			outputWriter.write(virtue.getPassword());
+			outputWriter.write('\n');
+			outputWriter.write(virtue.getPassword());
+			outputWriter.write('\n');
+			outputWriter.flush();
+		}
 
 		LOGGER.trace("waiting for smbpassword...");
 		boolean processDone;
@@ -236,20 +257,20 @@ public class VirtueService {
 				}
 				break;
 			default:
-				switch (c) {
-				case '-':
-				case '_':
-				case '.':
-					if (username.length() > 0) {
+				if (username.length() > 0) {
+					switch (c) {
+					case '-':
+					case '_':
+					case '.':
 						newChar = c;
-					} else {
-						continue;
+						break;
+					default:
+						// invalid char for username
+						newChar = '_';
+						break;
 					}
-					break;
-				default:
-					// invalid char for username
-					newChar = '_';
-					break;
+				} else {
+					continue;
 				}
 			}
 			username.append(newChar);
@@ -297,5 +318,59 @@ public class VirtueService {
 			}
 		}
 		return users;
+	}
+
+	public void removeVirtue(String id) throws IOException {
+		Virtue virtue = virtuesById.get(id);
+		if (virtue == null) {
+			IllegalStateException ise = new IllegalStateException("virtue does not exist: " + id);
+			LOGGER.throwing(ise);
+			throw ise;
+		}
+		deleteSambaUser(virtue);
+		deleteLinuxUser(virtue);
+		virtuesById.remove(id);
+	}
+
+	private void deleteSambaUser(Virtue virtue) throws IOException {
+		ProcessBuilder pb = new ProcessBuilder("sudo", "smbpasswd", "-x", virtue.getUsername());
+		Process process = pb.start();
+		LOGGER.trace("waiting for smbpassword...");
+		boolean processDone;
+		try {
+			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			InterruptedIOException ioe = new InterruptedIOException("smbpasswd process was interrupted");
+			ioe.initCause(e);
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+		LOGGER.trace("...done waiting for smbpassword");
+		if (!processDone) {
+			IOException ioe = new IOException("smbpasswd took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+	}
+
+	private void deleteLinuxUser(Virtue virtue) throws IOException {
+		ProcessBuilder pb = new ProcessBuilder("sudo", "deluser", virtue.getUsername());
+		Process process = pb.start();
+		LOGGER.trace("waiting for deluser...");
+		boolean processDone;
+		try {
+			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			InterruptedIOException ioe = new InterruptedIOException("deluser process was interrupted");
+			ioe.initCause(e);
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
+		LOGGER.trace("...done waiting for deluser");
+		if (!processDone) {
+			IOException ioe = new IOException("deluser took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
+			LOGGER.throwing(ioe);
+			throw ioe;
+		}
 	}
 }

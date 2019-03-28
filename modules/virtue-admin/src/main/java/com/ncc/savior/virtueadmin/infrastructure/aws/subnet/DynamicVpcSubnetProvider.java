@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.ArrayList;
@@ -59,9 +79,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private String serverId;
 	private NetworkAclManager networkAclManager;
 
-	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, NetworkAclManager networkAclManager,String vpcName,
-			String firstCidrBlock, String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId,
-			String availabilityZone) {
+	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider,
+			NetworkAclManager networkAclManager, String vpcName, String firstCidrBlock, String endNonInclusiveCidrBlock,
+			boolean usePublicIp, String routeTableId, String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
 		this.serverId = serverIdProvider.getServerId();
 		this.availabilityZone = availabilityZone;
@@ -107,6 +127,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				cidrRepo.deleteAll(col);
 				try {
 					cidrRepo.save(assignment);
+					logger.debug("resave successful", assignment);
 				} catch (Exception e1) {
 					String msg = "Error attempting to create subnet and store in database";
 					logger.error(msg, e1);
@@ -244,6 +265,26 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 	@Override
+	public void reassignSubnet(String oldId, String newId, List<Tag> tags) {
+		logger.debug(cidrRepo.findAll().toString());
+		Optional<CidrBlockAssignment> opt = cidrRepo.findById(oldId);
+		if (opt.isPresent()) {
+			CidrBlockAssignment cba = opt.get();
+			if (tags != null && !tags.isEmpty()) {
+				CreateTagsRequest createTagsRequest = new CreateTagsRequest(
+						Collections.singletonList(cba.getInfrastructureId()), tags);
+				ec2.createTags(createTagsRequest);
+			}
+			cba.setAssignmentId(newId);
+			cidrRepo.deleteById(oldId);
+			cidrRepo.save(cba);
+		} else {
+			logger.error("ERROR Cannot reassign subnet key.  oldId=" + oldId);
+			throw new SaviorException(SaviorErrorCode.DATABASE_ERROR, "Unable to reassign subnet key!");
+		}
+	}
+
+	@Override
 	public String getVpcId() {
 		return vpcId;
 	}
@@ -270,3 +311,4 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 }
+

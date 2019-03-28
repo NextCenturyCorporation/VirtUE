@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
@@ -104,7 +124,7 @@ public class AwsEc2Wrapper {
 			runInstancesRequest.withIamInstanceProfile(iamInstanceProfile);
 		}
 		String instanceId = UUID.randomUUID().toString();
-		List<Tag> tags = getTagsFromVirtueMods(vmt, name, virtueMods, instanceId);
+		List<Tag> tags = getTagsFromVirtueMods(vmt.getId(), name, virtueMods, instanceId);
 		runInstancesRequest
 				.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance).withTags(tags));
 		// .withSecurityGroups(securityGroups);
@@ -125,14 +145,17 @@ public class AwsEc2Wrapper {
 				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
 		return vm;
 	}
-
-	private List<Tag> getTagsFromVirtueMods(VirtualMachineTemplate vmt, String name,
-			VirtueCreationAdditionalParameters virtueMods, String instanceId) {
+public List<Tag> getTagsFromVirtueMods(String vmtId, String name, VirtueCreationAdditionalParameters virtueMods,
+			String instanceId) {
+//	private List<Tag> getTagsFromVirtueMods(VirtualMachineTemplate vmt, String name,
+//			VirtueCreationAdditionalParameters virtueMods, String instanceId) {
 		List<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(AwsUtil.TAG_NAME, name));
-		if (vmt != null && vmt.getId() != null) {
-			tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()));
+//		if (vmt != null && vmt.getId() != null) {
+//			tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()));
+if (vmtId != null) {
+			tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmtId));
 		}
 		if (instanceId != null) {
 			tags.add(new Tag(AwsUtil.TAG_VM_INSTANCE_ID, instanceId));

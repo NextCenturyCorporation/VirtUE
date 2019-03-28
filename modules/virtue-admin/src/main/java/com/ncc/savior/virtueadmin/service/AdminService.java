@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.ncc.savior.virtueadmin.service;
 
 import java.io.BufferedReader;
@@ -39,6 +59,7 @@ import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.mixed.BaseXenTemplateProvider;
+import com.ncc.savior.virtueadmin.infrastructure.mixed.IXenVmProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.FileSystem;
@@ -68,6 +89,7 @@ public class AdminService {
 	private ITemplateManager templateManager;
 	private IResourceManager resourceManager;
 	private IUserManager userManager;
+	private IXenVmProvider xenVmProvider;
 
 	@Autowired
 	private SessionRegistry sessionRegistry;
@@ -90,10 +112,11 @@ public class AdminService {
 
 	private ISecurityGroupManager securityGroupManager;
 	private IVpcSubnetProvider subnetProvider;
-
+	
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
 			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
-			IResourceManager resourceManager, IVpcSubnetProvider subnetProvider, String initialAdmin) {
+			IResourceManager resourceManager, IVpcSubnetProvider subnetProvider,
+			IXenVmProvider xenVmProvider, String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
@@ -103,6 +126,7 @@ public class AdminService {
 		this.initialAdmin = initialAdmin;
 		this.securityGroupManager = securityGroupManager;
 		this.subnetProvider = subnetProvider;
+		this.xenVmProvider = xenVmProvider;
 		addInitialUser();
 	}
 
@@ -114,6 +138,13 @@ public class AdminService {
 					Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
 					for (VirtueInstance virtueId : virtueIds) {
 						existingVirtueIds.add(virtueId.getId());
+					}
+					// find pooled xen instances and their subnets
+					Iterable<VirtualMachine> vms = virtueManager.getAllVirtualMachines();
+					for (VirtualMachine vm : vms) {
+						if (vm.getName().startsWith(IXenVmProvider.VM_NAME_POOL_PREFIX)) {
+							existingVirtueIds.add(vm.getId());
+						}
 					}
 					subnetProvider.sync(existingVirtueIds);
 
@@ -746,6 +777,14 @@ public class AdminService {
 		resourceManager.clear();
 	}
 
+	public void setXenPoolSize(int poolSize) {
+		xenVmProvider.setXenPoolSize(poolSize);
+	}
+
+	public int getXenPoolSize() {
+		return xenVmProvider.getXenPoolSize();
+	}
+
 	public VirtualMachineTemplate getXenTemplate() {
 		verifyAndReturnUser();
 		return xenTemplateProvider.getXenVmTemplate();
@@ -758,7 +797,7 @@ public class AdminService {
 
 	public void deleteXenTemplate() {
 		xenTemplateProvider.deleteXenVmTemplate();
-		
+
 	}
 
 }

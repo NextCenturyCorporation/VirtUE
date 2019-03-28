@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.io.BufferedReader;
@@ -22,7 +42,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.AttachVolumeResult;
-import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -63,7 +82,7 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
  */
 public class XenHostManager {
 	private static final String S3_DOWNLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
-	private static final String XEN_STANDARD = "standard";
+	// private static final String XEN_STANDARD = "standard";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
 
@@ -72,29 +91,25 @@ public class XenHostManager {
 	@Value("${virtue.aws.persistentStorage.deviceName}")
 	private String persistentVolumeDeviceName;
 	private AwsEc2Wrapper ec2Wrapper;
-	private String xenKeyName;
-	private InstanceType xenInstanceType;
 	protected IActiveVirtueDao xenVmDao;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
-	private String iamRoleName;
 	private String serverId;
 	protected String region;
 	protected String bucket;
 	protected String kmsKey;
-	private String xenLoginUser;
 	private BaseXenTemplateProvider xenImageProvider;
+	private IXenVmProvider xenVmProvider;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			BaseXenTemplateProvider xenImageProvider, ITemplateService templateService,
-			Collection<String> securityGroupsNames, String xenLoginUser, String xenKeyName,
-			InstanceType xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
-			String imageBucketName, String kmsKey) {
+			BaseXenTemplateProvider xenImageProvider, ITemplateService templateService, IXenVmProvider xenVmProvider,
+			Collection<String> securityGroupsNames, boolean usePublicDns, String region, String imageBucketName,
+			String kmsKey) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -104,14 +119,12 @@ public class XenHostManager {
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.templateService = templateService;
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
-		this.xenKeyName = xenKeyName;
-		this.iamRoleName = iamRoleName;
-		this.xenInstanceType = xenInstanceType;
+
 		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
 		this.kmsKey = kmsKey;
 		this.xenImageProvider = xenImageProvider;
-		this.xenLoginUser = xenLoginUser;
+		this.xenVmProvider = xenVmProvider;
 		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53, templateService);
 
 	}
@@ -119,12 +132,12 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
-			BaseXenTemplateProvider xenImageProvider, ITemplateService templateService,
-			String securityGroupsCommaSeparated, String xenUser, String xenKeyName, String xenInstanceType,
-			boolean usePublicDns, String iamRoleName, String region, String imageBucketName, String kmsKey) {
+			BaseXenTemplateProvider xenImageProvider, ITemplateService templateService, IXenVmProvider xenVmProvider,
+			String securityGroupsCommaSeparated, boolean usePublicDns, String region, String imageBucketName,
+			String kmsKey) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
-				xenImageProvider, templateService, splitOnComma(securityGroupsCommaSeparated), xenUser, xenKeyName,
-				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName, kmsKey);
+				xenImageProvider, templateService, xenVmProvider, splitOnComma(securityGroupsCommaSeparated),
+				usePublicDns, region, imageBucketName, kmsKey);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -169,10 +182,7 @@ public class XenHostManager {
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 		virtueMods.setUsername(virtue.getUsername());
-		VirtualMachine xenVm = ec2Wrapper.provisionVm(getXenVmTemplate(),
-				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
-				xenInstanceType, virtueMods, iamRoleName);
-
+		VirtualMachine xenVm = xenVmProvider.getNewXenVm(virtue, virtueMods, virtueName, secGroupIds);
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,
 		// "ec2-34-207-74-33.compute-1.amazonaws.com", 22, "ec2-user", "",

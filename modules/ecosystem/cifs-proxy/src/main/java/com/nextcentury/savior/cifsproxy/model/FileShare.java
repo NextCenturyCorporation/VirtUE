@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2019 Next Century Corporation
+ * 
+ * This file may be redistributed and/or modified under either the GPL
+ * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
+ * granted government purpose rights. For details, see the COPYRIGHT.TXT
+ * file at the root of this project.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA.
+ * 
+ * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
+ */
 package com.nextcentury.savior.cifsproxy.model;
 
 import java.util.Set;
@@ -12,9 +32,9 @@ import org.springframework.lang.NonNull;
  * @author clong
  *
  */
-public class FileShare implements Comparable<FileShare> {
+public class FileShare extends SambaService implements Comparable<FileShare> {
 
-	private static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
+	static final XLogger LOGGER = XLoggerFactory.getXLogger(FileShare.class);
 
 	/**
 	 * In the future we may support other types.
@@ -23,7 +43,7 @@ public class FileShare implements Comparable<FileShare> {
 	 *
 	 */
 	public enum ShareType {
-	CIFS
+		CIFS
 	};
 
 	/**
@@ -36,14 +56,9 @@ public class FileShare implements Comparable<FileShare> {
 		READ, WRITE
 	}
 
-	private String name;
-	private String virtueId;
-	private String server;
 	private String path;
 	private Set<SharePermissions> permissions;
 	private ShareType type;
-	private String exportedName;
-
 	/**
 	 * 
 	 * @param name
@@ -68,30 +83,6 @@ public class FileShare implements Comparable<FileShare> {
 		this.path = path;
 		this.permissions = permissions;
 		this.type = type;
-	}
-
-	/**
-	 * 
-	 * @return name of the share
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * 
-	 * @return the name of the Virtue
-	 */
-	public String getVirtueId() {
-		return virtueId;
-	}
-
-	/**
-	 * 
-	 * @return the server where this share lives
-	 */
-	public String getServer() {
-		return server;
 	}
 
 	/**
@@ -141,18 +132,5 @@ public class FileShare implements Comparable<FileShare> {
 	public String toString() {
 		return "name: " + name + ", path: " + path + ", permissions: " + permissions + ", server: " + server
 				+ ", type: " + type;
-	}
-
-	public String getExportedName() {
-		return exportedName;
-	}
-	
-	public void initExportedName(String name) {
-		if (exportedName != null && exportedName.length() != 0) {
-			IllegalStateException e = new IllegalStateException("cannot init already-set exportedName '" + exportedName + "'");
-			LOGGER.throwing(e);
-			throw e;
-		}
-		exportedName = name;
 	}
 }

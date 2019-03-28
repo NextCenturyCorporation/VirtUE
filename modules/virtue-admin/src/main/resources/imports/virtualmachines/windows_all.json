@@ -1,13 +1,14 @@
 {
 	"name": "windows All VM",
 	"os": "WINDOWS",
-	"templatePath": "ami-0abf68501390ca26f",
+	"templatePath": "ami-06cd0ce8eecb66095",
 	"loginUser": "virtue-admin",
 	"enabled": true,
 	"applicationIds": [
 		"IMPORT_windows_cmd",
 		"IMPORT_windows_chrome",
 		"IMPORT_windows_edge",
+		"IMPORT_windows_explorer",
 		"IMPORT_windows_excel",
 		"IMPORT_windows_outlook",
 		"IMPORT_windows_skype",
