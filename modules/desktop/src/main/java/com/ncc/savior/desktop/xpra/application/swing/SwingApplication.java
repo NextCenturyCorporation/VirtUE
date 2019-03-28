@@ -25,7 +25,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -183,8 +182,13 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// + packet.getHeight());
 				int x = packet.getX();
 				int y = packet.getY();
-
-				Rectangle rect = fixOutOfBounds(x, y, packet.getWidth(), packet.getHeight());
+				if (x < insetWidth) {
+					x = insetWidth;
+				}
+				if (y < titleBarHeight) {
+					y = titleBarHeight;
+				}
+				Rectangle rect = SwingUtils.fixOutOfBounds(x, y, packet.getWidth(), packet.getHeight());
 				x = rect.x;
 				y = rect.y;
 				frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
@@ -223,32 +227,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				}
 			}
 		});
-	}
-
-	protected Rectangle fixOutOfBounds(int x, int y, int width, int height) {
-		// make sure we slide for title bar and inset
-		if (x < insetWidth) {
-			x = insetWidth;
-		}
-		if (y < titleBarHeight) {
-			y = titleBarHeight;
-		}
-		Rectangle window = new Rectangle(x, y, width, height);
-		GraphicsDevice[] screens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-		for (GraphicsDevice screen : screens) {
-			boolean contains = screen.getDefaultConfiguration().getBounds().contains(window);
-			if (contains) {
-				return window;
-			}
-		}
-		GraphicsDevice ds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		Rectangle bounds = ds.getDefaultConfiguration().getBounds();
-		// if we are out of bounds, lets just center the window in the center of the
-		// default display.
-		x = (int) (bounds.getCenterX() - width / 2);
-		y = (int) (bounds.getCenterY() - height / 2);
-		window.setLocation(x, y);
-		return window;
 	}
 
 	private void fullscreenWindow() {
@@ -319,7 +297,11 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					c = ((JDialog) c).getContentPane();
 				}
 				Point l = c.getLocationOnScreen();
-				onLocationChange((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
+				Rectangle rect = SwingUtils.fixOutOfBounds((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
+				if ((l.getX() + c.getWidth() < 0) || (l.getY() + c.getHeight() < 0)) {
+					getWindow().setLocation(rect.x, rect.y);
+				}
+				onLocationChange(rect.x, rect.y, rect.width, rect.height);
 			}
 		});
 		// scene.widthProperty().addListener(new ChangeListener<Number>() {
@@ -378,8 +360,13 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 			@Override
 			public void mouseDragged(MouseEvent event) {
+				int x;
+				int y;
 				if (draggingApp) {
-					frame.setLocation((event.getXOnScreen() - clickSceneX), (event.getYOnScreen() - clickSceneY));
+					x = (event.getXOnScreen() - clickSceneX);
+					y = (event.getYOnScreen() - clickSceneY);
+					Rectangle rect = SwingUtils.fixOutOfBounds(x, y, frame.getWidth(), frame.getHeight());
+					frame.setLocation(rect.x, rect.y);
 				}
 				int nW = frame.getWidth();
 				int nH = frame.getHeight();
@@ -401,8 +388,9 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				if (resizeBottom) {
 					nH = event.getYOnScreen() - frame.getWindow().getY();
 				}
-				frame.setSize(nW, nH);
-				frame.setLocation(nX, nY);
+				Rectangle rect = SwingUtils.fixOutOfBounds(nX, nY, nW, nH);
+				frame.setSize(rect.width, rect.height);
+				frame.setLocation(rect.x, rect.y);
 			}
 
 		};
@@ -635,12 +623,14 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				logger.debug("location change");
+				Rectangle rect = SwingUtils.fixOutOfBounds(x, y, width, height);
 				// stage.setX(x - insetWidth);
 				// stage.setY(y - titleBarHeight);
-				frame.setLocation((x - insetWidth), (y - titleBarHeight));
+				frame.setLocation((rect.x - insetWidth), (rect.y - titleBarHeight));
 				// stage.setWidth(width + 2 * insetWidth);
 				// stage.setHeight(height + insetWidth + titleBarHeight);
-				frame.setSize((width + 2 * insetWidth), (height + insetWidth + titleBarHeight));
+				frame.setSize((rect.width + 2 * insetWidth), (rect.height + insetWidth + titleBarHeight));
 			}
 		});
 	}

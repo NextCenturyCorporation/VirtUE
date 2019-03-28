@@ -1,25 +1,28 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.xpra.application.swing;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -28,6 +31,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.BaseAlertMessage;
+import com.ncc.savior.desktop.alerting.PlainAlertMessage;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.jna.ILockingKeysService;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
@@ -111,6 +117,38 @@ public class SwingUtils {
 		if (numLock) {
 			mods.add(MOD_NUM_LOCK);
 		}
+	}
+
+	public static Rectangle fixOutOfBounds(int x, int y, int width, int height) {
+		// make sure we slide for title bar and inset
+		Rectangle window = new Rectangle(x, y, width, height);
+
+		// this if is a fix for XPRA not supporting monitors in negative space. (or our
+		// app not adjusting correctly)
+		if (x + width > 0 && y + height > 0) {
+
+			GraphicsDevice[] screens = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+			for (GraphicsDevice screen : screens) {
+				Rectangle bounds = screen.getDefaultConfiguration().getBounds();
+				Rectangle union = bounds.intersection(window);
+				// logger.debug("" + union);
+				if (union != null && union.width > 0 && union.height > 0) {
+					return window;
+				}
+			}
+		} else {
+			BaseAlertMessage alertMessage = new PlainAlertMessage("Window Moved",
+					"A window has been moved because windows cannot be fully contained in a monitor that has negative coordinate space.  To Fix this issue, please set your top left monitor your primary monitor.");
+			UserAlertingServiceHolder.sendAlertLogError(alertMessage, logger);
+		}
+		GraphicsDevice ds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		Rectangle bounds = ds.getDefaultConfiguration().getBounds();
+		// if we are out of bounds, lets just center the window in the center of the
+		// default display.
+		x = (int) (bounds.getCenterX() - width / 2);
+		y = (int) (bounds.getCenterY() - height / 2);
+		window.setLocation(x, y);
+		return window;
 	}
 
 	public static KeyCodeDto getKeyCodeFromEvent(KeyEvent e, SwingKeyboard keyboard) {
