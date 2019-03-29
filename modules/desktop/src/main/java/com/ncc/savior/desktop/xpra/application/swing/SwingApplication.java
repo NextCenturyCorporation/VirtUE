@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.xpra.application.swing;
@@ -188,6 +188,9 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				if (y < titleBarHeight) {
 					y = titleBarHeight;
 				}
+				Rectangle rect = SwingUtils.fixOutOfBounds(x, y, packet.getWidth(), packet.getHeight());
+				x = rect.x;
+				y = rect.y;
 				frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
 				frame.getContentPane().setPreferredSize(new Dimension(packet.getWidth(), packet.getHeight()));
 
@@ -294,7 +297,11 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					c = ((JDialog) c).getContentPane();
 				}
 				Point l = c.getLocationOnScreen();
-				onLocationChange((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
+				Rectangle rect = SwingUtils.fixOutOfBounds((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
+				if ((l.getX() + c.getWidth() < 0) || (l.getY() + c.getHeight() < 0)) {
+					getWindow().setLocation(rect.x, rect.y);
+				}
+				onLocationChange(rect.x, rect.y, rect.width, rect.height);
 			}
 		});
 		// scene.widthProperty().addListener(new ChangeListener<Number>() {
@@ -353,8 +360,13 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 			@Override
 			public void mouseDragged(MouseEvent event) {
+				int x;
+				int y;
 				if (draggingApp) {
-					frame.setLocation((event.getXOnScreen() - clickSceneX), (event.getYOnScreen() - clickSceneY));
+					x = (event.getXOnScreen() - clickSceneX);
+					y = (event.getYOnScreen() - clickSceneY);
+					Rectangle rect = SwingUtils.fixOutOfBounds(x, y, frame.getWidth(), frame.getHeight());
+					frame.setLocation(rect.x, rect.y);
 				}
 				int nW = frame.getWidth();
 				int nH = frame.getHeight();
@@ -376,8 +388,9 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				if (resizeBottom) {
 					nH = event.getYOnScreen() - frame.getWindow().getY();
 				}
-				frame.setSize(nW, nH);
-				frame.setLocation(nX, nY);
+				Rectangle rect = SwingUtils.fixOutOfBounds(nX, nY, nW, nH);
+				frame.setSize(rect.width, rect.height);
+				frame.setLocation(rect.x, rect.y);
 			}
 
 		};
@@ -610,12 +623,14 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				logger.debug("location change");
+				Rectangle rect = SwingUtils.fixOutOfBounds(x, y, width, height);
 				// stage.setX(x - insetWidth);
 				// stage.setY(y - titleBarHeight);
-				frame.setLocation((x - insetWidth), (y - titleBarHeight));
+				frame.setLocation((rect.x - insetWidth), (rect.y - titleBarHeight));
 				// stage.setWidth(width + 2 * insetWidth);
 				// stage.setHeight(height + insetWidth + titleBarHeight);
-				frame.setSize((width + 2 * insetWidth), (height + insetWidth + titleBarHeight));
+				frame.setSize((rect.width + 2 * insetWidth), (rect.height + insetWidth + titleBarHeight));
 			}
 		});
 	}
