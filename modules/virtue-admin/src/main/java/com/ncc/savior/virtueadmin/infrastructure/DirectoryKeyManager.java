@@ -22,6 +22,8 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.File;
 
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 
 /**
@@ -52,6 +54,9 @@ public class DirectoryKeyManager implements IKeyManager {
 	@Override
 	public File getKeyFileByName(String keyName) {
 		File file = new File(directory, keyName + defaultExtension);
+		if (!file.exists()) {
+			throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR, "Unable to find key with name=" + keyName);
+		}
 		return file;
 	}
 }
