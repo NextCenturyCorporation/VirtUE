@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.sidebar;
@@ -247,9 +247,8 @@ public class Sidebar implements VirtueChangeHandler {
 					DefaultApplicationType applicationType, String params) {
 				try {
 					HyperlinkBridgeSensorMessage messageObj = new HyperlinkBridgeSensorMessage(
-							"Opening new application through hyperlink",
-							authService.getUser().getUsername(), MessageType.HYPERLINK, dataSourceGroupId,
-							dataDestinationGroupId, applicationType, params);
+							"Opening new application through hyperlink", authService.getUser().getUsername(),
+							MessageType.HYPERLINK, dataSourceGroupId, dataDestinationGroupId, applicationType, params);
 					bridgeSensorService.sendMessage(messageObj);
 				} catch (InvalidUserLoginException e) {
 					logger.error("error with sending message to bridge sensor");
@@ -842,8 +841,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		// frame.pack();
 
-		boolean useSystemTray = true;
-		if (useSystemTray && SystemTray.isSupported()) {
+		if (SystemTray.isSupported()) {
 			setupSystemTray();
 		}
 
@@ -856,41 +854,33 @@ public class Sidebar implements VirtueChangeHandler {
 		Image trayImage = saviorIcon.getImage();
 		tray = SystemTray.getSystemTray();
 
-		trayIcon = new TrayIcon(trayImage, "Savior Desktop");
+		trayIcon = new TrayIcon(trayImage, "SAVIOR Desktop");
 		trayIcon.setImageAutoSize(true);
-		trayIcon.addActionListener(new ActionListener() {
-
+		/*
+		 * Double-click on Linux KDE does not generate an ActionEvent, nor does a
+		 * MouseEvent ever report more than one click. Might be this bug:
+		 * https://bugs.openjdk.java.net/browse/JDK-8081457. In any case, it's probably
+		 * friendlier to only require single click, anyway, since we aren't showing a
+		 * menu.
+		 */
+		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void mouseClicked(MouseEvent e) {
 				frame.setVisible(true);
-				frame.setExtendedState(JFrame.NORMAL);
+				frame.setExtendedState(frame.getExtendedState() & ~Frame.ICONIFIED);
 			}
-
 		});
 
 		frame.addWindowStateListener(new WindowStateListener() {
-
 			@Override
 			public void windowStateChanged(WindowEvent e) {
-				if (e.getNewState() == Frame.ICONIFIED) {
+				if ((e.getNewState() & Frame.ICONIFIED) != 0) {
 					try {
 						tray.add(trayIcon);
 						frame.setVisible(false);
 					} catch (AWTException ex) {
 					}
-				}
-				if (e.getNewState() == 7) {
-					try {
-						tray.add(trayIcon);
-						frame.setVisible(false);
-					} catch (AWTException ex) {
-					}
-				}
-				if (e.getNewState() == Frame.MAXIMIZED_BOTH) {
-					tray.remove(trayIcon);
-					frame.setVisible(true);
-				}
-				if (e.getNewState() == Frame.NORMAL) {
+				} else {
 					tray.remove(trayIcon);
 					frame.setVisible(true);
 				}
