@@ -20,12 +20,9 @@
  */
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.ncc.savior.util.SaviorErrorCode;
@@ -34,8 +31,6 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
-import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -44,29 +39,28 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 public class StandardXenProvider implements IXenVmProvider {
 	private IVpcSubnetProvider vpcSubnetProvider;
 	private AwsEc2Wrapper ec2Wrapper;
-	private VirtualMachineTemplate xenVmTemplate;
 	private String iamRoleName;
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
 	private String serverId;
+	private BaseXenTemplateProvider xenTemplateProvider;
 
 	public StandardXenProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
-			IVpcSubnetProvider vpcSubnetProvider, String xenAmi, String xenLoginUser, String xenKeyName,
+			IVpcSubnetProvider vpcSubnetProvider, BaseXenTemplateProvider templateProvider, String xenKeyName,
 			InstanceType xenInstanceType, String iamRoleName) {
 		this.serverId = serverIdProvider.getServerId();
 		this.ec2Wrapper = ec2Wrapper;
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.xenTemplateProvider=templateProvider;
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
 		this.xenInstanceType = xenInstanceType;
-		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
-				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
 
 	public StandardXenProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
-			IVpcSubnetProvider vpcSubnetProvider, String xenAmi, String xenLoginUser, String xenKeyName,
+			IVpcSubnetProvider vpcSubnetProvider,  BaseXenTemplateProvider xenTemplateProvider ,String xenKeyName,
 			String xenInstanceType, String iamRoleName) {
-		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenAmi, xenLoginUser, xenKeyName,
+		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenTemplateProvider, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), iamRoleName);
 	}
 
@@ -83,6 +77,7 @@ public class StandardXenProvider implements IXenVmProvider {
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
 		virtueMods.setSubnetId(subnetId);
 
+		VirtualMachineTemplate xenVmTemplate = xenTemplateProvider.getXenVmTemplate();
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverId + "-" + vi.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
 				xenInstanceType, virtueMods, iamRoleName);

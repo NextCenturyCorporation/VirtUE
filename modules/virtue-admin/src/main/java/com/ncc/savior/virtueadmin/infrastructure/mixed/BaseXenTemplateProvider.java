@@ -22,8 +22,8 @@ public class BaseXenTemplateProvider {
 	private String amiFromProperties;
 	@Value("${virtue.aws.xen.loginUser}")
 	private String userFromProperties;
-	@Value("${virtue.aws.xen.vmKey}")
-	private String keyNameFromProperties;
+//	@Value("${virtue.aws.xen.vmKey}")
+//	private String keyNameFromProperties;
 
 	@Autowired
 	private VirtualMachineTemplateRepository vmTemplateRepo;

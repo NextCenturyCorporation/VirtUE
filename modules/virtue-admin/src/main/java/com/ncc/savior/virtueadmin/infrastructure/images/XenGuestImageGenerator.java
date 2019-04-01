@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +129,7 @@ public class XenGuestImageGenerator {
 
 	public void init() {
 		sync();
-//		startDom0AndTestThread();
+		startDom0AndTestThread();
 	}
 
 	private void startDom0TestThread() {
@@ -148,7 +149,7 @@ public class XenGuestImageGenerator {
 		new Thread(() -> {
 			try {
 				ImageDescriptor desc = new ImageDescriptor("XenDomUBase-" + System.currentTimeMillis());
-				desc.setDom0Ami("ami-057aa501f6499629b");
+				desc.setDom0Ami("ami-00adf65830abfd276");
 				CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(desc);
 				Dom0ImageResult result = future.get();
 				xenImageProvider.setXenVmTemplateFromAmi(result.getAmi());
@@ -205,7 +206,7 @@ public class XenGuestImageGenerator {
 		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
 		String linuxAmi = (imageDescriptor.getBaseLinuxAmi() != null ? imageDescriptor.getBaseLinuxAmi()
 				: baseLinuxAmi);
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(linuxAmi, "Xen-Dom0");
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(linuxAmi, "Xen-Dom0");
 		vmFuture.handle((xenVm, ex) -> {
 			if (ex != null) {
 				logger.error("Error creating Dom0!", ex);
@@ -283,49 +284,120 @@ public class XenGuestImageGenerator {
 	}
 
 	private CompletableFuture<Dom0ImageResult> createNewDomUBaseImageDirect(ImageDescriptor imageDescriptor) {
+		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
 		ImageBuildStage stage = ImageBuildStage.domuBase;
 		String dom0Ami = imageDescriptor.getDom0Ami() != null ? imageDescriptor.getDom0Ami() : linuxWithDom0Ami;
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(dom0Ami, "DomUBase");
-		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
-		vmFuture.handle((xenVm, ex) -> {
-			if (ex != null) {
-				logger.error("Error creating Dom0!", ex);
-			} else {
-				// happy path
-				try {
-					File privateKeyFile = keyManager.getKeyFileByName(xenVm.getPrivateKeyName());
-					Session sshDom0Session = SshUtil.getConnectedSession(xenVm, privateKeyFile);
-					Map<String, Object> dataModel = new HashMap<String, Object>();
-					dataModel.put("xenVm", xenVm);
-					dataModel.put("basePath", BASE_IMAGE);
-					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
-							ImageBuildModifer.prior.toString());
+		String suffix = "DomUBase";
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(dom0Ami, suffix);
 
+		// create domU Image from linux ami
+		// first create basic debian
+		CompletableFuture<VirtualMachine> createDomUAmiFuture = createBasicLinuxAwsInstance(suffix);
+
+		// once created, run ansible on it.
+		CompletableFuture<VirtualMachine> domUtoS3Future = new CompletableFuture<VirtualMachine>();
+		createDomUAmiFuture.handle((domUVm, ex) -> {
+			if (ex != null) {
+				logger.error("Error creating DomU!", ex);
+				imageResultFuture.completeExceptionally(ex);
+			} else {
+				try {
+					File privateKeyFile = keyManager.getKeyFileByName(domUVm.getPrivateKeyName());
+					Session sshDom0Session = SshUtil.getConnectedSession(domUVm, privateKeyFile);
+					Map<String, Object> dataModel = new HashMap<String, Object>();
+					dataModel.put("domUVm", domUVm);
+					//TODO make configurable!
+					dataModel.put("bucket", "xen-images-unencrypted");
+					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.domu,
+							ImageBuildModifer.prior.toString());
 					// run ansible
-					packageInstaller.installPackages(stage, imageDescriptor, dataModel);
+
+					ImageBuildStage substage = ImageBuildStage.domuBaseCreateDomu;
+					packageInstaller.installPackages(substage, imageDescriptor, dataModel);
 
 					// runScript(sshDomuSession, dataModel, stage,
 					// ImageBuildTarget.domu,
 					// ImageBuildModifer.post.toString());
-					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
+					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.domu,
 							ImageBuildModifer.post.toString());
 					sshDom0Session.disconnect();
-
-					Dom0ImageResult result = saveAmi(imageDescriptor, xenVm);
-					imageResultFuture.complete(result);
+					domUtoS3Future.complete(domUVm);
 				} catch (Exception e) {
 					logger.error("error in image creation", e);
-					imageResultFuture.completeExceptionally(e);
+					domUtoS3Future.completeExceptionally(e);
 				}
-				logger.debug("attempting to delete Dom0 image creation VM=" + xenVm.getName() + " id="
-						+ xenVm.getInfrastructureId());
+				logger.debug("attempting to delete Dom0 image creation VM=" + domUVm.getName() + " id="
+						+ domUVm.getInfrastructureId());
 				Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-				vms.add(xenVm);
+				vms.add(domUVm);
 				ec2Wrapper.deleteVirtualMachines(vms);
 			}
-			return xenVm;
+			return domUVm;
+		});
+
+		// once ansible completed on the domU run next set
+
+		domUtoS3Future.handle((domUVm, domUEx) -> {
+			if (domUEx != null) {
+				logger.error("Error creating Dom0!", domUEx);
+			} else {
+				vmFuture.handle((xenVm, ex) -> {
+					if (ex != null) {
+						logger.error("Error creating Dom0!", ex);
+						imageResultFuture.completeExceptionally(ex);
+					} else {
+						// happy path
+						try {
+							File privateKeyFile = keyManager.getKeyFileByName(xenVm.getPrivateKeyName());
+							Session sshDom0Session = SshUtil.getConnectedSession(xenVm, privateKeyFile);
+							Map<String, Object> dataModel = new HashMap<String, Object>();
+							dataModel.put("xenVm", xenVm);
+							dataModel.put("basePath", BASE_IMAGE);
+							//TODO make configurable!
+							dataModel.put("bucket", "xen-images-unencrypted");
+							runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
+									ImageBuildModifer.prior.toString());
+
+							// run ansible
+							packageInstaller.installPackages(stage, imageDescriptor, dataModel);
+
+							// runScript(sshDomuSession, dataModel, stage,
+							// ImageBuildTarget.domu,
+							// ImageBuildModifer.post.toString());
+							runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
+									ImageBuildModifer.post.toString());
+							sshDom0Session.disconnect();
+
+							Dom0ImageResult result = saveAmi(imageDescriptor, xenVm);
+							imageResultFuture.complete(result);
+						} catch (Exception e) {
+							logger.error("error in image creation", e);
+							imageResultFuture.completeExceptionally(e);
+						}
+						logger.debug("attempting to delete Dom0 image creation VM=" + xenVm.getName() + " id="
+								+ xenVm.getInfrastructureId());
+						Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+						vms.add(xenVm);
+						ec2Wrapper.deleteVirtualMachines(vms);
+					}
+					//vmFuture.handle return, result is not used
+					return xenVm;
+				});
+			}
+			//domUToS3Future.handle return, result is not used
+			return domUVm;
 		});
 		return imageResultFuture;
+	}
+
+	private CompletableFuture<VirtualMachine> createBasicLinuxAwsInstance(String suffix) {
+		// TODO this is the magical AMI to use for ubuntu. Need to make it configurable
+		// though.
+		String ubuntuAmi = "ami-0ac019f4fcb7cb7e6";
+		//TODO user should be configurable
+		VirtualMachineTemplate vmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "debianTemplate",
+				OS.LINUX, ubuntuAmi, Collections.emptyList(), "ubuntu", true, new Date(), "System");
+		return getVm(ubuntuAmi, suffix+"-domU", vmTemplate, xenInstanceType, null);
 	}
 
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
@@ -359,7 +431,7 @@ public class XenGuestImageGenerator {
 		// get Dom0Vm
 		String baseDomUAmi = imageDescriptor.getBaseDomUAmi() != null ? imageDescriptor.getBaseDomUAmi()
 				: this.xenImageProvider.getXenVmTemplate().getTemplatePath();
-		CompletableFuture<VirtualMachine> vmFuture = getDomOVm(baseDomUAmi, "DomUSnapshot");
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(baseDomUAmi, "DomUSnapshot");
 		CompletableFuture<ImageResult> imageResultFuture = new CompletableFuture<ImageResult>();
 
 		vmFuture.handle((xenVm, ex) -> {
@@ -538,7 +610,13 @@ public class XenGuestImageGenerator {
 		return guestVm;
 	}
 
-	private CompletableFuture<VirtualMachine> getDomOVm(String ami, String postfix) {
+	private CompletableFuture<VirtualMachine> getDom0Vm(String ami, String postfix) {
+		VirtualMachineTemplate vmTemplate = getXenVmWithBaseImageTemplate(ami);
+		return getVm(ami, postfix+"-dom0", vmTemplate, xenInstanceType, iamRoleName);
+	}
+
+	private CompletableFuture<VirtualMachine> getVm(String ami, String postfix, VirtualMachineTemplate vmTemplate,
+			InstanceType xenInstanceType, String iamRoleName) {
 		Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters("Image-Creation");
 		if (virtueMods.getSecurityGroupId() != null) {
@@ -550,12 +628,11 @@ public class XenGuestImageGenerator {
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 		virtueMods.setUsername(systemUser);
 		virtueMods.setSubnetId(subnetId);
-		VirtualMachine xenVm = ec2Wrapper.provisionVm(getXenVmWithBaseImageTemplate(ami),
-				"VRTU-ImageCreation-" + serverId + "-" + postfix, secGroupIds, xenKeyName, xenInstanceType, virtueMods,
-				iamRoleName);
-		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
-		addVmToProvisionPipeline(xenVm, xenFuture);
-		return xenFuture;
+		VirtualMachine vm = ec2Wrapper.provisionVm(vmTemplate, "VRTU-ImageCreation-" + serverId + "-" + postfix,
+				secGroupIds, xenKeyName, xenInstanceType, virtueMods, iamRoleName);
+		CompletableFuture<VirtualMachine> vmFuture = new CompletableFuture<VirtualMachine>();
+		addVmToProvisionPipeline(vm, vmFuture);
+		return vmFuture;
 	}
 
 	private VirtualMachineTemplate getXenVmWithBaseImageTemplate(String ami) {
@@ -572,7 +649,7 @@ public class XenGuestImageGenerator {
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		// cf = serviceProvider.getErrorCausingService().chainFutures(cf, v);
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
-		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+		// cf = serviceProvider.getAddRsa().chainFutures(cf, v);
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf.handle((vm, ex) -> {
@@ -610,7 +687,7 @@ public class XenGuestImageGenerator {
 	 * The portion that the current task is trying to create
 	 */
 	public static enum ImageBuildStage {
-		dom0, domuBase, domuSnapshot
+		dom0, domuBase, domuSnapshot, domuBaseCreateDomu
 	}
 
 	public static enum ImageBuildModifer {

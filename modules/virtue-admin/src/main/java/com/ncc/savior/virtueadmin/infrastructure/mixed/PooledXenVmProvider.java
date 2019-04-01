@@ -23,7 +23,6 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +56,6 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurp
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -68,8 +65,8 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 public class PooledXenVmProvider implements IXenVmProvider {
 	private static final Logger logger = LoggerFactory.getLogger(PooledXenVmProvider.class);
 	private IVpcSubnetProvider vpcSubnetProvider;
+	private BaseXenTemplateProvider xenTemplateProvider;
 	private AwsEc2Wrapper ec2Wrapper;
-	private VirtualMachineTemplate xenVmTemplate;
 	private String iamRoleName;
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
@@ -78,17 +75,19 @@ public class PooledXenVmProvider implements IXenVmProvider {
 	private Collection<String> securityGroups;
 	protected IActiveVirtueDao xenVmDao;
 	private int poolSize;
-	private StandardXenProvider nonPool;
+	private IXenVmProvider nonPool;
 	private CompletableFutureServiceProvider serviceProvider;
 
 	public PooledXenVmProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao,
-			CompletableFutureServiceProvider serviceProvider, String xenAmi, String xenLoginUser, String xenKeyName,
-			InstanceType xenInstanceType, String iamRoleName, Collection<String> securityGroupsNames, int poolSize) {
+			CompletableFutureServiceProvider serviceProvider, BaseXenTemplateProvider xenTemplateProvider,
+			String xenKeyName, InstanceType xenInstanceType, String iamRoleName, Collection<String> securityGroupsNames,
+			int poolSize) {
 		this.pool = new LinkedBlockingDeque<VirtualMachine>();
 		this.serverId = serverIdProvider.getServerId();
 		this.ec2Wrapper = ec2Wrapper;
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.xenTemplateProvider = xenTemplateProvider;
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
 		this.xenInstanceType = xenInstanceType;
@@ -97,9 +96,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		this.serviceProvider = serviceProvider;
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.securityGroups = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
-		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
-				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
-		this.nonPool = new StandardXenProvider(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenAmi, xenLoginUser,
+		this.nonPool = new StandardXenProvider(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenTemplateProvider,
 				xenKeyName, xenInstanceType, iamRoleName);
 		initPool();
 	}
@@ -122,9 +119,10 @@ public class PooledXenVmProvider implements IXenVmProvider {
 
 	public PooledXenVmProvider(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, IActiveVirtueDao xenVmDao,
-			CompletableFutureServiceProvider serviceProvider, String xenAmi, String xenLoginUser, String xenKeyName,
-			String xenInstanceType, String iamRoleName, String securityGroupsCommaSeparated, int poolSize) {
-		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenVmDao, serviceProvider, xenAmi, xenLoginUser,
+			CompletableFutureServiceProvider serviceProvider, BaseXenTemplateProvider xenTemplateProvider,
+			String xenKeyName, String xenInstanceType, String iamRoleName, String securityGroupsCommaSeparated,
+			int poolSize) {
+		this(serverIdProvider, ec2Wrapper, vpcSubnetProvider, xenVmDao, serviceProvider, xenTemplateProvider,
 				xenKeyName, InstanceType.fromValue(xenInstanceType), iamRoleName,
 				splitOnComma(securityGroupsCommaSeparated), poolSize);
 
@@ -172,7 +170,8 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		modifyInstanceAttributeRequest.withGroups(secGroupIds).withInstanceId(xenVm.getInfrastructureId());
 		ec2.modifyInstanceAttribute(modifyInstanceAttributeRequest);
 
-		List<Tag> tags = ec2Wrapper.getTagsFromVirtueMods(xenVmTemplate.getId(), name, virtueMods, xenVm.getId());
+		VirtualMachineTemplate xenTemplate = xenTemplateProvider.getXenVmTemplate();
+		List<Tag> tags = ec2Wrapper.getTagsFromVirtueMods(xenTemplate.getId(), name, virtueMods, xenVm.getId());
 
 		List<Tag> subnetTags = new ArrayList<Tag>();
 		subnetTags.add(new Tag(AwsUtil.TAG_USERNAME, vi.getUsername()));
@@ -254,6 +253,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.XEN_POOL);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 
+		VirtualMachineTemplate xenVmTemplate = xenTemplateProvider.getXenVmTemplate();
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate, VM_NAME_POOL_PREFIX + serverId, securityGroups,
 				xenKeyName, xenInstanceType, virtueMods, iamRoleName);
 		vpcSubnetProvider.reassignSubnet(id, xenVm.getId(), null);

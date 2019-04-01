@@ -49,7 +49,7 @@ public class AnsiblePackageInstaller implements IPackageInstaller {
 		VirtualMachine vm = new VirtualMachine("id", "ansible", null, null, null, null, ansibleHostname, ansiblePort,
 				ansibleUsername, null, ansibleKeyName, null);
 		// try {
-		dataModel.put("initFile", UUID.randomUUID().toString());
+		dataModel.put("initFile", stage+"-"+UUID.randomUUID().toString());
 		Session session = SshUtil.getConnectedSessionWithRetries(vm, key, 3, 1000);
 		List<String> lines = SshUtil.runScriptFromFile(templateService, session,
 				"image/ansible/ansible-" + stage.toString() + ".tpl", dataModel);

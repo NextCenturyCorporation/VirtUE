@@ -247,8 +247,6 @@
 <!-- 		<constructor-arg ref="serverIdProvider" /> -->
 <!-- 		<constructor-arg ref="ec2Wrapper"></constructor-arg> -->
 <!-- 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg> -->
-<!-- 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg> -->
-<!-- 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg> -->
 <!-- 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg> -->
 <!-- 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg> -->
 <!-- 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg> -->
@@ -261,8 +259,7 @@
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
+		<constructor-arg ref="xenImageProvider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
