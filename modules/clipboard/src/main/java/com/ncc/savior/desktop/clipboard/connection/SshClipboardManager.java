@@ -86,12 +86,14 @@ public class SshClipboardManager implements IClipboardManager {
 	private ClipboardClient localClipboardClient;
 
 	private HashMap<String, ClipboardClientConnectionProperties> propertiesMap;
-	
+	private HashMap<String, Session> sessionMap;
+
 	private long retryPeriodMillis = 2000;
 
 	public SshClipboardManager(ClipboardHub clipboardHub, String sourceJarPath) {
 		this.clipboardHub = clipboardHub;
 		this.propertiesMap = new HashMap<String, ClipboardClientConnectionProperties>();
+		this.sessionMap = new HashMap<String, Session>();
 		clipboardHub.setDisconnectListener(new DisconnectListener() {
 
 			@Override
@@ -120,7 +122,7 @@ public class SshClipboardManager implements IClipboardManager {
 
 	protected void onDisconnectWithError(String clientId) {
 		// TODO new thread?
-
+		killSession(clientId);
 		if (propertiesMap.containsKey(clientId)) {
 			// remove because if we fail to reconnect, we are done.
 			ClipboardClientConnectionProperties props = propertiesMap.get(clientId);
@@ -193,6 +195,7 @@ public class SshClipboardManager implements IClipboardManager {
 				props.closeable.close();
 			}
 		}
+		killSession(clipboardId);
 	}
 
 	/**
@@ -218,7 +221,10 @@ public class SshClipboardManager implements IClipboardManager {
 				ClipboardClientConnectionProperties props = connectionClient(session, groupId, params.getDisplay(),
 						displayName, clientId);
 				props.connectionParameters = params;
-				propertiesMap.put(props.clientId, props);
+				String myClientId = props.clientId;
+				propertiesMap.put(myClientId, props);
+				killSession(myClientId);
+				sessionMap.put(myClientId, session);
 				return props.clientId;
 			} catch (JSchException | SftpException e) {
 				throw new IOException(e);
@@ -227,6 +233,19 @@ public class SshClipboardManager implements IClipboardManager {
 			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
 			// TODO Alert user
 			return null;
+		}
+	}
+
+	private void killSession(String clipboardId) {
+		if (sessionMap.containsKey(clipboardId)) {
+			Session session = sessionMap.remove(clipboardId);
+			if (session != null) {
+				try {
+					session.disconnect();
+				} catch (Exception e) {
+					logger.warn("Error trying to kill session.  This may be ignorable:", e);
+				}
+			}
 		}
 	}
 
