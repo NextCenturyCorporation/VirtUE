@@ -7,6 +7,6 @@ echo v-domU ansible_ssh_host=${xenVm.internalHostname} ansible_python_interprete
 cat image-creator/${initFile}
 ls -alh image-creator/${initFile}
 export ANSIBLE_HOST_KEY_CHECKING=False
-ansible-playbook -i image-creator/${initFile} -e "virtue-s3-bucket=${bucket} host_key_checking=False" virtue-create-baseline-domU.yml | tee image-creator/${initFile}.log
+ansible-playbook -i image-creator/${initFile} -e "virtue_s3_bucket=${bucket} host_key_checking=False" virtue-create-baseline-domU.yml | tee image-creator/${initFile}.log
 
 rm image-creator/${initFile}*

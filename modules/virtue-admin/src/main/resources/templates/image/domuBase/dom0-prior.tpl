@@ -1,0 +1,1 @@
+aws s3 cp s3://${bucket}/s3download-0.1.0-SNAPSHOT-all.jar ~

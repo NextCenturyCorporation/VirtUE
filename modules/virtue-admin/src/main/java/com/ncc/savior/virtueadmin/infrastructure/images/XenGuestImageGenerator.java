@@ -397,7 +397,7 @@ public class XenGuestImageGenerator {
 		//TODO user should be configurable
 		VirtualMachineTemplate vmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "debianTemplate",
 				OS.LINUX, ubuntuAmi, Collections.emptyList(), "ubuntu", true, new Date(), "System");
-		return getVm(ubuntuAmi, suffix+"-domU", vmTemplate, xenInstanceType, null);
+		return getVm(ubuntuAmi, suffix+"-domU", vmTemplate, xenInstanceType, iamRoleName);
 	}
 
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
