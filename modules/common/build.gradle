@@ -24,7 +24,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
-	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.55'
 	compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.2'
 	compile group: 'org.springframework.data', name: 'spring-data-commons', version: springDataVersion
     //	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: springDataVersion
