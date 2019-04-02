@@ -20,8 +20,10 @@
  */
 package com.ncc.savior.desktop.clipboard.linux;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -138,19 +140,25 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 				NativeLong eventMask = new NativeLong(X11.PropertyChangeMask);
 				x11.XSelectInput(display, window, eventMask);
+				final XErrorHandler[] oldHandlerReference = { null };
 				XErrorHandler handler = new XErrorHandler() {
-
 					@Override
 					public int apply(Display display, XErrorEvent errorEvent) {
 						byte[] buffer = new byte[2048];
 						x11.XGetErrorText(display, errorEvent.error_code, buffer, 2048);
 						logger.error("ERROR: " + new String(buffer));
+						if (EventQueue.isDispatchThread() && oldHandlerReference[0] != null) {
+							oldHandlerReference[0].apply(display, errorEvent);
+						}
 						return 1;
 					}
 				};
 				startTargetPollThread();
 
-				x11.XSetErrorHandler(handler);
+				oldHandlerReference[0] = x11.XSetErrorHandler(handler);
+				if (oldHandlerReference[0] != null) {
+					logger.debug("saving old X11 error handler");
+				}
 				delayedFormats.add(ClipboardFormat.TEXT);
 				delayedFormats.add(ClipboardFormat.UNICODE);
 				delayedFormats.add(ClipboardFormat.FILES);
