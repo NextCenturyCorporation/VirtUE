@@ -146,7 +146,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 					public int apply(Display display, XErrorEvent errorEvent) {
 						byte[] buffer = new byte[2048];
 						x11.XGetErrorText(display, errorEvent.error_code, buffer, 2048);
-						logger.error("ERROR: " + new String(buffer));
+						logger.error("ERROR: " + new String(buffer).trim());
 						if (EventQueue.isDispatchThread() && oldHandlerReference[0] != null) {
 							oldHandlerReference[0].apply(display, errorEvent);
 						}
