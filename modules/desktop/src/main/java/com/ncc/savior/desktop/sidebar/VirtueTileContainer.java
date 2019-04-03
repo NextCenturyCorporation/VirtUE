@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.sidebar;
@@ -29,7 +29,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import org.slf4j.Logger;
@@ -65,9 +65,8 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	private JPanel tileContainer;
 	private Color bodyColor;
 
-	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField, GhostText ghostText)
-			throws IOException {
+	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService, Color headerColor, Color bodyColor,
+			JScrollPane sp, JTextField textField, GhostText ghostText) {
 		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = true;
 
@@ -206,12 +205,14 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	@Override
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
-		this.statusLabel.setText(virtue.getVirtueState().toString());
-		if (virtue.getVirtueState() == VirtueState.RUNNING) {
-			tileContainer.setBackground(bodyColor);
-		} else {
-			tileContainer.setBackground(Color.LIGHT_GRAY);
-		}
+		SwingUtilities.invokeLater(() -> {
+			this.statusLabel.setText(virtue.getVirtueState().toString());
+			if (virtue.getVirtueState() == VirtueState.RUNNING) {
+				tileContainer.setBackground(bodyColor);
+			} else {
+				tileContainer.setBackground(Color.LIGHT_GRAY);
+			}
+		});
 		triggerUpdateListener();
 	}
 

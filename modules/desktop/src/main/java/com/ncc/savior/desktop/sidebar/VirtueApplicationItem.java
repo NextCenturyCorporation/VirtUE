@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.sidebar;
@@ -52,6 +52,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -298,7 +299,6 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		dialogContainer.add(checkBox, BorderLayout.CENTER);
 		checkBox.setBackground(Color.WHITE);
 
-
 		JPanel bottomContainer = new JPanel();
 		bottomContainer.setBackground(Color.WHITE);
 		bottomContainer.setLayout(new GridBagLayout());
@@ -445,12 +445,12 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				true, frame, textField, cb, sortAppsByStatus, ghostText, flagColor, view);
 		va.tileSetup();
 		switch (selected) {
-			case "Alphabetical":
+		case "Alphabetical":
 			fv.addFavorite(ad, virtue, va, textField, null, ghostText);
-				break;
-			case "Status":
+			break;
+		case "Status":
 			fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus, ghostText);
-				break;
+			break;
 		}
 		favoritedLabel.setIcon(favoritedImage);
 	}
@@ -502,8 +502,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	public void update(DesktopVirtue virtue) {
 		this.virtue = virtue;
-		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
-				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
+		SwingUtilities.invokeLater(() -> {
+			container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
+					+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
+		});
 	}
 
 	private class ChangeListener implements PropertyChangeListener {

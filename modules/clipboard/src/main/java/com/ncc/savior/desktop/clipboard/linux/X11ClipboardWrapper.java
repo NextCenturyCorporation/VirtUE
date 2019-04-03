@@ -20,6 +20,7 @@
  */
 package com.ncc.savior.desktop.clipboard.linux;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -138,19 +139,25 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 				NativeLong eventMask = new NativeLong(X11.PropertyChangeMask);
 				x11.XSelectInput(display, window, eventMask);
+				final XErrorHandler[] oldHandlerReference = { null };
 				XErrorHandler handler = new XErrorHandler() {
-
 					@Override
 					public int apply(Display display, XErrorEvent errorEvent) {
 						byte[] buffer = new byte[2048];
 						x11.XGetErrorText(display, errorEvent.error_code, buffer, 2048);
-						logger.error("ERROR: " + new String(buffer));
+						logger.error("ERROR: " + new String(buffer).trim());
+						if (EventQueue.isDispatchThread() && oldHandlerReference[0] != null) {
+							oldHandlerReference[0].apply(display, errorEvent);
+						}
 						return 1;
 					}
 				};
 				startTargetPollThread();
 
-				x11.XSetErrorHandler(handler);
+				oldHandlerReference[0] = x11.XSetErrorHandler(handler);
+				if (oldHandlerReference[0] != null) {
+					logger.debug("saving old X11 error handler");
+				}
 				delayedFormats.add(ClipboardFormat.TEXT);
 				delayedFormats.add(ClipboardFormat.UNICODE);
 				delayedFormats.add(ClipboardFormat.FILES);
@@ -298,7 +305,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 							}
 							if (!ownSelection) {
 								previousFormats = acf;
-								listener.onClipboardChanged(acf);
+								// this can be null (might be a race because this is started (indirectly) by the constructor)
+								if (listener != null) {
+									listener.onClipboardChanged(acf);
+								}
 							}
 						}
 

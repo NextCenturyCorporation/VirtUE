@@ -1,3 +1,13 @@
+plugins {
+        id "io.freefair.aspectj.post-compile-weaving" version "3.2.0" apply false
+}
+
+def devMode = project.hasProperty('mode') && project.mode == 'dev'
+
+if (devMode) {
+    apply plugin: 'io.freefair.aspectj.post-compile-weaving'
+}
+
 group 'com.ncc.savior'
 version '0.1.0-SNAPSHOT'
 
@@ -24,9 +34,23 @@ task fatJar(type: Jar) {
     with jar
 }
 
+sourceSets {
+    main {
+        java {
+            if (devMode) {
+                srcDir 'src/dev'
+            }
+        }
+    }
+}
+
 dependencies {
 	compile project(':common')
 	compile project(':clipboard')
+    if (devMode) {
+        compile "org.aspectj:aspectjrt:1.9.2"
+    }
+
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'    
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'

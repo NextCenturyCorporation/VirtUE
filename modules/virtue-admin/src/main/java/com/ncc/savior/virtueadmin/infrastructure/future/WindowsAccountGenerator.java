@@ -38,7 +38,8 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
- * Future service which creates a new user with a random password for windows machines.
+ * Future service which creates a new user with a random password for windows
+ * machines.
  * 
  *
  */
@@ -66,22 +67,29 @@ public class WindowsAccountGenerator
 			BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void>.Wrapper wrapper) {
 		VirtualMachine vm = wrapper.param;
 		if (OS.WINDOWS.equals(vm.getOs())) {
+			Session session = null;
+			try {
+				session = SshUtil.getConnectedSession(vm, keyManager.getKeyFileByName(vm.getPrivateKeyName()));
+			} catch (JSchException e) {
+				logger.debug("could not connect to Windows VM " + vm.getUserName() + "@" + vm.getHostname() + ":"
+						+ vm.getSshPort() + ": " + e);
+				throw new SaviorException(SaviorErrorCode.SSH_ERROR, "Error connecting to Windows VM.", e);
+			}
+			
 			String password = createPassword();
 			String user = "virtue";
 			String command = String.format(
 					"powershell.exe $password = ConvertTo-SecureString -AsPlainText -Force \"%s\"; New-LocalUser \"%s\" -Password $password ; Add-LocalGroupMember -Group \\\"Remote Desktop Users\\\" -Member \"%s\"",
 					password, user, user);
-
-			Session session;
 			try {
-				session = SshUtil.getConnectedSession(vm, keyManager.getKeyFileByName(vm.getPrivateKeyName()));
 				List<String> lines = SshUtil.sendCommandFromSession(session, command);
 				logger.debug("Create windows user output: " + lines);
-				vm.setPassword(password);
-				vm.setWindowsUser(user);
 			} catch (JSchException | IOException e) {
-				throw new SaviorException(SaviorErrorCode.SSH_ERROR, "Error attempting to create new windows user.", e);
+				logger.debug("error creating Windows user with command: " + command);
+				throw new SaviorException(SaviorErrorCode.SSH_ERROR, "Error attempting to create new Windows user.", e);
 			}
+			vm.setPassword(password);
+			vm.setWindowsUser(user);
 		}
 		onSuccess(id, vm, wrapper.future);
 	}
@@ -90,7 +98,7 @@ public class WindowsAccountGenerator
 		int length = 22 + random.nextInt(4);
 		String password = new Random().ints(length, 65, 90)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
-//		password="password123";
+		// password="password123";
 		return password;
 	}
 

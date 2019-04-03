@@ -22,9 +22,12 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.HeadlessException;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.alerting.ToastUserAlertService;
@@ -56,10 +59,17 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
  */
 public class SidebarApplication {
 	public static void main(String[] args) throws HeadlessException, Exception {
-		start(new JFrame());
+		SwingUtilities.invokeLater(() -> {
+			try {
+				start(new JFrame());
+			} catch (HeadlessException | IOException e) {
+				System.err.println("Error starting the application: " + e);
+				System.exit(1);
+			}
+		});
 	}
 
-	public static void start(JFrame primaryFrame) throws Exception {
+	public static void start(JFrame primaryFrame) throws UnknownHostException, IOException {
 
 		// Plumbing and dependency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
