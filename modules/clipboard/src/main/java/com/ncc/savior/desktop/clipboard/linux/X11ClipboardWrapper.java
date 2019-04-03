@@ -23,7 +23,6 @@ package com.ncc.savior.desktop.clipboard.linux;
 import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.Reference;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -306,7 +305,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 							}
 							if (!ownSelection) {
 								previousFormats = acf;
-								listener.onClipboardChanged(acf);
+								// this can be null (might be a race because this is started (indirectly) by the constructor)
+								if (listener != null) {
+									listener.onClipboardChanged(acf);
+								}
 							}
 						}
 
