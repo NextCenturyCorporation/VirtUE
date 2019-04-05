@@ -163,17 +163,17 @@ public class XenGuestImageGenerator {
 
 	private void startSnapshotTestThread() {
 		new Thread(() -> {
-			while (true) {
+//			while (true) {
 				try {
 					String templatePath = "domUSnap-" + System.currentTimeMillis();
 					ImageDescriptor desc = new ImageDescriptor(templatePath);
-					desc.setBaseDomUAmi("ami-0978dbf32d1bc59c1");
+					desc.setBaseDomUAmi("ami-0b300b6f272f8faa9");
 					ImageResult image = createNewDomUSnapshotImage(desc).get();
 					logger.debug(image.toString());
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("error creating snapshot ", e);
 				}
-			}
+//			}
 		}).start();
 	}
 
