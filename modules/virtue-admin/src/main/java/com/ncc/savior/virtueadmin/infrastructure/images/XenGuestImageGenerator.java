@@ -129,7 +129,8 @@ public class XenGuestImageGenerator {
 
 	public void init() {
 		sync();
-		startDom0AndTestThread();
+		// startDom0AndTestThread();
+		startSnapshotTestThread();
 	}
 
 	private void startDom0TestThread() {
@@ -164,8 +165,10 @@ public class XenGuestImageGenerator {
 		new Thread(() -> {
 			while (true) {
 				try {
-					String templatePath = "test-" + System.currentTimeMillis();
-					ImageResult image = createNewDomUSnapshotImage(new ImageDescriptor(templatePath)).get();
+					String templatePath = "domUSnap-" + System.currentTimeMillis();
+					ImageDescriptor desc = new ImageDescriptor(templatePath);
+					desc.setBaseDomUAmi("ami-0978dbf32d1bc59c1");
+					ImageResult image = createNewDomUSnapshotImage(desc).get();
 					logger.debug(image.toString());
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("error creating snapshot ", e);
@@ -306,7 +309,7 @@ public class XenGuestImageGenerator {
 					Session sshDom0Session = SshUtil.getConnectedSession(domUVm, privateKeyFile);
 					Map<String, Object> dataModel = new HashMap<String, Object>();
 					dataModel.put("domUVm", domUVm);
-					//TODO make configurable!
+					// TODO make configurable!
 					dataModel.put("bucket", "xen-images-unencrypted");
 					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.domu,
 							ImageBuildModifer.prior.toString());
@@ -353,7 +356,7 @@ public class XenGuestImageGenerator {
 							Map<String, Object> dataModel = new HashMap<String, Object>();
 							dataModel.put("xenVm", xenVm);
 							dataModel.put("basePath", BASE_IMAGE);
-							//TODO make configurable!
+							// TODO make configurable!
 							dataModel.put("bucket", "xen-images-unencrypted");
 							runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
 									ImageBuildModifer.prior.toString());
@@ -380,11 +383,11 @@ public class XenGuestImageGenerator {
 						vms.add(xenVm);
 						ec2Wrapper.deleteVirtualMachines(vms);
 					}
-					//vmFuture.handle return, result is not used
+					// vmFuture.handle return, result is not used
 					return xenVm;
 				});
 			}
-			//domUToS3Future.handle return, result is not used
+			// domUToS3Future.handle return, result is not used
 			return domUVm;
 		});
 		return imageResultFuture;
@@ -394,17 +397,17 @@ public class XenGuestImageGenerator {
 		// TODO this is the magical AMI to use for ubuntu. Need to make it configurable
 		// though.
 		String ubuntuAmi = "ami-0ac019f4fcb7cb7e6";
-		//TODO user should be configurable
+		// TODO user should be configurable
 		VirtualMachineTemplate vmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "debianTemplate",
 				OS.LINUX, ubuntuAmi, Collections.emptyList(), "ubuntu", true, new Date(), "System");
-		return getVm(ubuntuAmi, suffix+"-domU", vmTemplate, xenInstanceType, iamRoleName);
+		return getVm(ubuntuAmi, suffix + "-domU", vmTemplate, xenInstanceType, iamRoleName);
 	}
 
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
 		if (!JavaUtil.isNotEmpty(imageDescriptor.getBaseDomUAmi())) {
 			imageDescriptor.setBaseDomUAmi(xenImageProvider.getXenVmTemplate().getTemplatePath());
 		}
-		if (JavaUtil.isNotEmpty(imageDescriptor.getDom0Ami())) {
+		if (JavaUtil.isNotEmpty(imageDescriptor.getBaseDomUAmi())) {
 			return createNewDomUSnapshotImageDirect(imageDescriptor);
 		} else {
 			// We don't have a DomUbase image yet, we need to create it!
@@ -443,25 +446,33 @@ public class XenGuestImageGenerator {
 					Map<String, Object> dataModel = new HashMap<String, Object>();
 					dataModel.put("xenVm", xenVm);
 					dataModel.put("basePath", BASE_IMAGE);
+					// TODO make configurable!
+					dataModel.put("bucket", "xen-images-unencrypted");
+					dataModel.put("encryptionKey", kmsKey);
+					dataModel.put("s3Folder", "test");
+					dataModel.put("apps", "firefox gnome-terminal");
 					// run pre-dom0 scripts
 					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
 							ImageBuildModifer.prior.toString());
 					// start base DomU
-					VirtualMachine xenGuestVm = startDomU(xenVm, imageLoginUser, sshDom0Session);
+					// VirtualMachine xenGuestVm = startDomU(xenVm, imageLoginUser, sshDom0Session);
+
+					VirtualMachine xenGuestVm = new VirtualMachine("", "", null, null, null, null, xenVm.getHostname(),
+							8001, "user", xenVm.getPrivateKey(), xenVm.getPrivateKeyName(), xenVm.getIpAddress());
 					dataModel.put("guestVm", xenGuestVm);
 
-					Session sshDomUSession = getStableSession(privateKeyFile, xenGuestVm);
+//					Session sshDomUSession = getStableSession(privateKeyFile, xenGuestVm);
 
 					// run pre-domU scripts
-					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
-							ImageBuildModifer.prior.toString());
+//					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
+//							ImageBuildModifer.prior.toString());
 					// run ansible
 					packageInstaller.installPackages(stage, imageDescriptor, dataModel);
 					// run post-domU scripts
-					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
-							ImageBuildModifer.post.toString());
+//					runScript(sshDomUSession, dataModel, stage, ImageBuildTarget.domu,
+//							ImageBuildModifer.post.toString());
 
-					shutdownAndWaitGuest(sshDom0Session, dataModel);
+//					shutdownAndWaitGuest(sshDom0Session, dataModel);
 
 					// run post-dom0 scripts
 					runScript(sshDom0Session, dataModel, stage, ImageBuildTarget.dom0,
@@ -473,13 +484,13 @@ public class XenGuestImageGenerator {
 					dataModel.put("kmsKey", kmsKey);
 					dataModel.put("bucket", bucket);
 					dataModel.put("templatePath", templatePath);
-					List<String> lines = SshUtil.runScriptFromFile(templateService, sshDom0Session, "image/upload.tpl",
-							dataModel);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Upload output: " + lines);
-					} else {
-						logger.debug("Upload complete");
-					}
+//					List<String> lines = SshUtil.runScriptFromFile(templateService, sshDom0Session, "image/upload.tpl",
+//							dataModel);
+//					if (logger.isTraceEnabled()) {
+//						logger.trace("Upload output: " + lines);
+//					} else {
+//						logger.debug("Upload complete");
+//					}
 					ImageResult imageResult = new ImageResult(templatePath);
 					imageResultFuture.complete(imageResult);
 				} catch (JSchException | IOException | TemplateException e) {
@@ -612,7 +623,7 @@ public class XenGuestImageGenerator {
 
 	private CompletableFuture<VirtualMachine> getDom0Vm(String ami, String postfix) {
 		VirtualMachineTemplate vmTemplate = getXenVmWithBaseImageTemplate(ami);
-		return getVm(ami, postfix+"-dom0", vmTemplate, xenInstanceType, iamRoleName);
+		return getVm(ami, postfix + "-dom0", vmTemplate, xenInstanceType, iamRoleName);
 	}
 
 	private CompletableFuture<VirtualMachine> getVm(String ami, String postfix, VirtualMachineTemplate vmTemplate,
