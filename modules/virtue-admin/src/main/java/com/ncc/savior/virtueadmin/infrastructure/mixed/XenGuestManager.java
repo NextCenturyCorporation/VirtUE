@@ -301,7 +301,7 @@ public class XenGuestManager {
 //			JavaUtil.sleepAndLogInterruption(100);
 //		}
 		JavaUtil.sleepAndLogInterruption(100);
-		logger.debug(lines.toString() );
+		logger.debug(lines.toString());
 	}
 
 	private String getIpFromConsole(CommandHandler ch, String name) {
