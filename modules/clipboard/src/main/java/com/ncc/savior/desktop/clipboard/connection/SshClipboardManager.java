@@ -230,7 +230,7 @@ public class SshClipboardManager implements IClipboardManager {
 				throw new IOException(e);
 			}
 		} else {
-			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
+			logger.warn("Clipboard jar not found at '" + sourceJarPath + "'.  Clipboard will be disabled");
 			// TODO Alert user
 			return null;
 		}
@@ -272,10 +272,11 @@ public class SshClipboardManager implements IClipboardManager {
 		if (logger.isTraceEnabled()) {
 			logger.trace("clipboard command:" + myCommand);
 		}
-		ChannelExec channel = SshUtil.getChannelFromCommand(session, myCommand);
+		ChannelExec channel = SshUtil.getChannelExecFromCommand(session, myCommand);
 		if (testParam != null) {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+			channel.connect();
 			writer.write("test");
 			writer.newLine();
 			writer.flush();
@@ -290,6 +291,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IConnectionWrapper connectionWrapper = new JschChannelConnectionWrapper(channel);
 			// connectionWrapper = new TestConnectionWrapper(connectionWrapper);
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connectionWrapper);
+			channel.connect();
 			clientId = clipboardHub.addClient(groupId, serializer, displayName, clientId);
 		}
 		String cId = clientId;

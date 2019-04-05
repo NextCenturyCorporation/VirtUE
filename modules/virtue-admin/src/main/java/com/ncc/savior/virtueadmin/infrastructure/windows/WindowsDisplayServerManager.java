@@ -22,6 +22,7 @@ package com.ncc.savior.virtueadmin.infrastructure.windows;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,6 +45,7 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.util.SshUtil.SshResult;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
@@ -249,17 +251,17 @@ public class WindowsDisplayServerManager {
 		VirtualMachine displayVm = null;
 		String templateName = RDP_TEMPLATE_NAME;
 		Map<String, Object> dataModel = null;
+
+		displayVm = getWindowsDisplayVm(appVm.getId());
+		File keyFile = keyManager.getKeyFileByName(displayVm.getPrivateKeyName());
+		int display = sam.startOrGetXpraServerWithRetries(displayVm, keyFile, 15);
+		if (params == null) {
+			params = "";
+		} else {
+			params = " " + params;
+		}
+
 		try {
-
-			displayVm = getWindowsDisplayVm(appVm.getId());
-			File keyFile = keyManager.getKeyFileByName(displayVm.getPrivateKeyName());
-			int display = sam.startOrGetXpraServerWithRetries(displayVm, keyFile, 15);
-			if (params == null) {
-				params = "";
-			} else {
-				params = " " + params;
-			}
-
 			session = SshUtil.getConnectedSession(displayVm, keyFile);
 			dataModel = new HashMap<String, Object>();
 			dataModel.put(MODEL_KEY_APP_VM, appVm);
@@ -273,20 +275,38 @@ public class WindowsDisplayServerManager {
 			// create runnable because connection must remain open
 			Runnable con = () -> {
 				try {
-					Session winSession = SshUtil.getConnectedSession(appVm, keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
-					List<String> out = SshUtil.sendCommandFromSession(winSession, "echo "+application.getLaunchCommand()+ " > c:\\virtue\\app.txt");
-					logger.debug("app out: "+out);
-					
-					List<String> line = SshUtil.runCommandsFromFileWithTimeout(templateService, session, templateName,
-							dataModelFinal, 3000);
-					logger.debug("returned!**" + line);
+					Session winSession = SshUtil.getConnectedSession(appVm,
+							keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
+					List<String> out = SshUtil.sendCommandFromSession(winSession,
+							"echo " + application.getLaunchCommand() + " > c:\\virtue\\app.txt");
+					logger.debug("app out: " + out);
+
+					SshResult result = SshUtil.runTemplateFile(templateService, session, templateName, dataModelFinal,
+							5000);
+
+					int exitStatus = result.getExitStatus();
+					if (exitStatus == -1) {
+						logger.debug("letting app run in the background");
+					}
+					else if (exitStatus == 131) {
+						throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND,
+								"Error starting application, it may not be installed. DisplayVm=" + displayVmFinal
+										+ " AppVm=" + appVm + " application=" + application);
+					} else if (exitStatus != 0) {
+						throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+								"Error " + exitStatus + " starting application. DisplayVm=" + displayVmFinal + " AppVm="
+										+ appVm + " application=" + application);
+					}
+					logger.debug("returned!**" + result.getOutput() + result.getError());
+				} catch (InterruptedIOException e) {
+					logger.debug("letting app run in the background");
 				} catch (JSchException | IOException e) {
 					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
-							"Error connection to windows display VM to start application. DisplayVm=" + displayVmFinal
+							"Error connecting to windows display VM to start application. DisplayVm=" + displayVmFinal
 									+ " AppVm=" + appVm + " application=" + application,
 							e);
 				} catch (TemplateException e) {
-					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+					throw new SaviorException(SaviorErrorCode.TEMPLATE_ERROR,
 							"Error creating template. Template=" + templateName + " model=" + dataModelFinal, e);
 				}
 			};

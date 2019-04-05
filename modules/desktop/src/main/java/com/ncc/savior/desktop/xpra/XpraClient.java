@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.xpra;
@@ -76,7 +76,7 @@ public class XpraClient implements Closeable {
 	// private IConnection connection;
 	private IKeyboard keyboard;
 	protected InputStreamPacketReader packetReader;
-	protected boolean stopReadThread;
+	volatile protected boolean stopReadThread;
 	private static int threadCount = 1;
 	private Status status;
 	private int display;
@@ -88,7 +88,6 @@ public class XpraClient implements Closeable {
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
 		status = Status.DISCONNECTED;
-
 
 		internalPacketDistributer.addPacketHandler(PacketType.HELLO, new BasePacketHandler(PacketType.HELLO) {
 
@@ -137,50 +136,50 @@ public class XpraClient implements Closeable {
 	}
 
 	public void callOnSuccess(IConnection connection) {
-		// logger.debug("success on connection = " + connection + " client=" + this);
+		logger.trace("success on connection = " + connection + " client=" + this);
 		status = Status.CONNECTED;
 
-		try {
-			IConnectionErrorCallback myErrorCallback = new IConnectionErrorCallback() {
-				@Override
-				public void onError(String description, IOException e) {
-					onIoException(e);
-					if (errorCallback != null) {
-						errorCallback.onError(description, e);
-					}
+		IConnectionErrorCallback myErrorCallback = new IConnectionErrorCallback() {
+			@Override
+			public void onError(String description, IOException e) {
+				onIoException(e);
+				if (errorCallback != null) {
+					errorCallback.onError(description, e);
 				}
-			};
+			}
+		};
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					InputStream in = connection.getInputStream();
+					packetReader = new InputStreamPacketReader(in, new PacketBuilder());
+					Packet packet = null;
+					while (!stopReadThread && (packet = packetReader.getNextPacket()) != null) {
+						internalPacketDistributer.handlePacket(packet);
+						packetReceivedListenerManager.handlePacket(packet);
+					}
+
+				} catch (IOException e) {
+					logger.warn("problem reading from connection " + connection.getConnectionParameters() + ": " + e);
+					onIoException(e);
+				}
+			}
+		};
+		Thread thread = new Thread(runnable, "PacketReader-" + threadCount++);
+		thread.setDaemon(true);
+
+		HelloPacket helloPacket = HelloPacket.createDefaultRequest();
+		helloPacket.setKeyMap(keyboard.getKeyMap());
+		try {
 			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder, myErrorCallback);
 			packetSender.setPacketListenerManager(packetSentListenerManager);
-			Runnable runnable = new Runnable() {
-
-				@Override
-				public void run() {
-					InputStream in = null;
-					try {
-						in = connection.getInputStream();
-						packetReader = new InputStreamPacketReader(in, new PacketBuilder());
-						Packet packet = null;
-						while ((packet = packetReader.getNextPacket()) != null && !stopReadThread) {
-							internalPacketDistributer.handlePacket(packet);
-							packetReceivedListenerManager.handlePacket(packet);
-						}
-
-					} catch (IOException e) {
-						onIoException(e);
-					}
-				}
-			};
-			Thread thread = new Thread(runnable, "PacketReader-" + threadCount++);
-
-			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
-			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
 			logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
-			thread.setDaemon(true);
 			thread.start();
 		} catch (IOException e) {
+			logger.warn("could not send hello packet on connection " + connection.getConnectionParameters() + ": " + e);
 			onIoException(e);
 		}
 	}

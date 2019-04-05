@@ -86,6 +86,7 @@ public abstract class XpraApplicationManager {
 
 			@Override
 			public void handlePacket(Packet packet) {
+				logger.trace("got packet type " + packet.getType());
 				// These are actions that need to be handled by the application, not the window.
 				switch (packet.getType()) {
 				case NEW_WINDOW:

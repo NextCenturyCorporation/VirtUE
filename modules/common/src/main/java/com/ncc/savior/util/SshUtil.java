@@ -28,11 +28,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,32 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
  */
 public class SshUtil {
 
+	public static class SshResult {
+
+		private String output;
+		private String error;
+		private int exitStatus;
+
+		public SshResult(String output, String error, int exitStatus) {
+			this.output = output;
+			this.error = error;
+			this.exitStatus = exitStatus;
+		}
+
+		public String getOutput() {
+			return output;
+		}
+
+		public String getError() {
+			return error;
+		}
+
+		public int getExitStatus() {
+			return exitStatus;
+		}
+
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(SshUtil.class);
 
 	public static void waitUtilVmReachable(VirtualMachine vm, String privateKeyFile, long periodMillis) {
@@ -69,19 +97,11 @@ public class SshUtil {
 	// }
 	// }
 
-	public static ChannelExec getChannelFromCommand(Session session, String command) throws JSchException, IOException {
+	public static ChannelExec getChannelExecFromCommand(Session session, String command) throws JSchException {
 		logger.debug("sending command: " + command);
 		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
-		try {
-			myChannel.setCommand(command);
-			// OutputStream ops = myChannel.getOutputStream();
-			// PrintStream ps = new PrintStream(ops, true);
-			myChannel.connect();
-			return myChannel;
-		} catch (Exception e) {
-			logger.debug("finished command exceptionally", e);
-			throw e;
-		}
+		myChannel.setCommand(command);
+		return myChannel;
 	}
 
 	public static List<String> sendCommandFromSession(Session session, String command)
@@ -91,12 +111,13 @@ public class SshUtil {
 		BufferedReader er = null;
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
-			myChannel = getChannelFromCommand(session, command);
+			myChannel = getChannelExecFromCommand(session, command);
 			myChannel.setPty(true);
 			InputStream input = myChannel.getInputStream();
 			InputStreamReader reader = new InputStreamReader(input);
 			br = new BufferedReader(reader);
 			er = new BufferedReader(new InputStreamReader(myChannel.getErrStream()));
+			myChannel.connect();
 			String line;
 			JavaUtil.sleepAndLogInterruption(500);
 			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
@@ -120,11 +141,12 @@ public class SshUtil {
 		InputStreamReader reader = null;
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
-			myChannel = getChannelFromCommand(session, command);
+			myChannel = getChannelExecFromCommand(session, command);
 			InputStream input = myChannel.getInputStream();
 			reader = new InputStreamReader(input);
 
 			er = new InputStreamReader(myChannel.getErrStream());
+			myChannel.connect();
 			JavaUtil.sleepAndLogInterruption(waitTimeMillis);
 			String error = readAvailable(er);
 			String output = readAvailable(reader);
@@ -171,8 +193,7 @@ public class SshUtil {
 			StringBuilder sb = new StringBuilder();
 			while (reader.ready()) {
 				int numRead = reader.read(cbuf, offset, size);
-				char[] buffer = Arrays.copyOf(cbuf, numRead);
-				sb.append(new String(buffer));
+				sb.append(cbuf, offset, numRead);
 			}
 			return sb.toString();
 		}
@@ -306,8 +327,8 @@ public class SshUtil {
 		return output;
 	}
 
-	public static List<String> runScriptFromFile(ITemplateService templateService, Session session,
-			String templateName, Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
+	public static List<String> runScriptFromFile(ITemplateService templateService, Session session, String templateName,
+			Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		String line = String.join("\n", lines);
 		List<String> o = SshUtil.sendCommandFromSession(session, line);
@@ -404,5 +425,51 @@ public class SshUtil {
 			}
 		} while (numTries > 0);
 		throw lastException;
+	}
+
+	public static SshResult runTemplateFile(ITemplateService templateService, Session session, String templateName,
+			Map<String, Object> dataModel, int timeoutMillis) throws TemplateException, JSchException, IOException {
+		String command = String.join("\n", templateService.processTemplateToLines(templateName, dataModel));
+		return runCommand(session, command, timeoutMillis);
+	}
+
+	public static SshResult runCommand(Session session, String command, int timeoutMillis)
+			throws JSchException, IOException {
+		ChannelExec channel = (ChannelExec) session.openChannel("exec");
+		logger.debug("running command: " + command);
+		channel.setCommand(command);
+		InputStream inputStream = channel.getInputStream();
+		InputStream extInputStream = channel.getExtInputStream();
+		StringBuilder inputBuilder = new StringBuilder();
+		InputStreamConsumer inputConsumer = new InputStreamConsumer(inputStream, inputBuilder);
+		StringBuilder extInputBuilder = new StringBuilder();
+		InputStreamConsumer extInputConsumer = new InputStreamConsumer(extInputStream, extInputBuilder);
+		ExecutorService threadPool = Executors.newFixedThreadPool(2);
+		threadPool.submit(inputConsumer);
+		threadPool.submit(extInputConsumer);
+		channel.connect();
+		try {
+			if (!threadPool.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS)) {
+				logger.debug("ssh command timed out after " + timeoutMillis + "ms");
+				threadPool.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+			threadPool.shutdownNow();
+			Thread.currentThread().interrupt();
+		} finally {
+			channel.disconnect();
+		}
+		logger.debug("done with command");
+		IOException exception = inputConsumer.getException();
+		if (exception != null) {
+			throw exception;
+		}
+		exception = extInputConsumer.getException();
+		if (exception != null) {
+			throw exception;
+		}
+
+		SshResult result = new SshResult(inputBuilder.toString(), extInputBuilder.toString(), channel.getExitStatus());
+		return result;
 	}
 }
