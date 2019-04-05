@@ -3,6 +3,9 @@
 REMOTEPORTFILE=ports.properties
 USER=user
 CERT=virginiatech_ec2.pem
+NUM_PORTS=${numSensingPorts}
+
+ssh -i $CERT $USER@${guestIp} "rm -f $REMOTEPORTFILE"
 
 portForward () {
         EXTERNALPORT=$1;
@@ -15,5 +18,10 @@ portForward () {
         ssh -i $CERT $USER@$GUESTIP "echo $INTERNALPORT=$EXTERNALPORT >> $REMOTEPORTFILE"
 }
 
-
-portForward ${externalPort} ${guestIp} ${internalPort}
+for (( i=0; i<$NUM_PORTS; i++ ))
+do
+	extPort=$((i + ${externalPort}))
+	intPort=$((i + ${internalPort}))
+	echo "i=$i Port $extPort -> $intPort"
+	portForward $extPort ${guestIp} $intPort
+done
