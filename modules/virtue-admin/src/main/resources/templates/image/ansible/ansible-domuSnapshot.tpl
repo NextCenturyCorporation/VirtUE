@@ -9,7 +9,7 @@ echo v-domU ansible_ssh_host=${xenVm.internalHostname} ansible_python_interprete
 cat image-creator/${initFile}
 ls -alh image-creator/${initFile}
 export ANSIBLE_HOST_KEY_CHECKING=False
-ansible-playbook -i image-creator/${initFile} -e 'virtue_s3_bucket="${bucket}"  encrypt_key="${encryptionKey}" virtue_s3_folder="${s3Folder}"  host_key_checking=False virtue_apps="${apps}"' virtue-install-domU-apps.yml
+ansible-playbook -i image-creator/${initFile} -e 'virtue_s3_bucket="${bucket}"  encrypt_key="${encryptionKey}" virtue_s3_folder="${s3Folder}"  host_key_checking=False virtue_apps="${apps}"' virtue-install-domU-apps.yml | tee image-creator/${initFile}.log
 
 rm image-creator/${initFile}*
 
