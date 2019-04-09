@@ -1,11 +1,25 @@
 package com.ncc.savior.virtueadmin.infrastructure.images;
 
+import java.util.List;
+
 public class ImageDescriptor {
+	public static final String GNOME_TERMINAL = "gnome-terminal";
+	public static final String XTERM = "xterm";
+	public static final String NAUTILUS = "nautilus";
+	public static final String GNOME_CALCULATOR = "gnome-calculator";
+	public static final String LIBREOFFICE = "libreoffice";
+	public static final String THUNDERBIRD = "thunderbird";
+	public static final String FIREFOX = "firefox";
+	
+	//apps we should add
+	protected static final String CHROME = "";
+	protected static final String TERMINATOR = "";
 
 	private String templatePath;
 	private String baseLinuxAmi;
 	private String dom0Ami;
 	private String baseDomUAmi;
+	private List<String> appKeys;
 
 	public ImageDescriptor(String templatePath) {
 		this.templatePath = templatePath;
@@ -50,5 +64,13 @@ public class ImageDescriptor {
 
 	public void setTemplatePath(String templatePath) {
 		this.templatePath = templatePath;
+	}
+
+	public List<String> getAppKeys() {
+		return appKeys;
+	}
+
+	public void setAppKeys(List<String> appKeys) {
+		this.appKeys = appKeys;
 	}
 }
