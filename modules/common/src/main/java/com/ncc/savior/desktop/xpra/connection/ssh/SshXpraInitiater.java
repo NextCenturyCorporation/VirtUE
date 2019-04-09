@@ -77,6 +77,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 				logger.warn("Failed to get Xpra Servers.  Tries left=" + (triesLeft) + " Error=" + e.getMessage());
 			}
 		}
+		logger.warn("cannot find Xpra server with params " + params);
 		throw lastException;
 	}
 

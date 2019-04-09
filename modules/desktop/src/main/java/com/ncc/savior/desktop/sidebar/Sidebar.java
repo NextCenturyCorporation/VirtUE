@@ -847,6 +847,7 @@ public class Sidebar implements VirtueChangeHandler {
 		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				logger.debug("User clicked system tray, unminimizing");
 				frame.setVisible(true);
 				frame.setExtendedState(frame.getExtendedState() & ~Frame.ICONIFIED);
 			}
@@ -856,17 +857,19 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void windowStateChanged(WindowEvent e) {
 				if ((e.getNewState() & Frame.ICONIFIED) != 0) {
+					logger.debug("moving to the system tray");
 					try {
 						tray.add(trayIcon);
 						frame.setVisible(false);
 					} catch (AWTException ex) {
+						logger.info("Could not add the Desktop to the system tray: " + e);
 					}
 				} else {
+					logger.debug("moving out of the system tray");
 					tray.remove(trayIcon);
 					frame.setVisible(true);
 				}
 			}
-
 		});
 	}
 
