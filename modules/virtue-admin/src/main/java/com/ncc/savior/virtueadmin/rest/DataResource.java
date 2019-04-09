@@ -186,7 +186,7 @@ public class DataResource {
 		ApplicationDefinition loimpress = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Impress",
 				"1.0", OS.LINUX, "lo-impress", "loimpress", null);
 		ApplicationDefinition linuxTerminal = new ApplicationDefinition(UUID.randomUUID().toString(), "Terminal", "1.0",
-				OS.LINUX, "linux-terminal", "xterm", null);
+				OS.LINUX, "linux-terminal", "terminator", null);
 		ApplicationDefinition thunderBird = new ApplicationDefinition(UUID.randomUUID().toString(), "Thunderbird",
 				"1.0", OS.LINUX, "thunderbird", "thunderbird", null);
 
