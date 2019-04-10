@@ -129,8 +129,23 @@ public class XenGuestImageGenerator {
 
 	public void init() {
 		sync();
-		// startDom0AndTestThread();
-		startSnapshotTestThread();
+
+//		Thread t = new Thread(() -> {
+//			try {
+//				String oldAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
+//				startDom0AndBaseTestThread().join();
+//				String newAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
+//				logger.debug("old=" + oldAmi + " new=" + newAmi);
+//				if (oldAmi.equals(newAmi)) {
+//					logger.error("FAILED!");
+//				} else {
+//					startSnapshotTestThread(null);
+//				}
+//			} catch (InterruptedException e) {
+//				logger.error("Test failed", e);
+//			}
+//		});
+//		t.start();
 	}
 
 	private void startDom0TestThread() {
@@ -148,8 +163,8 @@ public class XenGuestImageGenerator {
 		}).start();
 	}
 
-	private void startDom0AndTestThread() {
-		new Thread(() -> {
+	private Thread startDom0AndBaseTestThread() {
+		Thread t = new Thread(() -> {
 			try {
 				ImageDescriptor desc = new ImageDescriptor("XenDomUBase-" + System.currentTimeMillis());
 				desc.setDom0Ami("ami-00adf65830abfd276");
@@ -158,20 +173,25 @@ public class XenGuestImageGenerator {
 				CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(desc);
 				Dom0ImageResult result = future.get();
 				xenImageProvider.setXenVmTemplateFromAmi(result.getAmi());
-				logger.debug("test done");
+				logger.debug("test done " + result.getAmi());
+				logger.debug("Saved template AMI: " + xenImageProvider.getXenVmTemplate().getTemplatePath());
 			} catch (InterruptedException | ExecutionException e) {
 				logger.debug("test failed", e);
 			}
-		}).start();
+		});
+		t.start();
+		return t;
 	}
 
-	private void startSnapshotTestThread() {
+	private void startSnapshotTestThread(String xenAmi) {
 		new Thread(() -> {
 			// while (true) {
 			try {
 				String templatePath = "domUSnap-" + System.currentTimeMillis();
 				ImageDescriptor desc = new ImageDescriptor(templatePath);
-				desc.setBaseDomUAmi("ami-0b300b6f272f8faa9");
+				if (xenAmi != null) {
+					desc.setBaseDomUAmi(xenAmi);
+				}
 				// this is the magical AMI to use for ubuntu.
 				desc.setBaseLinuxAmi("ami-0ac019f4fcb7cb7e6");
 				List<String> apps = new ArrayList<String>();
