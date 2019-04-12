@@ -54,7 +54,6 @@ public class Bencoder {
 			encodeObject(itr.next(), os);
 		}
 		os.write(POSTFIX_NONSTR);
-
 	}
 
 	public Object decodeStream(InputStream bis) throws IOException {

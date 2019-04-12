@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.BaseConnection;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
@@ -48,33 +47,33 @@ public class SshConnection extends BaseConnection {
 	private InputStream in;
 	private OutputStream out;
 
-	private boolean logErrorStream = false;
-
-	public SshConnection(SshConnectionParameters p, Session session, ChannelExec channel) throws IOException {
+	public SshConnection(SshConnectionParameters p, ChannelExec channel) throws IOException {
 		super(p);
-		// this.session = session;
 		this.channel = channel;
-		if (logErrorStream) {
-			BufferedReader err = new BufferedReader(new InputStreamReader(channel.getErrStream()));
-			Thread t = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					String line;
-					try {
-						while ((line = err.readLine()) != null) {
-							logger.debug(line);
+		if (logger.isDebugEnabled()) {
+			BufferedReader err;
+			try {
+				err = new BufferedReader(new InputStreamReader(channel.getErrStream()));
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						String line;
+						try {
+							while ((line = err.readLine()) != null) {
+								logger.debug(line);
+							}
+						} catch (IOException e) {
+							logger.warn("Error attempting to read SshConnection error stream", e);
 						}
-					} catch (IOException e) {
-						logger.warn("Error attempting to read SshConnection error stream", e);
 					}
-
-				}
-			});
-			t.start();
-		}
+				});
+				t.start();
+			} catch (IOException e) {
+				logger.warn("could not debug ssh connection because error stream was inaccessible: " + e);
+			}
 		in = channel.getInputStream();
 		out = channel.getOutputStream();
+		}
 	}
 
 	@Override
