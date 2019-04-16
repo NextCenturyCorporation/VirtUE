@@ -37,6 +37,7 @@ public class VirtueCreationAdditionalParameters {
 	private VirtuePrimaryPurpose primaryPurpose;
 	private VirtueSecondaryPurpose secondaryPurpose;
 	private String username;
+	private Integer diskSizeGB;
 
 	public void setVirtueId(String virtueId) {
 		this.virtueId = virtueId;
@@ -104,5 +105,13 @@ public class VirtueCreationAdditionalParameters {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public Integer getDiskSizeGB() {
+		return this.diskSizeGB;
+	}
+	
+	public void setDiskSizeGB(Integer diskSizeGB) {
+		this.diskSizeGB=diskSizeGB;
 	}
 }

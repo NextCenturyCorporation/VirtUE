@@ -279,6 +279,8 @@ public class SshUtil {
 		session.setConfig("PreferredAuthentications", "publickey");
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.setTimeout(1000);
+		session.setServerAliveCountMax(10);
+		session.setServerAliveInterval(2000);
 		session.connect();
 		return session;
 	}

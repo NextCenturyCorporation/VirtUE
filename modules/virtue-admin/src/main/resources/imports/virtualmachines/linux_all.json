@@ -1,7 +1,7 @@
 {
 	"name": "Linux All",
 	"os": "LINUX",
-	"templatePath": "master",
+	"templatePath": "domUSnap-1555085508817",
 	"loginUser": "user",
 	"enabled": true,
 	"applicationIds": [

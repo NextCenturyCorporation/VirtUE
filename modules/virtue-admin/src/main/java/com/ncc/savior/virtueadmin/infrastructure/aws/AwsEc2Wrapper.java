@@ -31,8 +31,10 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.amazonaws.services.ec2.model.BlockDeviceMapping;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceNetworkInterfaceSpecification;
@@ -50,6 +52,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+import com.amazonaws.services.ec2.model.VolumeType;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
@@ -118,6 +121,21 @@ public class AwsEc2Wrapper {
 			runInstancesRequest.withSubnetId(virtueMods.getSubnetId()).withSecurityGroupIds(securityGroupIds);
 		}
 
+		if (virtueMods.getDiskSizeGB() != null) {
+			if (virtueMods.getDiskSizeGB() < 8) {
+				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Cannot set disk size less than 8BG.");
+			}
+			List<BlockDeviceMapping> mappings = runInstancesRequest.getBlockDeviceMappings();
+			EbsBlockDevice ebs = new EbsBlockDevice();
+			ebs.withVolumeSize(virtueMods.getDiskSizeGB()).withVolumeType(VolumeType.Gp2);
+
+			BlockDeviceMapping bdm = new BlockDeviceMapping().withEbs(ebs);
+			bdm.withDeviceName("/dev/xvda");
+			
+			mappings.add(bdm);
+			runInstancesRequest.setBlockDeviceMappings(mappings);
+		}
+
 		if (iamRoleName != null) {
 			IamInstanceProfileSpecification iamInstanceProfile = new IamInstanceProfileSpecification();
 			iamInstanceProfile.setName(iamRoleName);
@@ -145,16 +163,18 @@ public class AwsEc2Wrapper {
 				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
 		return vm;
 	}
-public List<Tag> getTagsFromVirtueMods(String vmtId, String name, VirtueCreationAdditionalParameters virtueMods,
+
+	public List<Tag> getTagsFromVirtueMods(String vmtId, String name, VirtueCreationAdditionalParameters virtueMods,
 			String instanceId) {
-//	private List<Tag> getTagsFromVirtueMods(VirtualMachineTemplate vmt, String name,
-//			VirtueCreationAdditionalParameters virtueMods, String instanceId) {
+		// private List<Tag> getTagsFromVirtueMods(VirtualMachineTemplate vmt, String
+		// name,
+		// VirtueCreationAdditionalParameters virtueMods, String instanceId) {
 		List<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(AwsUtil.TAG_NAME, name));
-//		if (vmt != null && vmt.getId() != null) {
-//			tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()));
-if (vmtId != null) {
+		// if (vmt != null && vmt.getId() != null) {
+		// tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()));
+		if (vmtId != null) {
 			tags.add(new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmtId));
 		}
 		if (instanceId != null) {

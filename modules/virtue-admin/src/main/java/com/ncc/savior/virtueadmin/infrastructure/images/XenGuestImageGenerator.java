@@ -92,13 +92,15 @@ public class XenGuestImageGenerator {
 
 	private IPackageInstaller packageInstaller;
 
-	@Value("${virtue.imageCreation.initialAmi.linux}")
+	// this is the dom0 linux, not domu linux
+	@Value("${virtue.imageCreation.initialAmi.dom0Linux}")
 	private String baseLinuxAmi;
 	@Value("${virtue.imageCreation.initialAmi.dom0}")
 	private String linuxWithDom0Ami;
-	// @Value("${virtue.imageCreation.initialAmi.baseDomU}")
-	// private String linuxWithBaseDomUAmi;
+	@Value("${virtue.imageCreation.initialAmi.domULinux}")
+	private String domULinux;
 	private BaseXenTemplateProvider xenImageProvider;
+	private Integer dom0SizeGb=64;
 
 	public XenGuestImageGenerator(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
 			IVpcSubnetProvider vpcSubnetProvider, CompletableFutureServiceProvider serviceProvider,
@@ -129,23 +131,24 @@ public class XenGuestImageGenerator {
 
 	public void init() {
 		sync();
+//		startDom0TestThread();
+		Thread t = new Thread(() -> {
+			try {
 
-//		Thread t = new Thread(() -> {
-//			try {
-//				String oldAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
-//				startDom0AndBaseTestThread().join();
-//				String newAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
-//				logger.debug("old=" + oldAmi + " new=" + newAmi);
-//				if (oldAmi.equals(newAmi)) {
-//					logger.error("FAILED!");
-//				} else {
-//					startSnapshotTestThread(null);
-//				}
-//			} catch (InterruptedException e) {
-//				logger.error("Test failed", e);
-//			}
-//		});
-//		t.start();
+				String oldAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
+				startDom0AndBaseTestThread().join();
+				String newAmi = xenImageProvider.getXenVmTemplate().getTemplatePath();
+				logger.debug("old=" + oldAmi + " new=" + newAmi);
+				if (oldAmi.equals(newAmi)) {
+					logger.error("FAILED!");
+				} else {
+					startSnapshotTestThread(null);
+				}
+			} catch (InterruptedException e) {
+				logger.error("Test failed", e);
+			}
+		});
+//		 t.start();
 	}
 
 	private void startDom0TestThread() {
@@ -153,7 +156,7 @@ public class XenGuestImageGenerator {
 			try {
 				ImageDescriptor desc = new ImageDescriptor("XenDom0-" + System.currentTimeMillis());
 				// this is the magical AMI to use for ubuntu.
-				desc.setBaseLinuxAmi("ami-0ac019f4fcb7cb7e6");
+				desc.setBaseDomUAmi("ami-0ac019f4fcb7cb7e6");
 				CompletableFuture<Dom0ImageResult> future = createNewDom0Ami(desc);
 				future.get();
 				logger.debug("test done");
@@ -167,9 +170,12 @@ public class XenGuestImageGenerator {
 		Thread t = new Thread(() -> {
 			try {
 				ImageDescriptor desc = new ImageDescriptor("XenDomUBase-" + System.currentTimeMillis());
-				desc.setDom0Ami("ami-00adf65830abfd276");
-				// this is the magical AMI to use for ubuntu.
-				desc.setBaseLinuxAmi("ami-0ac019f4fcb7cb7e6");
+				// desc.setDom0Ami("ami-00adf65830abfd276");
+				desc.setDom0Ami("ami-06a471b7c5341b049");
+				// this is the magical AMI to use for ubuntu. It is an Ubuntu 18.04 amd64 bionic
+				// image from awas
+//				desc.setBaseDomUAmi("ami-0ac019f4fcb7cb7e6");
+
 				CompletableFuture<Dom0ImageResult> future = createNewDomUBaseImage(desc);
 				Dom0ImageResult result = future.get();
 				xenImageProvider.setXenVmTemplateFromAmi(result.getAmi());
@@ -193,7 +199,7 @@ public class XenGuestImageGenerator {
 					desc.setBaseDomUAmi(xenAmi);
 				}
 				// this is the magical AMI to use for ubuntu.
-				desc.setBaseLinuxAmi("ami-0ac019f4fcb7cb7e6");
+//				desc.setBaseDomUAmi("ami-0ac019f4fcb7cb7e6");
 				List<String> apps = new ArrayList<String>();
 				apps.add(ImageDescriptor.FIREFOX);
 				apps.add(ImageDescriptor.GNOME_CALCULATOR);
@@ -241,7 +247,7 @@ public class XenGuestImageGenerator {
 		CompletableFuture<Dom0ImageResult> imageResultFuture = new CompletableFuture<Dom0ImageResult>();
 		String linuxAmi = (imageDescriptor.getBaseLinuxAmi() != null ? imageDescriptor.getBaseLinuxAmi()
 				: baseLinuxAmi);
-		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(linuxAmi, "Xen-Dom0");
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(linuxAmi, "Xen-Dom0", dom0SizeGb);
 		vmFuture.handle((xenVm, ex) -> {
 			if (ex != null) {
 				logger.error("Error creating Dom0!", ex);
@@ -322,12 +328,15 @@ public class XenGuestImageGenerator {
 		ImageBuildStage stage = ImageBuildStage.domuBase;
 		String dom0Ami = imageDescriptor.getDom0Ami() != null ? imageDescriptor.getDom0Ami() : linuxWithDom0Ami;
 		String suffix = "DomUBase";
-		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(dom0Ami, suffix);
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(dom0Ami, suffix, dom0SizeGb);
 
 		// create domU Image from linux ami
 		// first create basic debian
+		if (imageDescriptor.getBaseDomUAmi() == null) {
+			imageDescriptor.setBaseDomUAmi(domULinux);
+		}
 		CompletableFuture<VirtualMachine> createDomUAmiFuture = createBasicLinuxAwsInstance(
-				imageDescriptor.getBaseLinuxAmi(), suffix);
+				imageDescriptor.getBaseDomUAmi(), suffix,null);
 
 		// once created, run ansible on it.
 		CompletableFuture<VirtualMachine> domUtoS3Future = new CompletableFuture<VirtualMachine>();
@@ -423,11 +432,11 @@ public class XenGuestImageGenerator {
 		return imageResultFuture;
 	}
 
-	private CompletableFuture<VirtualMachine> createBasicLinuxAwsInstance(String ubuntuAmi, String suffix) {
+	private CompletableFuture<VirtualMachine> createBasicLinuxAwsInstance(String ubuntuAmi, String suffix, Integer diskSizeGb) {
 		// TODO user should be configurable
 		VirtualMachineTemplate vmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "debianTemplate",
 				OS.LINUX, ubuntuAmi, Collections.emptyList(), "ubuntu", true, new Date(), "System");
-		return getVm(ubuntuAmi, suffix + "-domU", vmTemplate, xenInstanceType, iamRoleName);
+		return getVm(ubuntuAmi, suffix + "-domU", vmTemplate, xenInstanceType, iamRoleName, diskSizeGb);
 	}
 
 	public CompletableFuture<ImageResult> createNewDomUSnapshotImage(ImageDescriptor imageDescriptor) {
@@ -460,7 +469,7 @@ public class XenGuestImageGenerator {
 		// get Dom0Vm
 		String baseDomUAmi = imageDescriptor.getBaseDomUAmi() != null ? imageDescriptor.getBaseDomUAmi()
 				: this.xenImageProvider.getXenVmTemplate().getTemplatePath();
-		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(baseDomUAmi, "DomUSnapshot");
+		CompletableFuture<VirtualMachine> vmFuture = getDom0Vm(baseDomUAmi, "DomUSnapshot", dom0SizeGb);
 		CompletableFuture<ImageResult> imageResultFuture = new CompletableFuture<ImageResult>();
 
 		vmFuture.handle((xenVm, ex) -> {
@@ -652,13 +661,13 @@ public class XenGuestImageGenerator {
 		return guestVm;
 	}
 
-	private CompletableFuture<VirtualMachine> getDom0Vm(String ami, String postfix) {
+	private CompletableFuture<VirtualMachine> getDom0Vm(String ami, String postfix,Integer sizeGb) {
 		VirtualMachineTemplate vmTemplate = getXenVmWithBaseImageTemplate(ami);
-		return getVm(ami, postfix + "-dom0", vmTemplate, xenInstanceType, iamRoleName);
+		return getVm(ami, postfix + "-dom0", vmTemplate, xenInstanceType, iamRoleName, sizeGb);
 	}
 
 	private CompletableFuture<VirtualMachine> getVm(String ami, String postfix, VirtualMachineTemplate vmTemplate,
-			InstanceType xenInstanceType, String iamRoleName) {
+			InstanceType xenInstanceType, String iamRoleName, Integer sizeGb) {
 		Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters("Image-Creation");
 		if (virtueMods.getSecurityGroupId() != null) {
@@ -666,6 +675,7 @@ public class XenGuestImageGenerator {
 		}
 		// virtueMods.setVirtueId(virtue.getId());
 		// virtueMods.setVirtueTemplateId(virtue.getTemplateId());
+		virtueMods.setDiskSizeGB(sizeGb);
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.IMAGE_CREATION);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 		virtueMods.setUsername(systemUser);
