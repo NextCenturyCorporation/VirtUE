@@ -98,12 +98,16 @@ public class VirtueService {
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
+		ensureConnectionForVirtue(virtue, false);
+	}
+
+	public void ensureConnectionForVirtue(DesktopVirtue virtue, boolean dropExistingConnection) {
 		Runnable runnable = () -> {
 			Collection<DesktopVirtueApplication> apps = desktopResourceService.getReconnectionApps(virtue.getId());
 			RgbColor color = getColorFromVirtue(virtue);
 			apps.parallelStream().forEach((app) -> {
 				try {
-					ensureConnection(app, virtue, color);
+					ensureConnection(app, virtue, color, dropExistingConnection);
 				} catch (IOException e) {
 					logger.error("Error creating connection to app=" + app + " virtue=" + virtue, e);
 					BaseAlertMessage alertMessage = new VirtueAlertMessage(
@@ -130,12 +134,13 @@ public class VirtueService {
 	 * @param app
 	 * @param virtue
 	 * @param color
+	 * @param dropExistingConnection
 	 * @throws IOException
 	 */
-	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
-			throws IOException {
+	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color,
+			boolean dropExistingConnection) throws IOException {
 		// if (OS.LINUX.equals(app.getOs())) {
-		ensureConnectionLinux(app, virtue, color);
+		ensureConnectionLinux(app, virtue, color, dropExistingConnection);
 		// } else {
 		// ensureConnectionWindows(app, virtue, color);
 		// }
@@ -176,8 +181,12 @@ public class VirtueService {
 		}
 	}
 
-	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
-	{
+	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color) {
+		ensureConnectionLinux(app, virtue, color, false);
+	}
+
+	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color,
+			boolean dropExistingConnection) {
 		String key = app.getPrivateKey();
 
 		SshConnectionParameters params = getConnectionParams(app, key);
@@ -188,6 +197,12 @@ public class VirtueService {
 		Object lock = getLock(virtue);
 		synchronized (lock) {
 			XpraClient client = connectionManager.getExistingClient(params);
+
+			if (dropExistingConnection && client != null) {
+				client.close();
+				client = null;
+			}
+
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
 				try {
@@ -253,7 +268,7 @@ public class VirtueService {
 					Thread t = new Thread(() -> {
 						try {
 							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue, appDefn);
-							ensureConnection(app, virtue, color);
+							ensureConnection(app, virtue, color, false);
 						} catch (Exception e) {
 							logger.error("error starting pending application", e);
 							BaseAlertMessage alertMessage = new VirtueAlertMessage(
@@ -296,7 +311,7 @@ public class VirtueService {
 				} else {
 					if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
 						app = desktopResourceService.startApplication(virtue, appDefn);
-						ensureConnection(app, virtue, color);
+						ensureConnection(app, virtue, color, false);
 					} else if (VirtueState.STOPPED.equals(virtue.getVirtueState())) {
 						startVirtue(virtue);
 						addPendingAppStart(virtue.getId(), appDefn);
