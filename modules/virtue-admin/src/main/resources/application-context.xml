@@ -294,7 +294,6 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
-		<constructor-arg ref="resourceManager" />
 		<constructor-arg ref="cifsProxyManager" />
 	</bean>
 

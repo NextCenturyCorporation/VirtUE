@@ -39,7 +39,6 @@ import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
-import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.infrastructure.windows.WindowsDisplayServerManager;
@@ -65,7 +64,6 @@ public class DesktopVirtueService {
 	private static final Logger logger = LoggerFactory.getLogger(DesktopVirtueService.class);
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
-	private IResourceManager resourceManager;
 	private IApplicationManager applicationManager;
 
 	@Autowired
@@ -77,12 +75,10 @@ public class DesktopVirtueService {
 	private WindowsDisplayServerManager wdsManager;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager, IResourceManager resourceManager, CifsManager cifsManager,
-			WindowsDisplayServerManager wdsManager) {
+			IApplicationManager applicationManager, CifsManager cifsManager, WindowsDisplayServerManager wdsManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
-		this.resourceManager = resourceManager;
 		this.wdsManager = wdsManager;
 		this.pollHandlers = new HashSet<PollHandler>();
 		addPollHandler(cifsManager.getPollHandler());
@@ -150,7 +146,7 @@ public class DesktopVirtueService {
 		if (OS.LINUX.equals(vm.getOs())) {
 			applicationManager.startApplicationOnVm(vm, application, params, 15);
 		} else {
-			wdsManager.startApplication(vm, application, params,15);
+			wdsManager.startApplication(vm, application, params, 15);
 		}
 		String hostname = vm.getHostname();
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
@@ -162,8 +158,11 @@ public class DesktopVirtueService {
 				dva.setPort(wdsVm.getSshPort());
 				dva.setUserName(wdsVm.getUserName());
 				dva.setPrivateKey(wdsVm.getPrivateKey());
-			} else if (windowsPassword != null) {
-				dva.setPrivateKey(windowsPassword);
+			} else {
+				logger.warn("Could not find Windows Display Server for Virtue " + virtueId);
+				if (windowsPassword != null) {
+					dva.setPrivateKey(windowsPassword);
+				}
 			}
 		}
 		logger.debug("started app: " + dva);
@@ -204,10 +203,21 @@ public class DesktopVirtueService {
 				null);
 		Collection<DesktopVirtueApplication> col = new ArrayList<DesktopVirtueApplication>();
 		for (VirtualMachine vm : virtue.getVms()) {
-			String hostname = vm.getHostname();
+			VirtualMachine effectiveVm;
+			if (vm.getOs() == OS.WINDOWS) {
+				VirtualMachine windowsDisplayVm = wdsManager.getWindowsDisplayVm(vm.getId());
+				if (windowsDisplayVm != null) {
+					effectiveVm = windowsDisplayVm;
+				} else {
+					effectiveVm = vm;
+				}
+			} else {
+				effectiveVm = vm;
+			}
+			String hostname = effectiveVm.getHostname();
 			ApplicationDefinition application = (OS.LINUX.equals(vm.getOs()) ? linuxApp : winApp);
-			DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
-					vm.getUserName(), vm.getPrivateKey());
+			DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, effectiveVm.getSshPort(),
+					effectiveVm.getUserName(), effectiveVm.getPrivateKey());
 			col.add(dva);
 		}
 		return col;
