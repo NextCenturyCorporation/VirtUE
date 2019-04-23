@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.sidebar;
@@ -123,16 +123,16 @@ public abstract class AbstractVirtueContainer {
 		optionsLabel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem mi1 = new JMenuItem("Stop");
-				JMenuItem mi2 = new JMenuItem("Start");
-				JMenuItem mi3 = new JMenuItem("Terminate");
-				mi3.setToolTipText("Terminates the virtue state. (Cannot be undone)");
-				JMenuItem mi4 = new JMenuItem("Reconnect");
-				mi4.setToolTipText(
+				JPopupMenu menu = new JPopupMenu();
+				JMenuItem stopMenuItem = new JMenuItem("Stop");
+				JMenuItem startMenuItem = new JMenuItem("Start");
+				JMenuItem terminateMenuItem = new JMenuItem("Terminate");
+				terminateMenuItem.setToolTipText("Terminates the virtue state. (Cannot be undone)");
+				JMenuItem reconnectMenuItem = new JMenuItem("Reconnect");
+				reconnectMenuItem.setToolTipText(
 						"Attempts to re-establishe a connection for the virtue if necessary.  Applications running on the virtue when the connect was broken should resume.");
 
-				mi1.addActionListener(new ActionListener() {
+				stopMenuItem.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
@@ -145,7 +145,7 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
-				mi2.addActionListener(new ActionListener() {
+				startMenuItem.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
@@ -158,7 +158,7 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
-				mi3.addActionListener(new ActionListener() {
+				terminateMenuItem.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
@@ -171,22 +171,22 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
-				mi4.addActionListener(new ActionListener() {
+				reconnectMenuItem.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						virtueService.ensureConnectionForVirtue(virtue);
 					}
 				});
 
-				pm.setPopupSize(78, 97);
-				pm.add(mi1);
-				pm.addSeparator();
-				pm.add(mi2);
-				pm.addSeparator();
-				pm.add(mi3);
-				pm.addSeparator();
-				pm.add(mi4);
-				pm.show(optionsLabel, -44, 26);
+				menu.setPopupSize(78, 97);
+				menu.add(stopMenuItem);
+				menu.addSeparator();
+				menu.add(startMenuItem);
+				menu.addSeparator();
+				menu.add(terminateMenuItem);
+				menu.addSeparator();
+				menu.add(reconnectMenuItem);
+				menu.show(optionsLabel, -44, 26);
 			}
 		});
 	}
