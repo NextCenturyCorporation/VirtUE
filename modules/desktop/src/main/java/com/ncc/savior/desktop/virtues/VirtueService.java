@@ -1,21 +1,21 @@
 /*
  * Copyright (C) 2019 Next Century Corporation
- * 
+ *
  * This file may be redistributed and/or modified under either the GPL
  * 2.0 or 3-Clause BSD license. In addition, the U.S. Government is
  * granted government purpose rights. For details, see the COPYRIGHT.TXT
  * file at the root of this project.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
  */
 package com.ncc.savior.desktop.virtues;
@@ -193,19 +193,19 @@ public class VirtueService {
 				XpraClient client = connectionManager.getExistingClient(params);
 				if (client == null || client.getStatus() == Status.ERROR) {
 					logger.debug("needed new connection");
+					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					try {
-						connectionManager.createXpraServerAndAddDisplayToParams(params);
-						//if (app.getOs().equals(OS.LINUX)) {
-							logger.debug("connecting clipboard");
-							clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-						//}
+						// if (app.getOs().equals(OS.LINUX)) {
+						logger.debug("connecting clipboard");
+						clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+						// }
 					} catch (IOException e) {
 						logger.error("clipboard manager connection failed!", e);
 						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
 								"Failed to connect clipboard to virtue");
 						UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 					}
-					client = connectionManager.createClient(params, color, virtue);
+					connectionManager.createClient(params, color, virtue);
 				}
 			}
 		} finally {
@@ -225,7 +225,7 @@ public class VirtueService {
 		return lock;
 	}
 
-	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
+	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) {
 		SshConnectionParameters params = null;
 		if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
 			params = SshConnectionParameters.withPemString(app.getHostname(), app.getPort(), app.getUserName(), key);

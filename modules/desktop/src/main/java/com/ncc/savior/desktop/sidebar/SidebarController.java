@@ -21,7 +21,6 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -144,7 +143,7 @@ public class SidebarController {
 							List<DesktopVirtue> virtues;
 							try {
 								virtues = virtueService.getVirtuesForUser();
-							} catch (ConnectException e) {
+							} catch (IOException e) {
 								sidebar.logout(false);
 								break;
 							} catch (UserLoggedOutException e) {
@@ -176,7 +175,7 @@ public class SidebarController {
 		}
 	}
 
-	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
+	protected void updateVirtues(List<DesktopVirtue> virtues) {
 		List<DesktopVirtue> addedVirtues = new ArrayList<DesktopVirtue>();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
 		if (logger.isTraceEnabled()) {
@@ -303,7 +302,7 @@ public class SidebarController {
 		}
 	}
 
-	protected void reportAddedVirtues(List<DesktopVirtue> virtues) throws IOException {
+	protected void reportAddedVirtues(List<DesktopVirtue> virtues) {
 		try {
 			if (logger.isTraceEnabled()) {
 				logger.debug("adding virtues " + virtues);
