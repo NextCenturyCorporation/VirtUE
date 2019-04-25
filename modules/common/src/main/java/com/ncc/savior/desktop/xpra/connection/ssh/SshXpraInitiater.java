@@ -52,10 +52,10 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private static final String XPRA_START = XPRA_CMD + " start";
 	// Returns list of xpra log files for started servers, but only prints the
 	// number, 1 per line
-	private static final String XPRA_PROBE_LIST = "cd /run/user/1000/xpra/; ls -1 \\:*.log | egrep -o \"[0-9]+\"";
+	private static final String XPRA_PROBE_LIST = "cd /run/user/1000/xpra/; ls -1 :*.log | egrep -o \"[0-9]+\"";
 	// version followed by a display will error if display works and is not
 	// destructive (xpra list is destructive).
-	private static final String XPRA_TEST_DISLAY = XPRA_CMD + " version ";
+	private static final String XPRA_TEST_DISPLAY = XPRA_CMD + " version ";
 	// if version returns successfully, it'll return a version number and this
 	// should match. definitely matches 2.4.2 which is our current version.
 	private static final String XPRA_VERSION_MATCH = "[0-9]+.[0-9]+.[0-9]+.*";
@@ -121,7 +121,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private boolean isDisplayReady(Session session, Integer d) {
 		try {
 			logger.debug("attempting to probe display " + d);
-			List<String> lines = SshUtil.sendCommandFromSession(session, XPRA_TEST_DISLAY + ":" + d);
+			List<String> lines = SshUtil.sendCommandFromSession(session, XPRA_TEST_DISPLAY + ":" + d);
 			for (String line : lines) {
 				boolean matched = line.matches(XPRA_VERSION_MATCH);
 				if (matched) {
