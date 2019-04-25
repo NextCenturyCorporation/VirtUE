@@ -288,13 +288,18 @@ public class XenGuestManager {
 		ArrayList<String> lines = new ArrayList<String>();
 		Map<String, Object> dataModel = new HashMap<String, Object>();
 		dataModel.put("guestIp", ipAddress);
-		for (int i = 0; i < numSensingPorts; i++) {
-			dataModel.put("externalPort", externalSensingPort + i);
-			dataModel.put("internalPort", startingInternalPort + i);
-			List<String> o = SshUtil.runScriptFromFile(templateService, session, "port-forwarding.tpl", dataModel);
-			lines.addAll(o);
-			JavaUtil.sleepAndLogInterruption(100);
-		}
+		dataModel.put("externalPort", externalSensingPort );
+		dataModel.put("internalPort", startingInternalPort );
+		dataModel.put("numSensingPorts", numSensingPorts);
+		List<String> o = SshUtil.runScriptFromFile(templateService, session, "port-forwarding.tpl", dataModel);
+		lines.addAll(o);
+//		for (int i = 0; i < numSensingPorts; i++) {
+//			dataModel.put("externalPort", externalSensingPort + i);
+//			dataModel.put("internalPort", startingInternalPort + i);
+//			List<String> o = SshUtil.runScriptFromFile(templateService, session, "port-forwarding.tpl", dataModel);
+//			lines.addAll(o);
+//			JavaUtil.sleepAndLogInterruption(100);
+//		}
 		JavaUtil.sleepAndLogInterruption(100);
 		logger.debug(lines.toString());
 	}

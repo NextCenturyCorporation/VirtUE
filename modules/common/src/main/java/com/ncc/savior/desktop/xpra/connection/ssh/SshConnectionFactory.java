@@ -75,8 +75,9 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 				logger.debug("connecting with command=" + command);
 				channel.setCommand(command);
 				channel.connect();
-				return new SshConnection(p, session, channel);
+				return new SshConnection(p, channel);
 			} catch (JSchException e) {
+				logger.debug("could not connect with ssh, params=" + params);
 				throw new IOException(e);
 			}
 		} else {

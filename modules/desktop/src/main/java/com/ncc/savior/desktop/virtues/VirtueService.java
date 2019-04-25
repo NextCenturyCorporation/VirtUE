@@ -21,7 +21,6 @@
 package com.ncc.savior.desktop.virtues;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -178,41 +177,35 @@ public class VirtueService {
 	}
 
 	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
-			throws IOException {
-		File file = null;
-		try {
-			String key = app.getPrivateKey();
+	{
+		String key = app.getPrivateKey();
 
-			SshConnectionParameters params = getConnectionParams(app, key);
-			String colorDesc = (color == null ? "" : " with color " + color.toString());
-			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
-			// synchronized by virtue prevents user from clicking the application button
-			// twice and getting 2 connections.
-			Object lock = getLock(virtue);
-			synchronized (lock) {
-				XpraClient client = connectionManager.getExistingClient(params);
-				if (client == null || client.getStatus() == Status.ERROR) {
-					logger.debug("needed new connection");
+		SshConnectionParameters params = getConnectionParams(app, key);
+		String colorDesc = (color == null ? "" : " with color " + color.toString());
+		logger.debug("verifying connection to " + app.getHostname() + colorDesc);
+		// synchronized by virtue prevents user from clicking the application button
+		// twice and getting 2 connections.
+		Object lock = getLock(virtue);
+		synchronized (lock) {
+			XpraClient client = connectionManager.getExistingClient(params);
+			if (client == null || client.getStatus() == Status.ERROR) {
+				logger.debug("needed new connection");
+				try {
 					connectionManager.createXpraServerAndAddDisplayToParams(params);
-					try {
-						// if (app.getOs().equals(OS.LINUX)) {
-						logger.debug("connecting clipboard");
-						clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-						// }
-					} catch (IOException e) {
-						logger.error("clipboard manager connection failed!", e);
-						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
-								"Failed to connect clipboard to virtue");
-						UserAlertingServiceHolder.sendAlertLogError(pam, logger);
-					}
-					connectionManager.createClient(params, color, virtue);
+					// if (app.getOs().equals(OS.LINUX)) {
+					logger.debug("connecting clipboard");
+					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+					// }
+				} catch (IOException e) {
+					logger.error("clipboard manager connection failed!", e);
+					VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
+							"Failed to connect clipboard to virtue");
+					UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 				}
-			}
-		} finally {
-			if (file != null && file.exists()) {
-				file.delete();
+				client = connectionManager.createClient(params, color, virtue);
 			}
 		}
+		logger.debug("got connection to " + app.getHostname() + colorDesc);
 	}
 
 	private synchronized Object getLock(DesktopVirtue virtue) {

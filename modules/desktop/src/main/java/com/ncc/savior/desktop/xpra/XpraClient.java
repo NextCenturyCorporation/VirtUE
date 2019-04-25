@@ -136,52 +136,50 @@ public class XpraClient implements Closeable {
 	}
 
 	public void callOnSuccess(IConnection connection) {
-		// logger.debug("success on connection = " + connection + " client=" + this);
+		logger.trace("success on connection = " + connection + " client=" + this);
 		status = Status.CONNECTED;
 
-		try {
-			IConnectionErrorCallback myErrorCallback = new IConnectionErrorCallback() {
-				@Override
-				public void onError(String description, IOException e) {
-					onIoException(e);
-					if (errorCallback != null) {
-						errorCallback.onError(description, e);
-					}
+		IConnectionErrorCallback myErrorCallback = new IConnectionErrorCallback() {
+			@Override
+			public void onError(String description, IOException e) {
+				onIoException(e);
+				if (errorCallback != null) {
+					errorCallback.onError(description, e);
 				}
-			};
+			}
+		};
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					InputStream in = connection.getInputStream();
+					packetReader = new InputStreamPacketReader(in, new PacketBuilder());
+					Packet packet = null;
+					while (!stopReadThread && (packet = packetReader.getNextPacket()) != null) {
+						internalPacketDistributer.handlePacket(packet);
+						packetReceivedListenerManager.handlePacket(packet);
+					}
+
+				} catch (IOException e) {
+					logger.warn("problem reading from connection " + connection.getConnectionParameters() + ": " + e);
+					onIoException(e);
+				}
+			}
+		};
+		Thread thread = new Thread(runnable, "PacketReader-" + threadCount++);
+		thread.setDaemon(true);
+
+		HelloPacket helloPacket = HelloPacket.createDefaultRequest();
+		helloPacket.setKeyMap(keyboard.getKeyMap());
+		try {
 			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder, myErrorCallback);
 			packetSender.setPacketListenerManager(packetSentListenerManager);
-			Runnable runnable = new Runnable() {
-
-				@Override
-				public void run() {
-					InputStream in = null;
-					try {
-						in = connection.getInputStream();
-						packetReader = new InputStreamPacketReader(in, new PacketBuilder());
-						Packet packet = null;
-						while (!stopReadThread && (packet = packetReader.getNextPacket()) != null) {
-							internalPacketDistributer.handlePacket(packet);
-							packetReceivedListenerManager.handlePacket(packet);
-						}
-
-					} catch (IOException e) {
-						logger.debug("error reading packets from Xpra connection to "
-								+ connection.getConnectionParameters().getConnectionKey());
-						onIoException(e);
-					}
-				}
-			};
-			Thread thread = new Thread(runnable, "PacketReader-" + threadCount++);
-
-			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
-			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
 			logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
-			thread.setDaemon(true);
 			thread.start();
 		} catch (IOException e) {
+			logger.warn("could not send hello packet on connection " + connection.getConnectionParameters() + ": " + e);
 			onIoException(e);
 		}
 	}

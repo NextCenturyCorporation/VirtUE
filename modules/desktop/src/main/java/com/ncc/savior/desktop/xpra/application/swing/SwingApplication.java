@@ -269,7 +269,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					logger.error("Error attempting to close application." + SwingApplication.this, ex);
 				}
 				XpraWindowManager manager = SwingApplication.super.windowManager;
-				manager.CloseAllWindows();
+				manager.closeAllWindows();
 			}
 		});
 		frame.addComponentListener(new ComponentAdapter() {

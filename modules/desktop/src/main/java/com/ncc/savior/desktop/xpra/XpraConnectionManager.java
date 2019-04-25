@@ -134,9 +134,9 @@ public class XpraConnectionManager {
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
-			// logger.debug("getting servers");
+			logger.debug("getting xpra servers");
 			Set<Integer> servers = init.getXpraServersWithRetries();
-			// logger.debug("displays: " + servers);
+			logger.debug("xpra displays: " + servers);
 			if (servers.size() >= 1) {
 				params.setDisplay(servers.iterator().next());
 			}
@@ -151,8 +151,7 @@ public class XpraConnectionManager {
 	}
 
 	public void startApplication(IConnectionParameters params, String startCommand) throws IOException {
-		// logger.debug("starting application with command=" + startCommand + " params="
-		// + params);
+		logger.debug("starting application with command=" + startCommand + " params=" + params);
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
@@ -161,8 +160,7 @@ public class XpraConnectionManager {
 			int display;
 			if (!servers.isEmpty()) {
 				display = servers.iterator().next();
-				// logger.debug("starting application on display=" + display + " command=" +
-				// startCommand);
+				logger.debug("starting application on display=" + display + " command=" + startCommand);
 				init.startXpraApp(display, startCommand);
 			} else {
 				throw new IOException("Error getting starting and getting display from Xpra.");
