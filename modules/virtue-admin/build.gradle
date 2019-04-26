@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.M7'
+		springBootVersion = '2.0.5.RELEASE'
 		springSecurityVersion = '5.0.0.RELEASE'
         springDataVersion = '2.0.2.RELEASE'
         jerseyVersion = '2.26'
@@ -19,7 +19,7 @@ buildscript {
 	}
 }
 plugins {
-    id 'org.unbroken-dome.test-sets' version '1.4.5'
+    id 'org.unbroken-dome.test-sets' version '2.1.1'
     id 'org.hidetake.swagger.generator' version '2.16.0'
 }
 
