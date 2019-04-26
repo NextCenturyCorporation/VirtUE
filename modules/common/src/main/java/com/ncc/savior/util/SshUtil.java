@@ -428,7 +428,7 @@ public class SshUtil {
 	}
 
 	public static SshResult runTemplateFile(ITemplateService templateService, Session session, String templateName,
-			Map<String, Object> dataModel, int timeoutMillis) throws TemplateException, JSchException, IOException {
+			Map<String, ?> dataModel, int timeoutMillis) throws TemplateException, JSchException, IOException {
 		String command = String.join("\n", templateService.processTemplateToLines(templateName, dataModel));
 		return runCommand(session, command, timeoutMillis);
 	}
