@@ -76,7 +76,7 @@ public class XpraClient implements Closeable {
 	// private IConnection connection;
 	private IKeyboard keyboard;
 	protected InputStreamPacketReader packetReader;
-	volatile protected boolean stopReadThread;
+	protected volatile boolean stopReadThread;
 	private static int threadCount = 1;
 	private Status status;
 	private int display;

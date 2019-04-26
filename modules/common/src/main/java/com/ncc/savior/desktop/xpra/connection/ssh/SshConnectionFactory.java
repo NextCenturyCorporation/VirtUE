@@ -64,7 +64,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 	}
 
 	@Override
-	protected IConnection doConnect(IConnectionParameters params) throws IOException {
+	protected IConnection doConnect(IConnectionParameters params) throws IOException, InvalidParameterException {
 		if (params instanceof SshConnectionParameters) {
 			try {
 				SshConnectionParameters p = (SshConnectionParameters) params;
