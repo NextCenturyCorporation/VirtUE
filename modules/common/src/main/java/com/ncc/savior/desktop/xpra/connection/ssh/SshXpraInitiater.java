@@ -51,9 +51,6 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
  */
 public class SshXpraInitiater implements IXpraInitiator {
 	private static final Logger logger = LoggerFactory.getLogger(SshXpraInitiater.class);
-	// if version returns successfully, it'll return a version number and this
-	// should match. definitely matches 2.4.2 which is our current version.
-	private static final String XPRA_VERSION_MATCH = "[0-9]+\\.[0-9]+\\.[0-9]+.*";
 	/**
 	 * The script for getting active xpra session numbers.
 	 */
@@ -118,21 +115,9 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private boolean isDisplayReady(Session session, int d) {
 		try {
 			logger.debug("attempting to probe display " + d);
-			SshResult sshResult = sendXpraCommand(session, XPRA_TEST_DISPLAY_COMMAND, d);
-			if (sshResult.getExitStatus() != 0) {
-				logger.error("Xpra test command to " + params.getHost() + " failed: " + sshResult.getExitStatus());
-				return false;
-			}
-			String[] lines = sshResult.getOutput().split("\\n");
-			for (String line : lines) {
-				boolean matched = line.matches(XPRA_VERSION_MATCH);
-				if (matched) {
-					logger.debug("matched " + d);
-					return true;
-				}
-			}
-			logger.debug("Probe fails with output: " + lines);
-			return false;
+			// This command is strangely slow. Informal tests showed times up to 1300ms.
+			SshResult sshResult = sendXpraCommand(session, XPRA_TEST_DISPLAY_COMMAND, d, 2000);
+			return sshResult.getExitStatus() == 0;
 		} catch (JSchException | IOException | TemplateException e) {
 			logger.error("Error testing display=" + d, e);
 			return false;
@@ -140,13 +125,13 @@ public class SshXpraInitiater implements IXpraInitiator {
 	}
 
 	// NOTE: this does not quote the options (not needed so far)
-	private SshResult sendXpraCommand(Session session, String xpraCommand, int display, String... options)
+	private SshResult sendXpraCommand(Session session, String xpraCommand, int display, int timeoutMs, String... options)
 			throws TemplateException, JSchException, IOException {
 		Map<String, Object> dataModel = new HashMap<String, Object>();
 		dataModel.put("command", xpraCommand);
 		dataModel.put("display", ":" + display);
 		dataModel.put("options", String.join(" ", options));
-		SshResult sshResult = SshUtil.runTemplateFile(templateService, session, XPRA_COMMAND_TEMPLATE, dataModel, 500);
+		SshResult sshResult = SshUtil.runTemplateFile(templateService, session, XPRA_COMMAND_TEMPLATE, dataModel, timeoutMs);
 		if (sshResult.getExitStatus() != 0 && logger.isDebugEnabled()) {
 			logger.debug("exit status = " + sshResult.getExitStatus());
 			logger.debug("stdout: " + sshResult.getOutput());
@@ -164,7 +149,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 			session.setTimeout(10000);
 			display = (display > 0 ? display : 201);
 			String options = "--systemd-run=no --pulseaudio=no --mdns=no";
-			sendXpraCommand(session, XPRA_START_COMMAND, display, options);
+			sendXpraCommand(session, XPRA_START_COMMAND, display, 500, options);
 			long timeoutTime = System.currentTimeMillis() + 60000;
 			while (System.currentTimeMillis() < timeoutTime) {
 				if (isDisplayReady(session, display)) {
@@ -184,7 +169,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		Session session = null;
 		try {
 			session = getConnectedSessionWithRetries();
-			SshResult sshResult = sendXpraCommand(session, XPRA_STOP_COMMAND, display);
+			SshResult sshResult = sendXpraCommand(session, XPRA_STOP_COMMAND, display, 500);
 			return sshResult.getExitStatus() == 0;
 		} catch (JSchException | TemplateException e) {
 			throw new IOException(e);
