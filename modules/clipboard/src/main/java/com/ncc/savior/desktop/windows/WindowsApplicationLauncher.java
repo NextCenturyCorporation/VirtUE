@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -59,31 +57,8 @@ public class WindowsApplicationLauncher {
 			String cmd = Arrays.stream(cmds).collect(Collectors.joining(" "));
 			write("running command"+cmd);
 //			cmd="cmd.exe /c start "+cmd;
-			Process p=Runtime.getRuntime().exec(cmd);
+			Runtime.getRuntime().exec(cmd);
 		} catch (Throwable t) {
-			writeException(t);
-		}
-	}
-
-	private static void runAppProcessBuilder(String... cmds) {
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder();
-			processBuilder.command(cmds);
-			processBuilder.redirectErrorStream(true);
-			write("Starting process " + cmds.toString());
-			Process proc = processBuilder.start();
-			InputStream in = proc.getInputStream();
-			BufferedReader output = new BufferedReader(new InputStreamReader(in));
-			write("Starting waiting for process");
-			// proc.waitFor();
-			write("finished process");
-			String line;
-			while (null != (line = output.readLine())) {
-				System.out.println(line);
-				write("output: " + line);
-			}
-		} catch (Throwable t) {
-
 			writeException(t);
 		}
 	}

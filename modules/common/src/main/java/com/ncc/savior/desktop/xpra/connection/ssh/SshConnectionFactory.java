@@ -111,7 +111,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			this.pemFile = pemFile;
 		}
 
-		// statics created only because its much easier documenation
+		// statics created only because it's much easier documenation
 		public static SshConnectionParameters withPassword(String host, int port, String user, String password) {
 			return new SshConnectionParameters(host, port, user, password, null, null);
 		}

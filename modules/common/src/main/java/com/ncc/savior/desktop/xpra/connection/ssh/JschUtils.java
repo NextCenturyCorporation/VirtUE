@@ -48,6 +48,9 @@ public class JschUtils {
 	 * @param params
 	 * @return
 	 * @throws JSchException
+	 *                           if the PEM key is invalid (see
+	 *                           {@link SshConnectionParameters#getPemFile()} and
+	 *                           {@link SshConnectionParameters#getPemString()})
 	 */
 	// TODO review parameters for sanity!
 	public static Session getUnconnectedSession(SshConnectionParameters params) throws JSchException {
