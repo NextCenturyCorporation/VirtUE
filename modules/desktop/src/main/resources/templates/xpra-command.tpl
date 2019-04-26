@@ -1,0 +1,1 @@
+xpra ${command} ${display} ${options}

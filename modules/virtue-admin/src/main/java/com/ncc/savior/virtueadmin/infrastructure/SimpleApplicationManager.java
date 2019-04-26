@@ -34,6 +34,7 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -45,20 +46,22 @@ public class SimpleApplicationManager implements IApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
 	private static Random rand = new Random();
 	private String defaultPassword;
-	// private File defaultCertificate;
+	private ITemplateService templateService;
 
-	public SimpleApplicationManager(String defaultPassword) {
+	public SimpleApplicationManager(String defaultPassword, ITemplateService templateService) {
+		this(templateService);
 		this.defaultPassword = defaultPassword;
 	}
 
-	public SimpleApplicationManager() {
+	public SimpleApplicationManager(ITemplateService templateService) {
+		this.templateService = templateService;
 	}
 
 	@Override
 	public int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException {
 		SshConnectionParameters params = SshConnectionParameters.withExistingPemFile(vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), privateKeyFile);
-		SshXpraInitiater initiator = new SshXpraInitiater(params);
+		SshXpraInitiater initiator = new SshXpraInitiater(params, templateService);
 		Set<Integer> servers = initiator.getXpraServers();
 		if (servers.isEmpty()) {
 			int attemptedDisplay = 100 + rand.nextInt(100);
@@ -86,7 +89,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 		} catch (IOException | InterruptedException e) {
 			String msg = "Error attempting to start application!";
 			logger.error(msg, e);
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, msg);
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, msg, e);
 		}
 	}
 
@@ -98,7 +101,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 		} catch (IOException | InterruptedException e) {
 			String msg = "Error getting Xpra Server!";
 			logger.error(msg, e);
-			throw new SaviorException(SaviorErrorCode.XPRA_FAILED, msg);
+			throw new SaviorException(SaviorErrorCode.XPRA_FAILED, msg, e);
 		}
 	}
 
@@ -111,7 +114,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 			params = SshConnectionParameters.withPassword(vm.getHostname(), vm.getSshPort(), vm.getUserName(),
 					defaultPassword);
 		}
-		SshXpraInitiater initiator = new SshXpraInitiater(params);
+		SshXpraInitiater initiator = new SshXpraInitiater(params, templateService);
 		return initiator;
 	}
 

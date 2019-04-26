@@ -246,7 +246,7 @@ public class WindowsDisplayServerManager {
 		if (!enabled) {
 			return;
 		}
-		SimpleApplicationManager sam = new SimpleApplicationManager();
+		SimpleApplicationManager sam = new SimpleApplicationManager(templateService);
 		Session session;
 		VirtualMachine displayVm = null;
 		String templateName = RDP_TEMPLATE_NAME;

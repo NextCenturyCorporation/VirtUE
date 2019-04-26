@@ -51,6 +51,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 /**
  * Service for handling virtues from the Desktop application. This service has
@@ -86,9 +87,9 @@ public class VirtueService {
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
 			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService,
-			ColorManager colorManager, boolean packetDebug) {
+			ColorManager colorManager, boolean packetDebug, ITemplateService templateService) {
 		this.desktopResourceService = desktopResourceService;
-		this.connectionManager = new XpraConnectionManager(appManger, packetDebug);
+		this.connectionManager = new XpraConnectionManager(appManger, packetDebug, templateService);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
