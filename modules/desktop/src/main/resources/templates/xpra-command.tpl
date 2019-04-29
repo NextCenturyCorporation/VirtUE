@@ -1,1 +1,1 @@
-xpra ${command} ${display} ${options}
+../../../../../virtue-admin/src/main/resources/templates/xpra-command.tpl

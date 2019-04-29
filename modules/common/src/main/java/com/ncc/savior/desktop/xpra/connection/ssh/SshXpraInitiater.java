@@ -52,10 +52,15 @@ import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 public class SshXpraInitiater implements IXpraInitiator {
 	private static final Logger logger = LoggerFactory.getLogger(SshXpraInitiater.class);
 	/**
-	 * The script for getting active xpra session numbers.
+	 * The script for getting active xpra session numbers. Note: Used by both
+	 * Desktop and Virtue Admin Server.
 	 */
 	private static final String XPRA_PROBE_TEMPLATE = "xpra-probe.tpl";
 	private static final String XPRA_TEST_DISPLAY_COMMAND = "version";
+	/**
+	 * The script for running a xpra command (e.g., "xpra version"). Note: Used by
+	 * both Desktop and Virtue Admin Server.
+	 */
 	private static final String XPRA_COMMAND_TEMPLATE = "xpra-command.tpl";
 	private static final String XPRA_START_COMMAND = "start";
 	private static final String XPRA_STOP_COMMAND = "stop";
@@ -102,8 +107,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 				} catch (NumberFormatException e) {
 					return null;
 				}
-			}).filter(display -> display != null && isDisplayReady(finalSession, display))
-					.collect(Collectors.toSet());
+			}).filter(display -> display != null && isDisplayReady(finalSession, display)).collect(Collectors.toSet());
 		} catch (JSchException | TemplateException e) {
 			throw new IOException(e);
 		} finally {
@@ -125,13 +129,14 @@ public class SshXpraInitiater implements IXpraInitiator {
 	}
 
 	// NOTE: this does not quote the options (not needed so far)
-	private SshResult sendXpraCommand(Session session, String xpraCommand, int display, int timeoutMs, String... options)
-			throws TemplateException, JSchException, IOException {
+	private SshResult sendXpraCommand(Session session, String xpraCommand, int display, int timeoutMs,
+			String... options) throws TemplateException, JSchException, IOException {
 		Map<String, Object> dataModel = new HashMap<String, Object>();
 		dataModel.put("command", xpraCommand);
 		dataModel.put("display", ":" + display);
 		dataModel.put("options", String.join(" ", options));
-		SshResult sshResult = SshUtil.runTemplateFile(templateService, session, XPRA_COMMAND_TEMPLATE, dataModel, timeoutMs);
+		SshResult sshResult = SshUtil.runTemplateFile(templateService, session, XPRA_COMMAND_TEMPLATE, dataModel,
+				timeoutMs);
 		if (sshResult.getExitStatus() != 0 && logger.isDebugEnabled()) {
 			logger.debug("exit status = " + sshResult.getExitStatus());
 			logger.debug("stdout: " + sshResult.getOutput());
