@@ -127,7 +127,12 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 			@Override
 			public void run() {
-				// x11.XInitThreads();
+				/*
+				 * Without this the program may crash in xcb with a sequence number error and
+				 * message that the likely cause is multi-threading. Possible culprits are
+				 * convertSelectionAndSync, getWindowProperty, and waitForAvailableFormats.
+				 */
+				x11.XInitThreads();
 				display = X11.INSTANCE.XOpenDisplay(null);
 				clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
 				selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
@@ -305,7 +310,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 							}
 							if (!ownSelection) {
 								previousFormats = acf;
-								// this can be null (might be a race because this is started (indirectly) by the constructor)
+								// this can be null (might be a race because this is started (indirectly) by the
+								// constructor)
 								if (listener != null) {
 									listener.onClipboardChanged(acf);
 								}
@@ -377,8 +383,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	@Override
 	public ClipboardData getClipboardData(ClipboardFormat format) {
-		Atom formatAtom = x11.XInternAtom(display, format.getLinux(), false);
 		runnableQueue.offer(() -> {
+			Atom formatAtom = x11.XInternAtom(display, format.getLinux(), false);
 			convertSelectionAndSync(formatAtom);
 			if (logger.isTraceEnabled()) {
 				logger.trace("called convert selection for data " + format);
