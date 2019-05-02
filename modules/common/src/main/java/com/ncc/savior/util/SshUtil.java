@@ -448,8 +448,13 @@ public class SshUtil {
 		threadPool.submit(inputConsumer);
 		threadPool.submit(extInputConsumer);
 		channel.connect();
+		threadPool.shutdown();
 		try {
-			if (!threadPool.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS)) {
+			logger.debug("before waiting, exit status = " + channel.getExitStatus());
+			boolean executorTerminated = threadPool.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+			logger.debug("after waiting, exit status = " + channel.getExitStatus() + "\tclosed? " + channel.isClosed()
+					+ "\tconnected? " + channel.isConnected() + "\tEOF? " + channel.isEOF());
+			if (!executorTerminated) {
 				logger.debug("ssh command timed out after " + timeoutMillis + "ms");
 				threadPool.shutdownNow();
 			}
@@ -459,7 +464,7 @@ public class SshUtil {
 		} finally {
 			channel.disconnect();
 		}
-		logger.debug("done with command");
+		logger.debug("done with command, exit status = " + channel.getExitStatus());
 		IOException exception = inputConsumer.getException();
 		if (exception != null) {
 			throw exception;

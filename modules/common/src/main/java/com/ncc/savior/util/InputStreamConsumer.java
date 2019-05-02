@@ -56,9 +56,8 @@ public class InputStreamConsumer implements Runnable {
 			exception = e;
 		}
 		finally {
-			logger.debug("ISC read " + totalBytes + " bytes");
+			logger.debug("ISC done, read " + totalBytes + " bytes");
 		}
-		logger.debug("ISC done");
 	}
 
 	public IOException getException() {
