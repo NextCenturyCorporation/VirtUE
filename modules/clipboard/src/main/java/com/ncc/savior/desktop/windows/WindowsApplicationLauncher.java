@@ -10,11 +10,12 @@ import java.util.stream.Collectors;
 import com.ncc.savior.util.JavaUtil;
 
 public class WindowsApplicationLauncher {
+	public static final String APPLICATION_LAUNCH_FILE = "c:\\virtue\\app.txt";
+
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String file = "c:\\virtue\\mount.txt";
 		runCommandsFromFile(file, "","");
-		file = "c:\\virtue\\app.txt";
-		runCommandsFromFile(file, "","");
+		runCommandsFromFile(APPLICATION_LAUNCH_FILE, "","");
 		// JavaUtil.sleepAndLogInterruption(2000);
 
 //		Runtime.getRuntime().exec("cmd.exe /c start");
