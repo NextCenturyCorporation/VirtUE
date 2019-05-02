@@ -351,7 +351,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	/**
 	 * Adds unique RSA keys to VM's for SSH login. The public key is played in the
 	 * .ssh/authorized_keys file and the private key is stored in the database. This
-	 * allows anyone with access to hte private key the ability to login to this VM
+	 * allows anyone with access to the private key the ability to login to this VM
 	 * and only this VM.
 	 * 
 	 * @param vms

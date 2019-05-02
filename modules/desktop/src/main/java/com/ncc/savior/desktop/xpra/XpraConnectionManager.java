@@ -118,8 +118,8 @@ public class XpraConnectionManager {
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();
-			VirtueAlertMessage pam = new VirtueAlertMessage("Virtue connection failed", virtue.getId(),
-					virtue.getName(), "Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
+			VirtueAlertMessage pam = new VirtueAlertMessage("Virtue connection failed", virtue,
+					"Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
 			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 		});
 		client.connect(factory, params);
