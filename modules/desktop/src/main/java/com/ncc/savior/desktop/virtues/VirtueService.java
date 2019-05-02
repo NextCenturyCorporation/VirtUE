@@ -178,6 +178,7 @@ public class VirtueService {
 	}
 
 	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException
 	{
 		String key = app.getPrivateKey();
 
@@ -190,9 +191,10 @@ public class VirtueService {
 		synchronized (lock) {
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
-				logger.debug("needed new connection");
+				logger.debug("needed new connection to {} {}", params.getHost(), virtue.getName());
+				connectionManager.createXpraServerAndAddDisplayToParams(params);
+				client = connectionManager.createClient(params, color, virtue);
 				try {
-					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					// if (app.getOs().equals(OS.LINUX)) {
 					logger.debug("connecting clipboard");
 					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
@@ -203,7 +205,6 @@ public class VirtueService {
 							"Failed to connect clipboard to virtue");
 					UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 				}
-				client = connectionManager.createClient(params, color, virtue);
 			}
 		}
 		logger.debug("got connection to " + app.getHostname() + colorDesc);
@@ -287,7 +288,6 @@ public class VirtueService {
 			DesktopVirtue virtue = v;
 			try {
 				String virtueId = virtue.getId();
-				DesktopVirtueApplication app;
 				if (virtueId == null) {
 					virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
 					addPendingAppStart(virtue.getId(), appDefn);
@@ -295,6 +295,7 @@ public class VirtueService {
 					v.setId(virtue.getId());
 					v.setVirtueState(virtue.getVirtueState());
 				} else {
+					DesktopVirtueApplication app;
 					if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
 						app = desktopResourceService.startApplication(virtue, appDefn);
 						ensureConnection(app, virtue, color);
