@@ -67,7 +67,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpos
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
-import com.ncc.savior.virtueadmin.infrastructure.future.BaseImediateCompletableFutureService;
+import com.ncc.savior.virtueadmin.infrastructure.future.BaseImmediateCompletableFutureService;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteScriptCompletableFutureService.ScriptGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -134,7 +134,7 @@ public class CifsManager {
 	private boolean cifsEnabled;
 	private ActiveVirtueManager activeVirtueManager;
 	private IKeyManager keyManager;
-	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser> cifsVmUpdater;
+	private BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser> cifsVmUpdater;
 	private ITemplateService templateService;
 
 	public CifsManager(ServerIdProvider serverIdProvider, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
@@ -158,7 +158,7 @@ public class CifsManager {
 		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
 				OS.LINUX, cifsProxyAmi, new ArrayList<ApplicationDefinition>(), cifsProxyLoginUser, true, new Date(0),
 				"system");
-		this.cifsVmUpdater = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser>(
+		this.cifsVmUpdater = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser>(
 				"CifsProxyUpdater") {
 
 			@Override

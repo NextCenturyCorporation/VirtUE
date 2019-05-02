@@ -39,11 +39,11 @@ import java.util.concurrent.CompletableFuture;
  *            - extra information class. Can be any class and is just passed
  *            along with the data. This could be a virtue id, for example.
  */
-public abstract class BaseImediateCompletableFutureService<P, R, X> extends BaseCompletableFutureService<P, R, X> {
+public abstract class BaseImmediateCompletableFutureService<P, R, X> extends BaseCompletableFutureService<P, R, X> {
 
 	private String serviceName = null;
 
-	public BaseImediateCompletableFutureService(String serviceName) {
+	public BaseImmediateCompletableFutureService(String serviceName) {
 		this.serviceName = serviceName;
 	}
 
