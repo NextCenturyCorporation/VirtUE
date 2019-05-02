@@ -40,9 +40,15 @@ import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 public class JschChannelConnectionWrapper implements IConnectionWrapper {
 
 	private Channel channel;
+	private OutputStream outputStream;
+	private InputStream inputStream;
 
-	public JschChannelConnectionWrapper(Channel ch) {
+	public JschChannelConnectionWrapper(Channel ch) throws IOException {
 		this.channel = ch;
+		// have to cache these because getOutputStream and getInputStream need to be
+		// called before connect
+		outputStream = channel.getOutputStream();
+		inputStream = channel.getInputStream();
 	}
 
 	@Override
@@ -54,12 +60,12 @@ public class JschChannelConnectionWrapper implements IConnectionWrapper {
 
 	@Override
 	public OutputStream getOutputStream() throws IOException {
-		return channel.getOutputStream();
+		return outputStream;
 	}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return channel.getInputStream();
+		return inputStream;
 	}
 
 }
