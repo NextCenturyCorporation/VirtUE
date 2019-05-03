@@ -111,8 +111,33 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		logger.debug("existing subnet for key=" + subnetKey + " is " + assignment);
 		if (assignment == null) {
 			assignment = getNextAvailableBlock(subnetKey, tags);
+			Iterable<CidrBlockAssignment> oldAssignments = cidrRepo.findByCidrBlock(assignment.getCidrBlock());
+			// the one we just made supercedes this one, if it exists
+			logger.debug("obsolete CIDRs: {}", oldAssignments);
+			/*
+			oldAssignments.forEach((cba) -> logger.debug("Pre-delete:  ID {} : {}", cba.getAssignmentId(),
+					cidrRepo.findById(cba.getAssignmentId())));
+					*/
+			cidrRepo.deleteAll(oldAssignments);
+			/*
+			oldAssignments.forEach((cba) -> logger.debug("Post-delete: ID {} : {}", cba.getAssignmentId(),
+					cidrRepo.findById(cba.getAssignmentId())));
+					*/
 			try {
-				cidrRepo.save(assignment);
+				Iterable<CidrBlockAssignment> beforeSave = cidrRepo.findAll();
+				ArrayList<CidrBlockAssignment> cidrsBefore = new ArrayList<>();
+				beforeSave.forEach(cidrsBefore::add);
+				logger.debug("Cidrs before save: {}", beforeSave);
+				CidrBlockAssignment savedAssignment = cidrRepo.save(assignment);
+				Iterable<CidrBlockAssignment> afterSave = cidrRepo.findAll();
+				ArrayList<CidrBlockAssignment> cidrsAfter = new ArrayList<>();
+				afterSave.forEach(cidrsAfter::add);
+				logger.debug("Cidrs after save: {}", afterSave);
+				if (afterSave.equals(beforeSave)) {
+					logger.debug("No change to DB CIDRs!");
+				}
+				logger.debug("Saved subnet to database. Input to save: {}, output from save: {}", assignment,
+						savedAssignment);
 			} catch (Exception e) {
 				// If the save fails, its most likely because there is a straggling entry in the
 				// database. We should clear it (because AWS is king) and save one that reflects
@@ -276,10 +301,11 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				ec2.createTags(createTagsRequest);
 			}
 			cba.setAssignmentId(newId);
+			logger.debug("re-IDing subnet from {} to {}", oldId, newId);
 			cidrRepo.deleteById(oldId);
 			cidrRepo.save(cba);
 		} else {
-			logger.error("ERROR Cannot reassign subnet key.  oldId=" + oldId);
+			logger.error("ERROR Cannot reassign subnet key (ID not found in DB).  oldId=" + oldId);
 			throw new SaviorException(SaviorErrorCode.DATABASE_ERROR, "Unable to reassign subnet key!");
 		}
 	}
@@ -303,6 +329,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		}
 		if (clearDatabase) {
 			try {
+				logger.debug("deleting subnet from DB: " + id);
 				cidrRepo.deleteById(id);
 			} catch (Exception e) {
 				logger.debug("Failed to delete cidr block from database", e);
@@ -311,4 +338,3 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 }
-

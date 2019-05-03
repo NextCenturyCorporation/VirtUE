@@ -47,6 +47,8 @@ sourceSets {
 dependencies {
 	implementation project(':common')
 	implementation project(':clipboard')
+	runtime project(path: ':clipboard', configuration: 'buildFatJar')
+
     if (devMode) {
         implementation "org.aspectj:aspectjrt:1.9.2"
     }

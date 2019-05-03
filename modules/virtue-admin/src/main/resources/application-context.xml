@@ -23,6 +23,7 @@
 	</bean>
 	<bean name="appManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
+		<constructor-arg ref="templateService"></constructor-arg>
 	</bean>
 
 	<!-- <bean name="virtueDao" -->

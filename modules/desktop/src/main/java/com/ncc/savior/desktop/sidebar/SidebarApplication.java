@@ -53,6 +53,8 @@ import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.swing.SwingApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
+import com.ncc.savior.virtueadmin.template.FreeMarkerTemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 /**
  * This is the main class to start the Desktop application.
@@ -122,8 +124,9 @@ public class SidebarApplication {
 		ColorManager colorManager = new ColorManager();
 		IIconService iconService = new IconResourceService(drs);
 		PreferenceService prefService = new PreferenceService(authService);
+		ITemplateService templateService = new FreeMarkerTemplateService("templates");
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService,
-				colorManager, packetDebug);
+				colorManager, packetDebug, templateService);
 		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService,
 				bridgeSensorService);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);

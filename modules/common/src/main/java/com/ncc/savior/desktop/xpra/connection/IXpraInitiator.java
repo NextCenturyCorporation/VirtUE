@@ -23,6 +23,8 @@ package com.ncc.savior.desktop.xpra.connection;
 import java.io.IOException;
 import java.util.Set;
 
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+
 /**
  * Used to control and get status of xpra servers as well as start applications
  * on a given Xpra display.
@@ -75,6 +77,6 @@ public interface IXpraInitiator {
 	public void startXpraApp(int display, String command) throws IOException;
 
 	public interface IXpraInitatorFactory {
-		public IXpraInitiator getXpraInitiator(IConnectionParameters params);
+		public IXpraInitiator getXpraInitiator(IConnectionParameters params, ITemplateService templateService);
 	}
 }

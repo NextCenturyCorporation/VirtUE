@@ -66,7 +66,7 @@ public class WindowsStartupAppsService {
 	private Thread pollingThread;
 	private IKeyManager keyManager;
 	private List<String> virtueList;
-	String windowsStartupScript = "windowsStartup.tpl";
+	private String windowsStartupScript = "windowsStartup.tpl";
 	private ITemplateService templateService;
 
 	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager,

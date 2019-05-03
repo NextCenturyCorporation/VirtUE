@@ -22,7 +22,10 @@ package com.ncc.savior.desktop.xpra.connection.ssh;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidParameterException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +114,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			this.pemFile = pemFile;
 		}
 
-		// statics created only because its much easier documenation
+		// statics created only because it's much easier documenation
 		public static SshConnectionParameters withPassword(String host, int port, String user, String password) {
 			return new SshConnectionParameters(host, port, user, password, null, null);
 		}
@@ -150,9 +153,27 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 
 		@Override
 		public String toString() {
+			String pemStringOut;
+			if (pemString == null) {
+				pemStringOut = null;
+			}
+			else if (logger.isDebugEnabled()) {
+				// allow comparing our pem with known ones to see if it's the one we expect
+				try {
+					MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+					byte[] digest = messageDigest.digest(pemString.getBytes());
+					pemStringOut = String.format("%032x", new BigInteger(digest));
+				} catch (NoSuchAlgorithmException e) {
+					logger.warn("Problem with Java installation: required algorithm MD5 not available. Cannot print hash of pemString.");
+					pemStringOut = "[protected]";
+				}
+			}
+			else {
+				pemStringOut = "[protected]";
+			}
 			return "SshConnectionParameters [port=" + port + ", host=" + host + ", user=" + user + ", password="
 					+ (password == null ? null : "[protected]") + ", pemString="
-					+ (pemString == null ? null : "[protected]") + ", pemFile=" + pemFile + ", display=" + display
+					+ pemStringOut + ", pemFile=" + pemFile + ", display=" + display
 					+ "]";
 		}
 

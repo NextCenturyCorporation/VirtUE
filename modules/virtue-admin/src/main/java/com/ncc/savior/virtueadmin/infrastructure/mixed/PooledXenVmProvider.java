@@ -32,11 +32,13 @@ import java.util.UUID;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
@@ -106,8 +108,52 @@ public class PooledXenVmProvider implements IXenVmProvider {
 
 	private void initPool() {
 		if (poolSize > 0) {
-			List<VirtualMachine> vms = xenVmDao.getVmWithNameStartsWith(VM_NAME_POOL_PREFIX);
-			pool.addAll(vms);
+			List<VirtualMachine> oldVms = xenVmDao.getVmWithNameStartsWith(VM_NAME_POOL_PREFIX);
+			// make sure all the ones we were using are still running
+			for (VirtualMachine vm : oldVms) {
+				try {
+					/*
+					 * Can't just get them all at once because if any of them don't exist any more,
+					 * AWS throws an exception.
+					 */
+					AwsUtil.updateStatusOnVm(ec2Wrapper.getEc2(), vm);
+				} catch (AmazonEC2Exception e) {
+					logger.debug("could not get status for vm " + vm.getId() + ": " + e);
+					vm.setState(VmState.ERROR);
+				}
+			}
+			Collection<VirtualMachine> runningVms = new ArrayList<>();
+			Collection<VirtualMachine> nonRunningVms = new ArrayList<>();
+			for (VirtualMachine vm : oldVms) {
+				if (vm.getState() == VmState.RUNNING) {
+					runningVms.add(vm);
+				} else {
+					nonRunningVms.add(vm);
+				}
+			}
+			Collection<VirtualMachine> deletedVms = ec2Wrapper.deleteVirtualMachines(nonRunningVms);
+			if (deletedVms.size() != nonRunningVms.size()) {
+				// couldn't delete all of them for some reason
+				Collection<VirtualMachine> undeletableVms = new ArrayList<>(nonRunningVms);
+				undeletableVms.removeAll(deletedVms);
+				logger.warn(
+						"Could not delete some non-running VMs from the pool. Will try again next time the server restarts: "
+								+ undeletableVms);
+			}
+			/*
+			 * Only forget about ones we actually deleted, so we can try again later
+			 * (otherwise if there's a transient failure when deleting them, they would just
+			 * hang around forever).
+			 */
+			deletedVms.forEach(xenVmDao::deleteVm);
+
+			if (logger.isDebugEnabled()) {
+				List<String> vmStrings = runningVms.stream()
+						.map((vm) -> vm.getId() + "[" + vm.getInfrastructureId() + ", " + vm.getState() + "]")
+						.collect(Collectors.toList());
+				logger.debug("using pre-existing VMs for the pool: " + vmStrings);
+			}
+			pool.addAll(runningVms);
 			int xensNeeded = poolSize - pool.size();
 			if (xensNeeded > 0) {
 				new Thread(() -> {
@@ -115,7 +161,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 					for (int i = 0; i < xensNeeded; i++) {
 						provisionToQueue();
 					}
-				}).start();
+				}, "XenPoolInsertion-initial").start();
 			}
 		}
 	}
@@ -156,6 +202,7 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		String oldSubnetKey = null;
 		String name = "VRTU-Xen-" + serverId + "-" + vi.getUsername() + "-" + virtueName;
 		VirtualMachine xenVm = getNextPoolVm();
+		provisionToQueueAsync();
 		xenVm.setName(name);
 		xenVmDao.updateVms(Collections.singletonList(xenVm));
 
@@ -192,7 +239,6 @@ public class PooledXenVmProvider implements IXenVmProvider {
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
 		createTagsRequest.withResources(xenVm.getInfrastructureId()).withTags(tags);
 		ec2.createTags(createTagsRequest);
-		provisionToQueueAsync();
 		return xenVm;
 	}
 
@@ -234,10 +280,15 @@ public class PooledXenVmProvider implements IXenVmProvider {
 	}
 
 	private synchronized void provisionToQueue() {
-		VirtualMachine xenVm = provisionNewXenVm();
-		pool.add(xenVm);
-		xenVmDao.updateVms(Collections.singletonList(xenVm));
-		logger.debug("added vm to pool.  Size=" + pool.size());
+		logger.debug("Adding vm to pool...");
+		try {
+			VirtualMachine xenVm = provisionNewXenVm();
+			pool.add(xenVm);
+			xenVmDao.updateVms(Collections.singletonList(xenVm));
+		} catch (RuntimeException e) {
+			logger.error("could not create new VM for pool", e);
+		}
+		logger.debug("...added vm to pool.  Size=" + pool.size());
 	}
 
 	protected VirtualMachine provisionNewXenVm() {
@@ -256,17 +307,23 @@ public class PooledXenVmProvider implements IXenVmProvider {
 
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate, VM_NAME_POOL_PREFIX + serverId, securityGroups,
 				xenKeyName, xenInstanceType, virtueMods, iamRoleName);
-		vpcSubnetProvider.reassignSubnet(id, xenVm.getId(), null);
+		try {
+			vpcSubnetProvider.reassignSubnet(id, xenVm.getId(), null);
 
-		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
-		createTagsRequest.withResources(subnetId).withTags(new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, xenVm.getId()));
-		ec2Wrapper.getEc2().createTags(createTagsRequest);
+			CreateTagsRequest createTagsRequest = new CreateTagsRequest();
+			createTagsRequest.withResources(subnetId).withTags(new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, xenVm.getId()));
+			ec2Wrapper.getEc2().createTags(createTagsRequest);
+		} catch (AmazonEC2Exception | SaviorException e) {
+			logger.error("failed to configure VM, so deleting it", e);
+			ec2Wrapper.deleteVirtualMachines(Collections.singletonList(xenVm));
+			throw e;
+		}
 		return xenVm;
 	}
 
 	// Facilitates clearing the pool.
 	@Override
-	public void setXenPoolSize(int newPoolSize) {
+	public synchronized void setXenPoolSize(int newPoolSize) {
 		if (newPoolSize < 0) {
 			throw new SaviorException(SaviorErrorCode.INVALID_INPUT,
 					"Invalid pool size.  Pool size cannot be set to " + newPoolSize);

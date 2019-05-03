@@ -44,6 +44,7 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComp
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 /**
  * {@link IVmUpdater} implemented designed specifically for AWS EC2 VM's that
@@ -59,7 +60,8 @@ public class AwsVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
 	public AwsVmUpdater(VirtueAwsEc2Provider ec2Provider, IUpdateListener<VirtualMachine> notifier,
-			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey, boolean usePublicDns) {
+			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey, boolean usePublicDns,
+			ITemplateService templateService) {
 		AmazonEC2 ec2 = ec2Provider.getEc2();
 		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
@@ -82,7 +84,7 @@ public class AwsVmUpdater implements IVmUpdater {
 		provisionPipeline.addPipelineComponent(reachableRsa);
 		if (includeXpra) {
 			reachableRsa.setSuccessState(VmState.LAUNCHING);
-			provisionPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager));
+			provisionPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager, templateService));
 		} else {
 			reachableRsa.setSuccessState(VmState.RUNNING);
 		}

@@ -92,7 +92,7 @@ public class FreeMarkerTemplateService implements ITemplateService {
 	}
 
 	@Override
-	public void processTemplate(String templateName, Writer out, Map<String, Object> dataModel)
+	public void processTemplate(String templateName, Writer out, Map<String, ?> dataModel)
 			throws TemplateException {
 		try {
 			Template template = getTemplate(templateName);
@@ -104,7 +104,7 @@ public class FreeMarkerTemplateService implements ITemplateService {
 	}
 
 	@Override
-	public String[] processTemplateToLines(String templateName, Map<String, Object> dataModel)
+	public String[] processTemplateToLines(String templateName, Map<String, ?> dataModel)
 			throws TemplateException {
 		StringBuilderWriter out = new StringBuilderWriter();
 		processTemplate(templateName, out, dataModel);

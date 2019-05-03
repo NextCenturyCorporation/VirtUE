@@ -31,6 +31,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 /**
  * Component of an {@link IUpdatePipeline} that will start Xpra on the
@@ -43,10 +44,10 @@ public class StartXpraComponent extends BaseIndividualVmPipelineComponent<Virtua
 	private IKeyManager keyManager;
 	private SimpleApplicationManager appManager;
 
-	public StartXpraComponent(ScheduledExecutorService executor, IKeyManager keyManager) {
+	public StartXpraComponent(ScheduledExecutorService executor, IKeyManager keyManager, ITemplateService templateService) {
 		super(executor, false, 100, 1500);
 		this.keyManager = keyManager;
-		this.appManager = new SimpleApplicationManager();
+		this.appManager = new SimpleApplicationManager(templateService);
 	}
 
 	@Override

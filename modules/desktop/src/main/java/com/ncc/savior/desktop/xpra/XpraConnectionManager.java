@@ -44,6 +44,7 @@ import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
 import com.ncc.savior.desktop.xpra.debug.DebugPacketHandler;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
 
 public class XpraConnectionManager {
 	@SuppressWarnings("unused")
@@ -54,9 +55,12 @@ public class XpraConnectionManager {
 	private HashMap<String, XpraApplicationManager> activeAppManagers;
 	private IApplicationManagerFactory applicationManagerFactory;
 	private boolean packetDebug;
+	private ITemplateService templateService;
 
-	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory, boolean packetDebug) {
+	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory, boolean packetDebug,
+			ITemplateService templateService) {
 		this.applicationManagerFactory = appManagerFactory;
+		this.templateService = templateService;
 		connectionFactoryMap = new HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory>();
 		// Set values by config?
 		connectionFactoryMap.put(TcpConnectionParameters.class, new TcpConnectionFactory());
@@ -66,9 +70,9 @@ public class XpraConnectionManager {
 		initiaterMap.put(SshConnectionParameters.class, new IXpraInitiator.IXpraInitatorFactory() {
 
 			@Override
-			public IXpraInitiator getXpraInitiator(IConnectionParameters params) {
+			public IXpraInitiator getXpraInitiator(IConnectionParameters params, ITemplateService templateSrvc) {
 				if (params instanceof SshConnectionParameters) {
-					return new SshXpraInitiater((SshConnectionParameters) params);
+					return new SshXpraInitiater((SshConnectionParameters) params, templateSrvc);
 				}
 				throw new IllegalArgumentException(
 						"SshXpraInitiator requires " + SshConnectionParameters.class.getCanonicalName() + ".  Got "
@@ -114,8 +118,8 @@ public class XpraConnectionManager {
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();
-			VirtueAlertMessage pam = new VirtueAlertMessage("Virtue connection failed", virtue.getId(),
-					virtue.getName(), "Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
+			VirtueAlertMessage pam = new VirtueAlertMessage("Virtue connection failed", virtue,
+					"Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
 			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 		});
 		client.connect(factory, params);
@@ -133,7 +137,7 @@ public class XpraConnectionManager {
 
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
-			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
+			IXpraInitiator init = initiatorFactory.getXpraInitiator(params, templateService);
 			logger.debug("getting xpra servers");
 			Set<Integer> servers = init.getXpraServersWithRetries();
 			logger.debug("xpra displays: " + servers);
@@ -147,24 +151,6 @@ public class XpraConnectionManager {
 			// int d = init.startXpraServer(factory.getDisplay());
 			// // logger.debug("Display " + d + " started");
 			// }
-		}
-	}
-
-	public void startApplication(IConnectionParameters params, String startCommand) throws IOException {
-		logger.debug("starting application with command=" + startCommand + " params=" + params);
-		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
-		if (initiatorFactory != null) {
-			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
-			Set<Integer> servers = init.getXpraServersWithRetries();
-			// logger.debug("displays: " + servers);
-			int display;
-			if (!servers.isEmpty()) {
-				display = servers.iterator().next();
-				logger.debug("starting application on display=" + display + " command=" + startCommand);
-				init.startXpraApp(display, startCommand);
-			} else {
-				throw new IOException("Error getting starting and getting display from Xpra.");
-			}
 		}
 	}
 

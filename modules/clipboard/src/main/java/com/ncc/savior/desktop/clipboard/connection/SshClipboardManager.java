@@ -23,6 +23,7 @@ package com.ncc.savior.desktop.clipboard.connection;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -213,8 +214,7 @@ public class SshClipboardManager implements IClipboardManager {
 			String clientId) throws IOException {
 		if (sourceJarPath != null && new File(sourceJarPath).exists()) {
 			try {
-				Session session;
-				session = JschUtils.getUnconnectedSession(params);
+				Session session = JschUtils.getUnconnectedSession(params);
 				session.connect();
 				copyClipboardClientIfNeeded(session);
 				// need to get correct display!
@@ -243,7 +243,7 @@ public class SshClipboardManager implements IClipboardManager {
 				try {
 					session.disconnect();
 				} catch (Exception e) {
-					logger.warn("Error trying to kill session.  This may be ignorable:", e);
+					logger.warn("Error trying to kill session.  This can be ignored: ", e);
 				}
 			}
 		}
@@ -254,25 +254,18 @@ public class SshClipboardManager implements IClipboardManager {
 	 * @param session
 	 * @param groupId
 	 * @param display
-	 * @param clientId
-	 *            - id if reconnecting or null if not
+	 * @param clientId - id if reconnecting or null if not
 	 * @return - returned closeable will close the connection when close is called.
 	 * @throws JSchException
 	 * @throws IOException
 	 */
 	private ClipboardClientConnectionProperties connectionClient(Session session, String groupId, int display,
 			String displayName, String clientId) throws JSchException, IOException {
-		String myCommand = null;
+		logger.debug("clipboard command:" + command);
+		ChannelExec channel = SshUtil.getChannelExecFromCommand(session, command);
 		if (display > 0) {
-			myCommand = "export DISPLAY=:" + display + "; " + command;
-		} else {
-			myCommand = command;
+			channel.setEnv("DISPLAY", ":" + display);
 		}
-		// myCommand = command;
-		if (logger.isTraceEnabled()) {
-			logger.trace("clipboard command:" + myCommand);
-		}
-		ChannelExec channel = SshUtil.getChannelExecFromCommand(session, myCommand);
 		if (testParam != null) {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
@@ -290,9 +283,18 @@ public class SshClipboardManager implements IClipboardManager {
 		} else {
 			IConnectionWrapper connectionWrapper = new JschChannelConnectionWrapper(channel);
 			// connectionWrapper = new TestConnectionWrapper(connectionWrapper);
-			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connectionWrapper);
 			channel.connect();
-			clientId = clipboardHub.addClient(groupId, serializer, displayName, clientId);
+			try {
+				IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connectionWrapper);
+				clientId = clipboardHub.addClient(groupId, serializer, displayName, clientId);
+			} catch (EOFException e) {
+				int exitStatus = channel.getExitStatus();
+				if (exitStatus == 127) {
+					logger.warn("Problem running clipboard client on " + session.getHost()
+							+ ". This may be due to Java not being installed.");
+				}
+				throw e;
+			}
 		}
 		String cId = clientId;
 		@SuppressWarnings("resource") // closed through call to closeConnection()
@@ -343,14 +345,16 @@ public class SshClipboardManager implements IClipboardManager {
 				SshUtil.sftpFile(session, fis, destinationFilePath);
 			}
 		} else {
+			logger.debug("Copying " + sourceJarPath + " to " + session.getHost() + ":" + destinationFilePath + "...");
 			SshUtil.sftpFile(session, fis, destinationFilePath);
+			logger.debug("...copied " + sourceJarPath + " to " + session.getHost() + ":" + destinationFilePath);
 		}
 		try {
+			logger.debug("Setting up savior-browser.sh");
 			InputStream is = SshClipboardManager.class.getClassLoader().getResourceAsStream("savior-browser.sh");
 			SshUtil.sftpFile(session, is, "savior-browser-win.sh");
 			JavaUtil.sleepAndLogInterruption(100);
-			SshUtil.sendCommandFromSession(session,
-					"tr -d '\\15\\32' < " + "savior-browser-win.sh > savior-browser.sh");
+			SshUtil.sendCommandFromSession(session, "tr -d '\\15\\32' < savior-browser-win.sh > savior-browser.sh");
 			SshUtil.sendCommandFromSession(session, "chmod 755 savior-browser.sh");
 		} catch (Exception e) {
 			logger.error("Failed to upload savior-browser.sh", e);

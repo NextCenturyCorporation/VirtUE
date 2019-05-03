@@ -1,0 +1,1 @@
+../../../../../virtue-admin/src/main/resources/templates/xpra-probe.tpl

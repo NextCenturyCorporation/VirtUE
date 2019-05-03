@@ -39,7 +39,7 @@ public interface ITemplateService {
 	 * @param dataModel
 	 * @throws TemplateException
 	 */
-	void processTemplate(String templateName, Writer out, Map<String, Object> dataModel) throws TemplateException;
+	void processTemplate(String templateName, Writer out, Map<String, ?> dataModel) throws TemplateException;
 
 	/**
 	 * Processes the given template and returns in the format of an Array of lines
@@ -50,7 +50,7 @@ public interface ITemplateService {
 	 * @return
 	 * @throws TemplateException
 	 */
-	String[] processTemplateToLines(String templateName, Map<String, Object> dataModel) throws TemplateException;
+	String[] processTemplateToLines(String templateName, Map<String, ?> dataModel) throws TemplateException;
 
 	public static class TemplateException extends Exception {
 		private static final long serialVersionUID = 1L;

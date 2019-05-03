@@ -54,7 +54,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpos
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
-import com.ncc.savior.virtueadmin.infrastructure.future.BaseImediateCompletableFutureService;
+import com.ncc.savior.virtueadmin.infrastructure.future.BaseImmediateCompletableFutureService;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -68,6 +68,11 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class WindowsDisplayServerManager {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsDisplayServerManager.class);
+	/**
+	 * See com.ncc.savior.desktop.windows.WindowsApplicationLauncher in the
+	 * clipboard module.
+	 */
+	private static final String APPLICATION_LAUNCH_FILE = "c:\\virtue\\app.txt";
 	private static final String MODEL_KEY_APP_VM = "applicationVm";
 	private static final String MODEL_KEY_DISPLAY_VM = "displayVm";
 	private static final String MODEL_KEY_APPLICATION = "application";
@@ -104,7 +109,7 @@ public class WindowsDisplayServerManager {
 	@Value("${virtue.aws.windows.password}")
 	private String windowsPassword;
 
-	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>> wdsVmUpdater;
+	private BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>> wdsVmUpdater;
 
 	public WindowsDisplayServerManager(ServerIdProvider serverIdProvider, AwsEc2Wrapper awsEc2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
@@ -117,7 +122,7 @@ public class WindowsDisplayServerManager {
 		this.keyManager = keyManager;
 		this.templateService = templateService;
 
-		this.wdsVmUpdater = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>>(
+		this.wdsVmUpdater = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Pair<String, String>>(
 				"WindowsDisplayServerUpdater") {
 
 			@Override
@@ -246,13 +251,10 @@ public class WindowsDisplayServerManager {
 		if (!enabled) {
 			return;
 		}
-		SimpleApplicationManager sam = new SimpleApplicationManager();
-		Session session;
-		VirtualMachine displayVm = null;
+		SimpleApplicationManager sam = new SimpleApplicationManager(templateService);
 		String templateName = RDP_TEMPLATE_NAME;
-		Map<String, Object> dataModel = null;
+		VirtualMachine displayVm = getWindowsDisplayVm(appVm.getId());
 
-		displayVm = getWindowsDisplayVm(appVm.getId());
 		File keyFile = keyManager.getKeyFileByName(displayVm.getPrivateKeyName());
 		int display = sam.startOrGetXpraServerWithRetries(displayVm, keyFile, 15);
 		if (params == null) {
@@ -262,39 +264,42 @@ public class WindowsDisplayServerManager {
 		}
 
 		try {
-			session = SshUtil.getConnectedSession(displayVm, keyFile);
-			dataModel = new HashMap<String, Object>();
+			Session session = SshUtil.getConnectedSession(displayVm, keyFile);
+			Map<String, Object> dataModel = new HashMap<String, Object>();
 			dataModel.put(MODEL_KEY_APP_VM, appVm);
 			dataModel.put(MODEL_KEY_DISPLAY_VM, displayVm);
 			dataModel.put(MODEL_KEY_APPLICATION, application);
 			dataModel.put(MODEL_KEY_PARAMS, params);
 			dataModel.put(MODEL_KEY_WINDOWS_PASSWORD, windowsPassword);
 			dataModel.put(MODEL_KEY_DISPLAY, display);
-			Map<String, Object> dataModelFinal = dataModel;
-			VirtualMachine displayVmFinal = displayVm;
 			// create runnable because connection must remain open
 			Runnable con = () -> {
 				try {
 					Session winSession = SshUtil.getConnectedSession(appVm,
 							keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
 					List<String> out = SshUtil.sendCommandFromSession(winSession,
-							"echo " + application.getLaunchCommand() + " > c:\\virtue\\app.txt");
-					logger.debug("app out: " + out);
-
-					SshResult result = SshUtil.runTemplateFile(templateService, session, templateName, dataModelFinal,
+							"echo " + application.getLaunchCommand() + " > " + APPLICATION_LAUNCH_FILE);
+					logger.debug("app out: {}", out);
+				} catch (JSchException | IOException e) {
+					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+							"Error connecting to windows application VM to configure application. AppVm=" + appVm
+									+ " application=" + application,
+							e);
+				}
+				try {
+					SshResult result = SshUtil.runTemplateFile(templateService, session, templateName, dataModel,
 							5000);
 
 					int exitStatus = result.getExitStatus();
 					if (exitStatus == -1) {
 						logger.debug("letting app run in the background");
-					}
-					else if (exitStatus == 131) {
+					} else if (exitStatus == 131) {
 						throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND,
-								"Error starting application, it may not be installed. DisplayVm=" + displayVmFinal
+								"Error starting application, it may not be installed. DisplayVm=" + displayVm
 										+ " AppVm=" + appVm + " application=" + application);
 					} else if (exitStatus != 0) {
 						throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
-								"Error " + exitStatus + " starting application. DisplayVm=" + displayVmFinal + " AppVm="
+								"Error " + exitStatus + " starting application. DisplayVm=" + displayVm + " AppVm="
 										+ appVm + " application=" + application);
 					}
 					logger.debug("returned!**" + result.getOutput() + result.getError());
@@ -302,12 +307,12 @@ public class WindowsDisplayServerManager {
 					logger.debug("letting app run in the background");
 				} catch (JSchException | IOException e) {
 					throw new SaviorException(SaviorErrorCode.SSH_ERROR,
-							"Error connecting to windows display VM to start application. DisplayVm=" + displayVmFinal
+							"Error connecting to windows display VM to start application. DisplayVm=" + displayVm
 									+ " AppVm=" + appVm + " application=" + application,
 							e);
 				} catch (TemplateException e) {
 					throw new SaviorException(SaviorErrorCode.TEMPLATE_ERROR,
-							"Error creating template. Template=" + templateName + " model=" + dataModelFinal, e);
+							"Error creating template. Template=" + templateName + " model=" + dataModel, e);
 				}
 			};
 			Thread t = new Thread(con, "WindowsApplication");

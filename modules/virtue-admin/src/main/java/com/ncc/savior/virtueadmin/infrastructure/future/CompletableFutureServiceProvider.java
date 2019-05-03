@@ -51,9 +51,9 @@ public class CompletableFutureServiceProvider {
 	private EnsureDeleteVolumeOnTerminationCompletableFutureService ensureDeleteVolumeOnTermination;
 	private TestReachabilityCompletableFuture testUpDown;
 	private AddRsaKeyCompletableFutureService addRsa;
-	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState> updateStatus;
-	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> vmNnotifierService;
-	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> networkClearingService;
+	private BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState> updateStatus;
+	private BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> vmNnotifierService;
+	private BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> networkClearingService;
 	private AwsUpdateStatusCompletableFutureService awsUpdateStatus;
 	private ScheduledExecutorService executor;
 	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> networkCopyingService;
@@ -118,7 +118,7 @@ public class CompletableFutureServiceProvider {
 		runRemoteCommand = new RunRemoteCommandCompletableFutureService(executor, keyManager);
 		runRemoteScript = new RunRemoteScriptCompletableFutureService(executor, keyManager);
 		windowsAccountGenerator = new WindowsAccountGenerator(executor, false, 10, 1000, 10000, keyManager);
-		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
+		updateStatus = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, VmState state) {
@@ -126,7 +126,7 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
-		vmNnotifierService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
+		vmNnotifierService = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
 				"notifierService") {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
@@ -137,7 +137,7 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
-		this.networkClearingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
+		this.networkClearingService = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
 				"NetworkClearingService") {
 
 			@Override
@@ -149,7 +149,7 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
-		this.networkCopyingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine>(
+		this.networkCopyingService = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine>(
 				"NetworkCopyingService") {
 
 			@Override
@@ -161,7 +161,7 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
-		this.errorCausingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
+		this.errorCausingService = new BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
 				"errorCausingService") {
 
 			@Override
@@ -191,15 +191,15 @@ public class CompletableFutureServiceProvider {
 		return addRsa;
 	}
 
-	public BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState> getUpdateStatus() {
+	public BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState> getUpdateStatus() {
 		return updateStatus;
 	}
 
-	public BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> getVmNotifierService() {
+	public BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> getVmNotifierService() {
 		return vmNnotifierService;
 	}
 
-	public BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> getNetworkClearingService() {
+	public BaseImmediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> getNetworkClearingService() {
 		return networkClearingService;
 	}
 
