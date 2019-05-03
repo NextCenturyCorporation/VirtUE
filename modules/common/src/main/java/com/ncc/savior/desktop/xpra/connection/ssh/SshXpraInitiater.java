@@ -62,9 +62,9 @@ public class SshXpraInitiater implements IXpraInitiator {
 	 * both Desktop and Virtue Admin Server.
 	 */
 	private static final String XPRA_COMMAND_TEMPLATE = "xpra-command.tpl";
-	private static final String XPRA_START_COMMAND = "start";
+	private static final String XPRA_START_TEMPLATE = "xpra-start.tpl";
 	private static final String XPRA_STOP_COMMAND = "stop";
-	private static final String START_XPRA_APP_TEMPLATE = "start-xpra_app.tpl";
+	private static final String START_XPRA_APP_TEMPLATE = "start-xpra-app.tpl";
 
 	private SshConnectionParameters params;
 	private final ITemplateService templateService;
@@ -108,6 +108,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 					return null;
 				}
 			}).filter(display -> display != null && isDisplayReady(finalSession, display)).collect(Collectors.toSet());
+			logger.debug("found xpra servers: " + displays);
 		} catch (JSchException | TemplateException e) {
 			throw new IOException(e);
 		} finally {
@@ -119,9 +120,11 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private boolean isDisplayReady(Session session, int d) {
 		try {
 			logger.debug("attempting to probe display " + d);
-			// This command is strangely slow. Informal tests showed times up to 1300ms.
-			SshResult sshResult = sendXpraCommand(session, XPRA_TEST_DISPLAY_COMMAND, d, 2000);
-			return sshResult.getExitStatus() == 0;
+			// This command is strangely slow. Informal tests showed times up to 1300ms on local laptop, 3300ms on Xen domU.
+			SshResult sshResult = sendXpraCommand(session, XPRA_TEST_DISPLAY_COMMAND, d, 5000);
+			boolean ready = sshResult.getExitStatus() == 0;
+			logger.debug("display " + d + " ready? " + ready);
+			return ready;
 		} catch (JSchException | IOException | TemplateException e) {
 			logger.error("Error testing display=" + d, e);
 			return false;
@@ -153,8 +156,17 @@ public class SshXpraInitiater implements IXpraInitiator {
 			session = getConnectedSessionWithRetries();
 			session.setTimeout(10000);
 			display = (display > 0 ? display : 201);
-			String options = "--systemd-run=no --pulseaudio=no --mdns=no";
-			sendXpraCommand(session, XPRA_START_COMMAND, display, 500, options);
+			Map<String, Object> dataModel = new HashMap<String, Object>();
+			dataModel.put("display", ":" + display);
+			dataModel.put("options", "");
+			SshResult sshResult = SshUtil.runTemplateFile(templateService, session, XPRA_START_TEMPLATE, dataModel,
+					5000);
+			logger.debug("exit status = {}", sshResult.getExitStatus());
+			if (sshResult.getExitStatus() != 0 && logger.isDebugEnabled()) {
+				logger.debug("stdout: " + sshResult.getOutput());
+				logger.debug("stderr: " + sshResult.getError());
+			}
+
 			long timeoutTime = System.currentTimeMillis() + 60000;
 			while (System.currentTimeMillis() < timeoutTime) {
 				if (isDisplayReady(session, display)) {
