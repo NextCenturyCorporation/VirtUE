@@ -73,3 +73,4 @@ modules/ecosystem/netplan/netplan.io_0.95-2_amd64.*
 /modules/ecosystem/cifs-proxy/src/terraform/test-remote-setup.sh
 tools/replace-header/.idea
 tools/replace-header/venv
+modules/wds/freerdp/build

@@ -1,0 +1,33 @@
+{
+	"builders": [{
+		"type": "amazon-ebs",
+		"profile": "virtue",
+		"region": "us-east-1",
+		"source_ami_filter": {
+			"filters": {
+				"virtualization-type": "hvm",
+				"name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+				"root-device-type": "ebs"
+			},
+			"owners": ["099720109477"],
+			"most_recent": true
+		},
+		"instance_type": "t3.medium",
+		"ssh_username": "ubuntu",
+		"ami_name": "WindowsDisplayServer {{timestamp}}",
+		"tags": {
+			"Base_AMI_Name": "{{ .SourceAMIName }}",
+			"savior-auto-generated": "true"
+		}
+	}],
+	"provisioners": [{
+		"type": "shell-local",
+		"command": "make -j4 -l2 -C freerdp"
+	}, {
+		"type": "shell",
+		"inline": ["sudo apt-get -y -q install python-minimal"]
+	}, {
+		"type": "ansible",
+		"playbook_file": "./playbook.yml"
+	}]
+}

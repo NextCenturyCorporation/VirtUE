@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Add Xpra repository key
+      apt_key:
+        url: https://winswitch.org/gpg.asc
+    - name: Add Xpra repository
+      apt_repository:
+        repo: deb http://winswitch.org/ bionic main
+    - name: Install JVM
+      package:
+        name: openjdk-8-jre
+        state: latest
+    - name: Install xpra
+      package:
+        name: xpra
+        state: latest
+    - name: Deploy custom FreeRDP package
+      copy:
+        src: freerdp/build/freerdp.deb
+        dest: .
+    - name: Install custom FreeRDP
+      apt:
+        deb: freerdp.deb
+    - name: Add user to xpra group
+      shell: usermod -a -G xpra $USER
