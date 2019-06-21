@@ -39,6 +39,10 @@ public class InputStreamConsumer implements Runnable {
 		this.output = output;
 	}
 
+	public InputStreamConsumer(InputStream input) {
+		this(input, new StringBuilder());
+	}
+
 	@Override
 	public void run() {
 		logger.debug("ISC start");
@@ -62,5 +66,9 @@ public class InputStreamConsumer implements Runnable {
 
 	public IOException getException() {
 		return exception;
+	}
+
+	public StringBuilder getOutput() {
+		return output;
 	}
 }

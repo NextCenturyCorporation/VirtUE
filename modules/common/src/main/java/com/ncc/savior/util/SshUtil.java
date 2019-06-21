@@ -20,7 +20,6 @@
  */
 package com.ncc.savior.util;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -28,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +83,12 @@ public class SshUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SshUtil.class);
 
+	/**
+	 * Special value for timeouts telling it to wait forever. Not supported for all
+	 * timeout parameters; see individual method documentation.
+	 */
+	public static final int FOREVER = -1;
+
 	public static void waitUtilVmReachable(VirtualMachine vm, String privateKeyFile, long periodMillis) {
 		while (!isVmReachable(vm, privateKeyFile)) {
 			JavaUtil.sleepAndLogInterruption(periodMillis);
@@ -107,30 +113,38 @@ public class SshUtil {
 	public static List<String> sendCommandFromSession(Session session, String command)
 			throws JSchException, IOException {
 		ChannelExec myChannel = null;
-		BufferedReader br = null;
-		BufferedReader er = null;
-		ArrayList<String> lines = new ArrayList<String>();
 		try {
 			myChannel = getChannelExecFromCommand(session, command);
-			myChannel.setPty(true);
-			InputStream input = myChannel.getInputStream();
-			InputStreamReader reader = new InputStreamReader(input);
-			br = new BufferedReader(reader);
-			er = new BufferedReader(new InputStreamReader(myChannel.getErrStream()));
+			// myChannel.setPty(true);
+			InputStreamConsumer outputConsumer = new InputStreamConsumer(myChannel.getInputStream());
+			InputStreamConsumer extOutputConsumer = new InputStreamConsumer(myChannel.getErrStream());
+			ExecutorService threadPool = Executors.newFixedThreadPool(2);
+			threadPool.submit(outputConsumer);
+			threadPool.submit(extOutputConsumer);
 			myChannel.connect();
-			String line;
-			JavaUtil.sleepAndLogInterruption(500);
-			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
-				lines.add(line);
+			threadPool.shutdown();
+			logger.debug("waiting for output on ssh channel");
+			try {
+				threadPool.awaitTermination(1000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				logger.debug("interrupted: " + e);
 			}
-			// logger.debug("finished command successfully");
-			return lines;
+
+			int exitStatus = myChannel.getExitStatus();
+			// -1 exitStatus means the command isn't done yet
+			if (exitStatus != 0 && exitStatus != -1) {
+				logger.debug("ssh command failed with status {}", exitStatus);
+				throw new JSchException("ssh command failed with status " + exitStatus);
+			}
+			logger.debug("finished command successfully");
+			return Arrays.asList(outputConsumer.getOutput().toString().split("\n"));
 		} catch (Exception e) {
 			logger.debug("finished command exceptionally", e);
 			throw e;
 		} finally {
-			JavaUtil.closeIgnoreErrors(br, er);
-			myChannel.disconnect();
+			if (myChannel != null) {
+				myChannel.disconnect();
+			}
 		}
 	}
 
@@ -300,6 +314,7 @@ public class SshUtil {
 		session.setConfig("StrictHostKeyChecking", "no");
 		session.setTimeout(1000);
 		session.connect();
+		logger.debug("connected to {}@{}:{} ({})", vm.getUserName(), vm.getHostname(), vm.getSshPort(), privateKeyFile);
 		return session;
 	}
 
@@ -321,7 +336,7 @@ public class SshUtil {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		List<String> output = new ArrayList<String>();
 		for (String line : lines) {
-			List<String> o = SshUtil.sendCommandFromSession(session, line);
+			List<String> o = Arrays.asList(SshUtil.runCommand(session, line, FOREVER).getOutput().split("\n"));
 			output.addAll(o);
 		}
 		return output;
@@ -331,7 +346,7 @@ public class SshUtil {
 			Map<String, Object> dataModel) throws JSchException, IOException, TemplateException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		String line = String.join("\n", lines);
-		List<String> o = SshUtil.sendCommandFromSession(session, line);
+		List<String> o = Arrays.asList(SshUtil.runCommand(session, line, FOREVER).getOutput().split("\n"));
 		return o;
 	}
 
@@ -423,6 +438,14 @@ public class SshUtil {
 				numTries--;
 				lastException = e;
 			}
+			if (numTries > 0) {
+				try {
+					Thread.sleep(timeBetweenTriesMillis);
+				} catch (InterruptedException e) {
+					logger.debug("interrupted while sleeping", e);
+					break;
+				}
+			}
 		} while (numTries > 0);
 		throw lastException;
 	}
@@ -449,9 +472,20 @@ public class SshUtil {
 		threadPool.submit(extInputConsumer);
 		channel.connect();
 		threadPool.shutdown();
+		boolean forever;
+		if (timeoutMillis == FOREVER) {
+			forever = true;
+			timeoutMillis = Integer.MAX_VALUE;
+		}
+		else {
+			forever = false;
+		}
 		try {
 			logger.debug("before waiting, exit status = " + channel.getExitStatus());
-			boolean executorTerminated = threadPool.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+			boolean executorTerminated;
+			do {
+				executorTerminated = threadPool.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+			} while (!executorTerminated && forever);
 			logger.debug("after waiting, exit status = " + channel.getExitStatus() + "\tclosed? " + channel.isClosed()
 					+ "\tconnected? " + channel.isConnected() + "\tEOF? " + channel.isEOF());
 			if (!executorTerminated) {

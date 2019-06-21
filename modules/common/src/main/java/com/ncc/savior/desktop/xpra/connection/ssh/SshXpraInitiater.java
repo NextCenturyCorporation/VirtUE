@@ -22,6 +22,7 @@ package com.ncc.savior.desktop.xpra.connection.ssh;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -80,12 +81,20 @@ public class SshXpraInitiater implements IXpraInitiator {
 		IOException lastException = null;
 		while (triesLeft > 0) {
 			try {
-				triesLeft--;
 				Set<Integer> servers = getXpraServers();
 				return servers;
 			} catch (IOException e) {
+				triesLeft--;
 				lastException = e;
-				logger.warn("Failed to get Xpra Servers.  Tries left=" + (triesLeft) + " Error=" + e.getMessage());
+				logger.warn("Failed to get Xpra Servers.  Tries left=" + triesLeft + " Error=" + e.getMessage());
+			}
+			if (triesLeft > 0) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					logger.debug("interrupted while sleeping");
+					break;
+				}
 			}
 		}
 		throw lastException;
@@ -98,10 +107,12 @@ public class SshXpraInitiater implements IXpraInitiator {
 		try {
 			logger.debug("probing for xpra servers");
 			session = getConnectedSessionWithRetries();
-			List<String> lines = SshUtil.runCommandsFromFile(templateService, session, XPRA_PROBE_TEMPLATE,
-					Collections.emptyMap());
-			Session finalSession = session;
-			displays = lines.stream().map(line -> {
+			List<String> lines = SshUtil.runCommandsFromFileWithTimeout(templateService, session, XPRA_PROBE_TEMPLATE,
+					Collections.emptyMap(), 5000);
+			String[] tokens = String.join(" ", lines).split("\\s");
+			logger.debug("candidate xpra servers: {}", lines);
+			final Session finalSession = session;
+			displays = Arrays.stream(tokens).map(line -> {
 				try {
 					return Integer.parseInt(line);
 				} catch (NumberFormatException e) {
