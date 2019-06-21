@@ -37,6 +37,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +180,23 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
+				menu.addPopupMenuListener(new PopupMenuListener() {
+					@Override
+					public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+						logger.debug("state of '" + virtue.getName() + "' = " + virtue.getVirtueState());
+						stopMenuItem.setEnabled(virtueService.isStopable(virtue));
+						startMenuItem.setEnabled(virtueService.isStartable(virtue));
+						terminateMenuItem.setEnabled(virtueService.isTerminatable(virtue));
+					}
+
+					@Override
+					public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+					}
+
+					@Override
+					public void popupMenuCanceled(PopupMenuEvent e) {
+					}
+				});
 				menu.setPopupSize(78, 97);
 				menu.add(stopMenuItem);
 				menu.addSeparator();

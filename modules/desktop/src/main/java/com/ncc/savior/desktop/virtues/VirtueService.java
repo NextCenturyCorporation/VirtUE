@@ -80,6 +80,7 @@ public class VirtueService {
 		startableVirtueStates = new ArrayList<VirtueState>();
 		stopableVirtueStates = new ArrayList<VirtueState>();
 		startableVirtueStates.add(VirtueState.STOPPED);
+		startableVirtueStates.add(VirtueState.UNPROVISIONED);
 		// startableVirtueStates.add(VirtueState.STOPPING);
 		stopableVirtueStates.add(VirtueState.LAUNCHING);
 		stopableVirtueStates.add(VirtueState.RUNNING);
@@ -285,9 +286,10 @@ public class VirtueService {
 		// TODO check to see if we have an XPRA connection
 		RgbColor color = getColorFromVirtue(v);
 		Thread t = new Thread(() -> {
+			logger.debug("Entered thread for starting " + appDefn.getName() + " for " + v.getName());
 			DesktopVirtue virtue = v;
+			String virtueId = virtue.getId();
 			try {
-				String virtueId = virtue.getId();
 				if (virtueId == null) {
 					virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
 					addPendingAppStart(virtue.getId(), appDefn);
@@ -315,6 +317,8 @@ public class VirtueService {
 				UserAlertingServiceHolder.sendAlertLogError(alertMessage, logger);
 			}
 		});
+		t.setDaemon(true);
+		t.setName("Start " + appDefn.getName() + " for " + v.getName());
 		t.start();
 	}
 
@@ -358,5 +362,17 @@ public class VirtueService {
 
 	public void closeXpraConnections() {
 		connectionManager.closeActiveClients();
+	}
+
+	public boolean isStopable(DesktopVirtue virtue) {
+		return stopableVirtueStates.contains(virtue.getVirtueState());
+	}
+
+	public boolean isStartable(DesktopVirtue virtue) {
+		return startableVirtueStates.contains(virtue.getVirtueState());
+	}
+
+	public boolean isTerminatable(DesktopVirtue virtue) {
+		return virtue.getVirtueState() != VirtueState.UNPROVISIONED;
 	}
 }
