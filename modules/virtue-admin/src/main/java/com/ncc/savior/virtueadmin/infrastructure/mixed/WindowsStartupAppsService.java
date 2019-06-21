@@ -145,8 +145,8 @@ public class WindowsStartupAppsService {
 			session = SshUtil.getConnectedSession(windows, keyFile);
 			Map<String, Object> dataModel = new HashMap<String, Object>();
 			dataModel.put("nfs", nfsOrXen);
-			dataModel.put("vm",windows);
-			SshUtil.runCommandsFromFile(templateService, session, windowsStartupScript, dataModel);
+			dataModel.put("vm", windows);
+			SshUtil.runCommandsFromFileWithTimeout(templateService, session, windowsStartupScript, dataModel, 5000);
 			// String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
 			// String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
 			// List<String> output = SshUtil.sendCommandFromSession(session, cmd);

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ncc.savior.util.Retrier;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
@@ -273,7 +275,7 @@ public class WindowsDisplayServerManager {
 			dataModel.put(MODEL_KEY_WINDOWS_PASSWORD, windowsPassword);
 			dataModel.put(MODEL_KEY_DISPLAY, display);
 			// create runnable because connection must remain open
-			Runnable con = () -> {
+			Runnable con = new Retrier(() -> {
 				try {
 					Session winSession = SshUtil.getConnectedSession(appVm,
 							keyManager.getKeyFileByName(appVm.getPrivateKeyName()));
@@ -287,8 +289,7 @@ public class WindowsDisplayServerManager {
 							e);
 				}
 				try {
-					SshResult result = SshUtil.runTemplateFile(templateService, session, templateName, dataModel,
-							5000);
+					SshResult result = SshUtil.runTemplateFile(templateService, session, templateName, dataModel, 5000);
 
 					int exitStatus = result.getExitStatus();
 					if (exitStatus == -1) {
@@ -314,7 +315,7 @@ public class WindowsDisplayServerManager {
 					throw new SaviorException(SaviorErrorCode.TEMPLATE_ERROR,
 							"Error creating template. Template=" + templateName + " model=" + dataModel, e);
 				}
-			};
+			}, 5, 100, Collections.singleton(Throwable.class));
 			Thread t = new Thread(con, "WindowsApplication");
 			t.setDaemon(true);
 			t.start();

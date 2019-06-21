@@ -60,23 +60,14 @@ public class AddRsaKeyCompletableFutureService
 			BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void>.Wrapper wrapper) {
 		VirtualMachine vm = wrapper.param;
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
-		// logger.debug("Testing if VM is reachable - " + vm);
+		logger.debug("Trying to inject ssh key into vm: {}", vm);
 		try {
-			logger.debug("VM is reachable - " + vm);
-			String newPrivateKey = null;
-			try {
-				newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
-				vm.setPrivateKey(newPrivateKey);
-				onSuccess(id, vm, wrapper.future);
-			} catch (Exception e) {
-				logger.error("Injecting new SSH key failed.  Retrying.", e);
-			} finally {
-
-			}
+			String newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
+			vm.setPrivateKey(newPrivateKey);
+			onSuccess(id, vm, wrapper.future);
 		} catch (Throwable t) {
-			logger.error("Test Failed - " + vm, t);
+			logger.error("Injecting new SSH key failed.  Retrying.", t);
 		}
-
 	}
 
 	@Override

@@ -20,13 +20,11 @@
  */
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -364,22 +362,14 @@ public class XenHostManager {
 		boolean success = false;
 		while (!success) {
 			try {
-				List<String> resp = SshUtil.sendCommandFromSession(session, "sudo xl list");
-				for (String line : resp) {
-					if (line.contains("Domain-0")) {
-						success = true;
-					}
-				}
+				String resp = SshUtil.runCommand(session, "sudo xl list", 5000).getOutput();
+				success = resp.contains("Domain-0");
 			} catch (IOException | JSchException e) {
 				logger.error("error waiting for xl list", e);
 			}
-			JavaUtil.sleepAndLogInterruption(2000);
-		}
-	}
-
-	protected void waitUntilXlListIsReady(PrintStream ps, BufferedReader br) {
-		while (true) {
-			ps.println("sudo xl list");
+			if (!success) {
+				JavaUtil.sleepAndLogInterruption(2000);
+			}
 		}
 	}
 

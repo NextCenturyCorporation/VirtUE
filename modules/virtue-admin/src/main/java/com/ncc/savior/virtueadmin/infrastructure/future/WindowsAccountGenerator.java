@@ -21,7 +21,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -33,6 +32,7 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.util.SshUtil.SshResult;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -69,7 +69,7 @@ public class WindowsAccountGenerator
 		if (OS.WINDOWS.equals(vm.getOs())) {
 			Session session = null;
 			try {
-				session = SshUtil.getConnectedSession(vm, keyManager.getKeyFileByName(vm.getPrivateKeyName()));
+				session = SshUtil.getConnectedSessionWithRetries(vm, keyManager.getKeyFileByName(vm.getPrivateKeyName()), 5, 1000);
 			} catch (JSchException e) {
 				logger.debug("could not connect to Windows VM " + vm.getUserName() + "@" + vm.getHostname() + ":"
 						+ vm.getSshPort() + ": " + e);
@@ -82,8 +82,8 @@ public class WindowsAccountGenerator
 					"powershell.exe $password = ConvertTo-SecureString -AsPlainText -Force \"%s\"; New-LocalUser \"%s\" -Password $password ; Add-LocalGroupMember -Group \\\"Remote Desktop Users\\\" -Member \"%s\"",
 					password, user, user);
 			try {
-				List<String> lines = SshUtil.sendCommandFromSession(session, command);
-				logger.debug("Create windows user output: " + lines);
+				SshResult result = SshUtil.runCommand(session, command, 10000);
+				logger.debug("Create windows user output: {}", result.getOutput());
 			} catch (JSchException | IOException e) {
 				logger.debug("error creating Windows user with command: " + command);
 				throw new SaviorException(SaviorErrorCode.SSH_ERROR, "Error attempting to create new Windows user.", e);

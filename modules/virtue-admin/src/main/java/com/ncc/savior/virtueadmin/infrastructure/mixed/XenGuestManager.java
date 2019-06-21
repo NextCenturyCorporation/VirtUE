@@ -197,8 +197,8 @@ public class XenGuestManager {
 		ipAddress = getGuestVmIpAddress(session, name);
 		updateSshKnownHosts(session, ipAddress);
 		logger.debug("Attempting to setup port forwarding. ");
-		String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
-		if (hostname == null) {
+		String hostname = SshUtil.runCommand(session, "hostname", 1000).getOutput().trim();
+		if (hostname.isEmpty()) {
 			hostname = "custom-" + ipAddress.replaceAll("\\.", "-");
 			logger.debug("hostname was not found!  Using " + hostname);
 		}
@@ -233,14 +233,8 @@ public class XenGuestManager {
 	}
 
 	private void updateSshKnownHosts(Session session, String ipAddress) throws JSchException, IOException {
-		List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
-		boolean hostIsKnown = false;
-		for (String line : sshConfig) {
-			if (line.contains(ipAddress)) {
-				hostIsKnown = true;
-				break;
-			}
-		}
+		String sshConfig = SshUtil.runCommand(session, "cat ~/.ssh/known_hosts", 5000).getOutput();
+		boolean hostIsKnown = sshConfig.contains(ipAddress);
 		if (!hostIsKnown) {
 			String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
 			List<String> logOutput = SshUtil.sendCommandFromSession(session, hostCmd);
