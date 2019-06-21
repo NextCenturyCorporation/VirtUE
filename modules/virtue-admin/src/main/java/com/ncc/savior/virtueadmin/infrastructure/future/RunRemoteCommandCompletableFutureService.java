@@ -22,6 +22,7 @@ package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
@@ -80,20 +81,16 @@ public class RunRemoteCommandCompletableFutureService
 
 		// Jsch is not thread safe
 		Session session = null;
-		ChannelExec channel = null;
 		try {
 			session = SshUtil.getConnectedSessionWithRetries(vm, privateKeyFile, 3, 1000);
 			List<String> lines;
 			if (timeout > 0) {
 				lines = SshUtil.sendCommandFromSessionWithTimeout(session, command, timeoutMillis);
 			} else {
-				lines = SshUtil.sendCommandFromSession(session, command);
+				lines = Arrays.asList(SshUtil.runCommand(session, command, Integer.MAX_VALUE).getOutput().split("\n"));
 			}
 			logger.debug(lines.toString());
 		} finally {
-			if (channel != null) {
-				channel.disconnect();
-			}
 			if (session != null) {
 				session.disconnect();
 			}

@@ -22,6 +22,7 @@ package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
@@ -29,7 +30,6 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.util.SshUtil;
@@ -94,24 +94,19 @@ public class RunRemoteScriptCompletableFutureService
 
 		// Jsch is not thread safe
 		Session session = null;
-		ChannelExec channel = null;
 		try {
 			session = SshUtil.getConnectedSessionWithRetries(vm, privateKeyFile, 3, 1000);
-			List<String> lines;
-//			List<String> totalOutput=new ArrayList<String>();
 			for (String command : commands) {
+				List<String> lines;
 				if (timeout > 0) {
 					lines = SshUtil.sendCommandFromSessionWithTimeout(session, command, timeoutMillis);
 				} else {
-					lines = SshUtil.sendCommandFromSession(session, command);
+					lines = Arrays.asList(SshUtil.runCommand(session, command, Integer.MAX_VALUE).getOutput().split("\n"));
 				}
 				logger.debug(lines.toString());
 			}
 			logger.debug("all commands run successfully");
 		} finally {
-			if (channel != null) {
-				channel.disconnect();
-			}
 			if (session != null) {
 				session.disconnect();
 			}

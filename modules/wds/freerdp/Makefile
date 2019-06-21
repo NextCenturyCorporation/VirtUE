@@ -30,7 +30,7 @@ build/freerdp.deb: build/Makefile
 	cd $(@D) && ln -s freerdp-*-Linux-x86_64.deb $(notdir $@)
 
 build/Makefile: source/CMakeLists.txt | build
-	cd $(@D) && cmake -G 'Unix Makefiles' $(CMAKE_FLAGS) ../source
+	cmake -G 'Unix Makefiles' $(CMAKE_FLAGS) -B $(@D) -S $(<D)
 	touch $@
 
 # can be any file in the repo

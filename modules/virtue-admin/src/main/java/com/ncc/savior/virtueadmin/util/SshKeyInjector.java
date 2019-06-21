@@ -62,9 +62,9 @@ public class SshKeyInjector {
 		File privateKeyFile = null;
 		try {
 			privateKeyFile = File.createTempFile("test", "");
-			FileWriter writer = new FileWriter(privateKeyFile);
-			writer.write(privateKey);
-			writer.close();
+			try (FileWriter writer = new FileWriter(privateKeyFile)) {
+				writer.write(privateKey);
+			}
 			return injectSshKey(vm, privateKeyFile);
 		} finally {
 			if (privateKeyFile != null) {
@@ -81,14 +81,12 @@ public class SshKeyInjector {
 	 * @throws IOException
 	 */
 	public String injectSshKey(VirtualMachine vm, File privateKeyFile) throws IOException {
-		PublicPrivatePair keyPair = null;
-		String privKey = "";
 		// Jsch is not thread safe
 		Session session = null;
 		ChannelExec channel = null;
 		try {
-			keyPair = keyGenerator.createRsaKeyPair();
-			privKey = keyPair.getPrivateKey();
+			PublicPrivatePair keyPair = keyGenerator.createRsaKeyPair();
+			String privKey = keyPair.getPrivateKey();
 			String pubKey = keyPair.getPublicKey();
 			session = SshUtil.getConnectedSession(vm, privateKeyFile);
 			channel = (ChannelExec) session.openChannel("exec");
