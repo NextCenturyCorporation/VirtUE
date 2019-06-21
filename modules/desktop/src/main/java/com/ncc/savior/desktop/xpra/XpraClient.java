@@ -156,10 +156,13 @@ public class XpraClient implements Closeable {
 					packetReader = new InputStreamPacketReader(in, new PacketBuilder());
 					Packet packet = null;
 					while (!stopReadThread && (packet = packetReader.getNextPacket()) != null) {
-						internalPacketDistributer.handlePacket(packet);
-						packetReceivedListenerManager.handlePacket(packet);
+						try {
+							internalPacketDistributer.handlePacket(packet);
+							packetReceivedListenerManager.handlePacket(packet);
+						} catch (RuntimeException e) {
+							logger.warn("error handling packet {}: {}", packet, e);
+						}
 					}
-
 				} catch (IOException e) {
 					logger.warn("problem reading from connection " + connection.getConnectionParameters() + ": " + e);
 					onIoException(e);

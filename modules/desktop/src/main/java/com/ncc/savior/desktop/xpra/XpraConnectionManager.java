@@ -144,6 +144,9 @@ public class XpraConnectionManager {
 			if (servers.size() >= 1) {
 				params.setDisplay(servers.iterator().next());
 			}
+			else if (servers.isEmpty()) {
+				throw new IOException("could not get any xpra servers");
+			}
 			// if (!servers.contains(factory.getDisplay())) {
 			// logger.error("Server does not have expected display running on XPRA.
 			// Display=" + factory.getDisplay());

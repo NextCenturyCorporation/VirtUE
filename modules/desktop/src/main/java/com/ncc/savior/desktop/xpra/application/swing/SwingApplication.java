@@ -291,17 +291,20 @@ public class SwingApplication extends XpraApplication implements Closeable {
 			@Override
 			public void componentMoved(ComponentEvent e) {
 				Component c = e.getComponent();
-				if (c instanceof JFrame) {
-					c = ((JFrame) c).getContentPane();
-				} else if (c instanceof JDialog) {
-					c = ((JDialog) c).getContentPane();
+				if (c.isShowing()) {
+					if (c instanceof JFrame) {
+						c = ((JFrame) c).getContentPane();
+					} else if (c instanceof JDialog) {
+						c = ((JDialog) c).getContentPane();
+					}
+					Point l = c.getLocationOnScreen();
+					Rectangle rect = SwingUtils.fixOutOfBounds((int) l.getX(), (int) l.getY(), c.getWidth(),
+							c.getHeight());
+					if ((l.getX() + c.getWidth() < 0) || (l.getY() + c.getHeight() < 0)) {
+						getWindow().setLocation(rect.x, rect.y);
+					}
+					onLocationChange(rect.x, rect.y, rect.width, rect.height);
 				}
-				Point l = c.getLocationOnScreen();
-				Rectangle rect = SwingUtils.fixOutOfBounds((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
-				if ((l.getX() + c.getWidth() < 0) || (l.getY() + c.getHeight() < 0)) {
-					getWindow().setLocation(rect.x, rect.y);
-				}
-				onLocationChange(rect.x, rect.y, rect.width, rect.height);
 			}
 		});
 		// scene.widthProperty().addListener(new ChangeListener<Number>() {

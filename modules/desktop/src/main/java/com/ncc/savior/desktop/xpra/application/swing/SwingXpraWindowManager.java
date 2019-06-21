@@ -178,14 +178,17 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 		KeyAdapter keyAdapter = new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
-
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
 				List<String> mods = SwingUtils.getModifiers(e);
 				KeyCodeDto key = SwingUtils.getKeyCodeFromEvent(e, keyboard);
-				onKeyUp(key, mods);
+				if (key == null) {
+					logger.debug("weird: key event but no key: " + e);
+				} else {
+					onKeyUp(key, mods);
+				}
 			}
 
 			@Override
@@ -196,7 +199,11 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				// if (key == null) {
 				// logger.warn("Key didn't work " + e.getKeyCode() + "-" + e.getKeyChar());
 				// }
-				onKeyDown(key, mods);
+				if (key == null) {
+					logger.debug("weird: key event but no key: " + e);
+				} else {
+					onKeyDown(key, mods);
+				}
 			}
 		};
 		this.baseFrame.addKeyListener(keyAdapter);
