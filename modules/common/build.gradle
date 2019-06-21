@@ -3,13 +3,14 @@ version '0.1.0-SNAPSHOT'
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.M7'
-		springDataVersion = '2.0.2.RELEASE'
+		springBootVersion = '2.1.4.RELEASE'
+        springDataVersion = '2.1.6.RELEASE'
 	}
 }
 	
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
 
@@ -45,4 +46,10 @@ dependencies {
 
 	compile group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-servlet-initializer', version: '2.0.6'
 	
+}
+
+eclipse {
+	classpath {
+		downloadJavadoc = true
+	}
 }

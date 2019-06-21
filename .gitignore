@@ -74,3 +74,4 @@ modules/ecosystem/netplan/netplan.io_0.95-2_amd64.*
 tools/replace-header/.idea
 tools/replace-header/venv
 modules/wds/freerdp/build
+/modules/wds/freerdp/source/
