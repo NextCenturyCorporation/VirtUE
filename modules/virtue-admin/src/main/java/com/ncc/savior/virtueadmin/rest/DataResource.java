@@ -191,23 +191,27 @@ public class DataResource {
 				"1.0", OS.LINUX, "thunderbird", "thunderbird", null);
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
-				"1.0", OS.WINDOWS, "chrome", "c:\\windows\\notepad.exe", tagsBrowser);
+				"1.0", OS.WINDOWS, "chrome", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+				tagsBrowser);
 		// "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 		ApplicationDefinition windowsEdge = new ApplicationDefinition(UUID.randomUUID().toString(), "Microsoft Edge",
-				"1.0", OS.WINDOWS, "ms-edge", "c:\\windows\\notepad.exe", tagsBrowser);
+				"1.0", OS.WINDOWS, "ms-edge", "c:\\windows\\system32\\cmd.exe /c start microsoft-edge:", tagsBrowser);
 		ApplicationDefinition windowsWord = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Word 2013", "1.0", OS.WINDOWS, "ms-word", "c:\\windows\\notepad.exe", null);
+				"Microsoft Word 2013", "1.0", OS.WINDOWS, "ms-word",
+				"C:\\Program Files\\Microsoft Office\\Office16\\winword.exe", null);
 		ApplicationDefinition windowsExcel = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "ms-excel", "c:\\windows\\notepad.exe", null);
+				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "ms-excel",
+				"C:\\Program Files\\Microsoft Office\\Office16\\excel.exe", null);
 		ApplicationDefinition windowsOutlook = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "ms-outlook", "c:\\windows\\notepad.exe", null);
+				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "ms-outlook",
+				"C:\\Program Files\\Microsoft Office\\Office16\\outlook.exe", null);
 		ApplicationDefinition windowsPowershell = new ApplicationDefinition(UUID.randomUUID().toString(),
 				"Windows Powershell", "1.0", OS.WINDOWS, "ms-powershell",
-				"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe", null);
-		ApplicationDefinition windowsSkype = new ApplicationDefinition(UUID.randomUUID().toString(), "Skype", "1.0",
-				OS.WINDOWS, "skype", "c:\\windows\\notepad.exe", null);
+				"c:\\windows\\system32\\cmd.exe /c start c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe",
+				null);
 		ApplicationDefinition windowsCommandTerminal = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Windows Command Terminal", "1.0", OS.WINDOWS, "ms-terminal", "c:\\windows\\system32\\cmd.exe", null);
+				"Windows Command Terminal", "1.0", OS.WINDOWS, "ms-terminal",
+				"c:\\windows\\system32\\cmd.exe /c start c:\\windows\\system32\\cmd.exe", null);
 
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
@@ -247,7 +251,6 @@ public class DataResource {
 		appsAll.add(windowsExcel);
 		appsAll.add(windowsOutlook);
 		appsAll.add(windowsPowershell);
-		appsAll.add(windowsSkype);
 		appsAll.add(windowsCommandTerminal);
 
 		Date now = new Date();
@@ -282,7 +285,6 @@ public class DataResource {
 		appsWinCorpEmail.add(windowsEdge);
 		Collection<ApplicationDefinition> appsExternalInternet = new LinkedList<ApplicationDefinition>();
 		appsExternalInternet.add(windowsChrome);
-		appsExternalInternet.add(windowsSkype);
 		Collection<ApplicationDefinition> appsPowerUserWin = new LinkedList<ApplicationDefinition>();
 		appsPowerUserWin.add(windowsCommandTerminal);
 		appsPowerUserWin.add(windowsPowershell);
